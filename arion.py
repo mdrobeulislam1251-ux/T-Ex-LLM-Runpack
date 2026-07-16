@@ -28,6 +28,8 @@ REPO_ROOT = Path(__file__).resolve().parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from core.engine import build_acknowledger_engine  # noqa: E402
+from core.hooks import QueryHook  # noqa: E402
 from core.router import Router, RoutingConfigError  # noqa: E402
 
 DEFAULT_CONFIG = REPO_ROOT / "config" / "routing.json"
@@ -51,6 +53,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Emit the match as JSON."
     )
 
+    p_exec = sub.add_parser(
+        "exec", help="Route AND dispatch a query through the execution engine."
+    )
+    p_exec.add_argument("query", help="The natural-language task query.")
+    p_exec.add_argument(
+        "--json", action="store_true", help="Emit the execution result as JSON."
+    )
+
     sub.add_parser("list", help="List all configured routes.")
     sub.add_parser("schema", help="Print the routing config schema summary.")
 
@@ -71,6 +81,21 @@ def _cmd_route(router: Router, query: str, as_json: bool) -> int:
     if match.matched_keywords:
         print(f"Triggers   : {', '.join(match.matched_keywords)} (score {match.score})")
     print(f"Rationale  : {match.description}")
+    return 0
+
+
+def _cmd_exec(router: Router, query: str, as_json: bool) -> int:
+    engine = build_acknowledger_engine(router)
+    hook = QueryHook(router, engine)
+    result = hook.on_query(query)
+    if as_json:
+        print(json.dumps(result.as_dict(), indent=2))
+        return 0
+    print(f"Query      : {query}")
+    print(f"Route      : {result.route_name}")
+    print(f"Workspace  : {result.workspace}")
+    print(f"Handler    : {result.handler}")
+    print(f"Output     : {result.output}")
     return 0
 
 
@@ -110,6 +135,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "route":
         return _cmd_route(router, args.query, args.json)
+    if args.command == "exec":
+        return _cmd_exec(router, args.query, args.json)
     if args.command == "list":
         return _cmd_list(router)
     if args.command == "schema":

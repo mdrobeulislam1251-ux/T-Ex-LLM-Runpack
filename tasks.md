@@ -36,28 +36,33 @@
 - [x] **GREEN** `arion.py` CLI — `route`, `list`, `schema`
 - [x] **VERIFY** `python3 -m unittest discover -s tests -v` → 17 passing
 
-## Phase 2 — Runtime hooks & interception `[ ]`
+## Phase 2 — Runtime hooks & interception ✅
 
-> Workspace: `App Dev and Engineering Team/runtime_hooks/`
+> Workspace: `App Dev and Engineering Team/runtime_hooks/` ·
+> Engine: `core/hooks.py`
 
-- [ ] **RED** `test_hooks.py::test_query_hook_fires_router` — assert an
-      incoming query event invokes `Router.route` and yields a `RouteMatch`.
-- [ ] **GREEN** Implement `runtime_hooks/query_hook.py` dispatching matched
-      queries to the resolved workspace.
-- [ ] **RED** `test_hooks.py::test_pre_and_post_execution_order` — assert
-      pre-hook runs before, post-hook after, the agent body.
-- [ ] **GREEN** Implement the lifecycle hook chain.
+- [x] **RED** `tests/test_hooks.py::QueryHookTests` — assert an incoming
+      query is routed then dispatched, and unmatched queries hit the default.
+- [x] **GREEN** `core/hooks.py::QueryHook` — routes (post pre-hooks) and
+      dispatches to the resolved workspace.
+- [x] **RED** `tests/test_hooks.py::LifecycleOrderTests` — assert pre runs
+      before body, post after; pre may rewrite the query before routing.
+- [x] **GREEN** `core/hooks.py::LifecycleChain` — ordered pre/post chain
+      over a shared context dict.
 
-## Phase 3 — Agent execution engine `[ ]`
+## Phase 3 — Agent execution engine ✅
 
-> Workspace: `App Dev and Engineering Team/agents/`
+> Workspace: `App Dev and Engineering Team/agents/` · Engine: `core/engine.py`
 
-- [ ] **RED** `test_agents.py::test_engine_dispatches_to_workspace` — assert
-      a routed task is handed to the correct sub-agent handler.
-- [ ] **GREEN** Implement `agents/engine.py` execution loop.
-- [ ] **RED** `test_agents.py::test_unknown_workspace_raises` — guard invalid
-      routes.
-- [ ] **GREEN** Add workspace validation.
+- [x] **RED** `tests/test_engine.py::EngineTests` — routed task is handed to
+      the correct handler; result carries route metadata.
+- [x] **GREEN** `core/engine.py::ExecutionEngine` — handler registry +
+      `dispatch()` returning `ExecutionResult`.
+- [x] **RED** unknown-workspace + duplicate-registration guards.
+- [x] **GREEN** `UnknownWorkspaceError` + duplicate-registration `ValueError`.
+- [x] **GREEN** `build_acknowledger_engine()` + `arion.py exec` drive the full
+      query → hook → router → engine → handler pipeline end-to-end.
+- [x] **VERIFY** `python3 -m unittest discover -s tests` → 27 passing.
 
 ## Phase 4 — External tool handlers `[ ]`
 

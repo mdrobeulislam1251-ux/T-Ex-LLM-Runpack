@@ -17,16 +17,23 @@ Arion-Multi-Agent/
 ├── config/
 │   └── routing.json                  # authoritative keyword → workspace map
 │
+├── core_router_test.py               # SKILL.md TDD gate (portable, 3 tests)
+│
 ├── core/
 │   ├── __init__.py
-│   └── router.py                     # keyword-triggered routing engine
+│   ├── router.py                     # keyword-triggered routing engine
+│   ├── engine.py                     # agent execution engine (registry + dispatch)
+│   └── hooks.py                      # runtime hook layer (lifecycle + QueryHook)
 │
 ├── tests/
 │   ├── __init__.py
-│   └── test_router.py                # 17 TDD tests (config, routing, scoring, schema)
+│   ├── test_router.py                # 17 TDD tests (config, routing, scoring, schema)
+│   ├── test_engine.py                # 6 TDD tests (dispatch, guards, metadata)
+│   └── test_hooks.py                 # 4 TDD tests (route+dispatch, lifecycle order)
 │
 ├── App Dev and Engineering Team/     # TRACK 1 — engines, hooks, deployments
 │   ├── README.md
+│   ├── SKILL.md                      #   Intent Hooks + code-gen/TDD/SSH/Playwright rules
 │   ├── agents/                       #   → agent execution engines & orchestration
 │   │   └── README.md
 │   ├── runtime_hooks/                #   → runtime hooks, lifecycle interceptors
@@ -36,11 +43,18 @@ Arion-Multi-Agent/
 │
 └── Robeul's Workspace Assistant/     # TRACK 2 — tasks, tool handlers, pipelines
     ├── README.md
+    ├── SKILL.md                      #   Global routing Intent Hooks + execution rules
     ├── tasks/                        #   → task/roadmap/backlog management
     │   ├── README.md
     │   └── inbox/                    #   → DEFAULT fallback for unrouted queries
     │       └── README.md
-    ├── tool_handlers/                #   → Gmail / Asana / calendar handlers
+    ├── gmail/                        #   → Gmail intent-hook skill home
+    │   └── README.md
+    ├── asana/                        #   → Asana intent-hook skill home
+    │   └── README.md
+    ├── support/                      #   → support intent-hook skill home
+    │   └── README.md
+    ├── tool_handlers/                #   → low-level Gmail / Asana / calendar adapters
     │   └── README.md
     └── pipelines/                    #   → support & workflow automation
         └── README.md
