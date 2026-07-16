@@ -1,0 +1,20 @@
+{
+  "name": "arion",
+  "owner": {
+    "name": "mdrobeulislam1251-ux"
+  },
+  "metadata": {
+    "description": "Arion Multi-Agent — an open-source company runpack for Claude Code: 52 specialist agents in 9 teams, driven by a switchable per-company brain.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "arion-company",
+      "source": "./plugins/arion-company",
+      "description": "52-agent company runpack: engineering (65-language full-stack + data engineer with CTO schema review), design, AI, issue fixers, technical, marketing, sales, research & strategy — with company-brain onboarding (/onboard) and pipelines (/build, /design, /fix, /schema, /team, /company).",
+      "author": {
+        "name": "mdrobeulislam1251-ux"
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "company": {
+    "name": "",
+    "slug": "",
+    "app_name": "",
+    "description": "",
+    "created_at": ""
+  },
+  "brain": {
+    "scope": {
+      "does": "",
+      "does_not": ""
+    },
+    "vision": "",
+    "mission": "",
+    "emotion_tone": "",
+    "target_audience": "",
+    "voice_examples": []
+  },
+  "brand": {
+    "guidelines_file": "brand/brand.md",
+    "assets_dir": "brand/assets/",
+    "colors": {
+      "primary": "",
+      "secondary": "",
+      "extra": {}
+    },
+    "typography": {
+      "heading": "",
+      "body": ""
+    }
+  },
+  "tech": {
+    "stack": {
+      "frontend": "",
+      "backend": "",
+      "database": "",
+      "mobile": "",
+      "cloud": "",
+      "decided_by": ""
+    },
+    "multi_tenant": false,
+    "compliance_notes": "",
+    "performance_budgets": {
+      "api_p95_ms": 300,
+      "lcp_ms": 2500
+    },
+    "monthly_cloud_budget_usd": null
+  },
+  "credentials": {
+    "_rule": "ENV VAR NAMES ONLY. Raw values live in .env (gitignored). Never store secret values in this file.",
+    "database": {
+      "provider": "",
+      "env": {
+        "host": "",
+        "port": "",
+        "name": "",
+        "user": "",
+        "password": ""
+      }
+    },
+    "n8n": {
+      "env": {
+        "url": "",
+        "api_key": ""
+      }
+    },
+    "other": {}
+  },
+  "logs": {
+    "decisions": "decisions.md",
+    "incidents": "incidents.md",
+    "research_dir": "research/"
+  }
+}

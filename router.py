@@ -4,11 +4,13 @@ import re
 import sys
 
 class ArionRouter:
-    def __init__(self, root_path="E:\\Robeul's Ai Assistant"):
-        self.root_path = root_path
+    def __init__(self, root_path=None):
+        # Default to this repo's root so the router works on any machine/OS;
+        # pass an explicit root_path to route into a different workspace.
+        self.root_path = root_path or os.path.dirname(os.path.abspath(__file__))
         self.tracks = {
-            "engineering": os.path.join(root_path, "App Dev and Engineering Team"),
-            "assistant": os.path.join(root_path, "Robeul's Workspace Assistant")
+            "engineering": os.path.join(self.root_path, "App Dev and Engineering Team"),
+            "assistant": os.path.join(self.root_path, "Robeul's Workspace Assistant")
         }
 
     def analyze_intent(self, prompt: str) -> str:

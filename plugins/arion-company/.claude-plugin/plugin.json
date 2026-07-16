@@ -1,0 +1,19 @@
+{
+  "name": "arion-company",
+  "description": "Arion company runpack — 52 specialist agents in 9 teams (executive, engineering, design, AI, issue fixers, technical, marketing, sales, research) driven by a switchable per-company brain with onboarding, credential-safe config, and hard review gates (CTO schema review, design review, QA gates).",
+  "version": "1.0.0",
+  "author": {
+    "name": "mdrobeulislam1251-ux",
+    "email": "mdrobeulislam1251@gmail.com"
+  },
+  "keywords": [
+    "multi-agent",
+    "orchestration",
+    "company",
+    "runpack",
+    "fullstack",
+    "design",
+    "data-engineering",
+    "n8n"
+  ]
+}
