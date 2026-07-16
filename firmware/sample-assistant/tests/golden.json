@@ -1,0 +1,10 @@
+{
+  "cases": [
+    {
+      "id": "team-runners-overview",
+      "goal": "Explain how T-ex LLM team runners work for product integration",
+      "expect_status": "succeeded",
+      "expect_review_passed": true
+    }
+  ]
+}

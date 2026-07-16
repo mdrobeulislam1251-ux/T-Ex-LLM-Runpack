@@ -1,86 +1,152 @@
 # T-ex LLM
 
-**Portable multi-agent AI platform** — team runners, host runtime, and sellable agentic firmware for apps and products. Works with **Grok**, **Claude Code**, **Codex**, and any LLM API.
+**Portable multi-agent AI platform** — team runners, host runtime, and sellable agentic firmware for apps and products. Works with **Grok**, **Claude Code**, **Codex**, OpenAI-compatible APIs, or offline **mock** mode.
 
-## What this is
+## Status
 
-T-ex LLM is a model-agnostic kit for:
+MVP runtime is live in this repo:
 
-| Layer | Purpose |
-|-------|---------|
-| **Host** | Runtime, API, queues, and deploy surface for agents |
-| **Workers** | Team-based runners (roles, handoffs, parallel work) |
-| **ML / agent eng** | Tools, memory, evals, model routing |
-| **Firmware** | Versioned agent packages you ship into products |
-| **Integrate** | SDKs, webhooks, and embeds for platforms you sell |
-
-Instructions are written as **portable playbooks** so the same repo works in any terminal AI window or direct API usage.
-
-## Repo layout (scaffold)
-
-```
-T-ex-LLM/
-├── README.md
-├── LICENSE
-├── .gitignore
-├── docs/                 # Architecture & product docs
-├── playbooks/            # Tool-agnostic agent playbooks (any CLI/API)
-├── skills/               # Skill packs (Grok / Claude / Codex adapters)
-│   ├── agentic-host/
-│   ├── agentic-workers/
-│   ├── agentic-ml-engineer/
-│   ├── agentic-firmware/
-│   └── agentic-integrate/
-├── host/                 # Host server (to be implemented)
-├── workers/              # Worker / runner runtime (to be implemented)
-├── firmware/             # Agent firmware packages (to be implemented)
-└── examples/             # Sample integrations
-```
+| Layer | Status |
+|-------|--------|
+| Team workers (plan → execute → review → integrate) | Done |
+| Host API (jobs, firmware list, health) | Done |
+| Sample firmware `sample-assistant@0.1.0` | Done |
+| Mock + OpenAI-compatible providers | Done |
+| Tool registry + allowlists | Done |
+| Durable queue / multi-tenant prod | Roadmap |
 
 ## Quick start
-
-### 1. Clone
 
 ```bash
 git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
 cd T-ex-LLM
+python3 -m pip install -e ".[dev]"
 ```
 
-### 2. Use with any terminal AI
-
-Point your agent at this repo and load the relevant playbook:
-
-| Goal | Open |
-|------|------|
-| Overall map | `playbooks/00-orchestrator.md` |
-| Host / deploy | `playbooks/01-host.md` |
-| Team workers | `playbooks/02-workers.md` |
-| ML agent design | `playbooks/03-ml-engineer.md` |
-| Product firmware | `playbooks/04-firmware.md` |
-| App integration | `playbooks/05-integrate.md` |
-
-### 3. Grok skills (optional)
-
-If you use Grok Build / Grok CLI:
+### Run a team job offline (no API key)
 
 ```bash
-# Project-scoped skills (recommended for this repo)
-mkdir -p .grok/skills
-cp -R skills/* .grok/skills/
+export LLM_PROVIDER=mock
+python3 -m texllm.cli "Explain how to sell agentic firmware in a SaaS product"
+# or
+python3 examples/run_demo.py "Your goal here"
 ```
 
-Claude Code / Codex: copy the same markdown bodies into `CLAUDE.md`, `AGENTS.md`, or that tool’s skill format.
+### Run the host API
+
+```bash
+export LLM_PROVIDER=mock
+export HOST_API_KEY=dev-secret
+python3 -m texllm.host.app
+# → http://0.0.0.0:8080
+```
+
+```bash
+# health
+curl -s http://127.0.0.1:8080/health
+
+# create job
+curl -s -X POST http://127.0.0.1:8080/v1/jobs \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: dev-secret" \
+  -d '{"goal":"List benefits of multi-agent workers","firmware_id":"sample-assistant","firmware_version":"0.1.0"}'
+
+# poll (use job id from create)
+curl -s http://127.0.0.1:8080/v1/jobs/<JOB_ID> -H "X-API-Key: dev-secret"
+```
+
+### Use a real model (OpenAI-compatible)
+
+```bash
+cp .env.example .env
+# set LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
+export LLM_PROVIDER=openai
+# Examples:
+#   OpenAI:  LLM_BASE_URL=https://api.openai.com/v1
+#   xAI:     LLM_BASE_URL=https://api.x.ai/v1   LLM_MODEL=grok-...
+#   Local:   LLM_BASE_URL=http://127.0.0.1:11434/v1
+python3 -m texllm.cli "Draft an onboarding agent for our CRM"
+```
+
+### Tests
+
+```bash
+LLM_PROVIDER=mock python3 -m pytest -q
+```
+
+## Architecture
+
+```
+Customer apps  →  Integrate (SDK/webhooks)
+                      ↓
+              Firmware packages (versioned)
+                      ↓
+              Host API (jobs, auth)
+                      ↓
+         Team runners: planner → executor → reviewer → integrator
+                      ↓
+         Providers (mock | OpenAI-compat) + tools
+```
+
+See [docs/architecture.md](./docs/architecture.md).
+
+## Repo layout
+
+```
+texllm/                 # Python package (host, workers, providers, firmware loader)
+firmware/sample-assistant/   # Demo agentic firmware
+playbooks/              # Tool-agnostic playbooks (any terminal AI)
+skills/                 # Skill packs for Grok / adapters
+examples/               # Demos
+tests/                  # Pytest suite
+```
+
+## Playbooks (any terminal AI)
+
+| Intent | File |
+|--------|------|
+| Route work | `playbooks/00-orchestrator.md` |
+| Host / deploy | `playbooks/01-host.md` |
+| Team workers | `playbooks/02-workers.md` |
+| ML / evals | `playbooks/03-ml-engineer.md` |
+| Firmware packages | `playbooks/04-firmware.md` |
+| Product integrate | `playbooks/05-integrate.md` |
+
+Point **Grok / Claude Code / Codex** at this repo and load the matching playbook or `skills/*/SKILL.md`.
+
+## Agentic firmware
+
+Ship agents as versioned packages:
+
+```
+firmware/<id>/
+  manifest.yaml
+  prompts/
+  tests/
+  README.md
+```
+
+Create a new package by copying `firmware/sample-assistant/` and editing prompts + tools.
+
+## API (host)
+
+| Method | Path | Notes |
+|--------|------|--------|
+| GET | `/health` | Liveness |
+| GET | `/v1/firmware` | List packages |
+| POST | `/v1/jobs` | Create job (`goal`, `firmware_id`, `firmware_version`) |
+| GET | `/v1/jobs/{id}` | Poll status + result |
+| GET | `/v1/jobs` | Recent jobs |
+| POST | `/v1/jobs/{id}/cancel` | Cancel if still queued |
+
+Auth: header `X-API-Key` (required when `HOST_API_KEY` is not the default `change-me`).
 
 ## Principles
 
-1. **Model-agnostic** — no hard dependency on a single vendor API.
-2. **Worker-first** — prefer team runners over a single monolithic agent.
-3. **Firmware as product** — agents ship as versioned packages with clear I/O contracts.
-4. **Terminal + API** — same playbooks for human-in-the-loop CLI and automated deploy.
-
-## Status
-
-Early scaffold. Host, workers, and firmware runtimes will land in follow-up commits.
+1. **Model-agnostic** — swap providers via env.
+2. **Worker-first** — team runners over a single free-form agent.
+3. **Firmware as product** — versioned packages with I/O contracts.
+4. **Terminal + API** — same runners for CLI and host.
 
 ## License
 
