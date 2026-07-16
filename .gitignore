@@ -41,6 +41,12 @@ npm-debug.log*
 yarn-error.log*
 .pnpm-store/
 dist/
+apps/web/dist/
+*.tsbuildinfo
+
+# Python packaging
+texllm.egg-info/
+.eggs/
 
 # Logs & runtime
 *.log

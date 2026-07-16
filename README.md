@@ -17,10 +17,27 @@ MVP runtime is live in this repo:
 
 ## Quick start
 
+Full product guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)** · SaaS vision: **[docs/saas-product.md](./docs/saas-product.md)**
+
 ```bash
 git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
 cd T-ex-LLM
 python3 -m pip install -e ".[dev]"
+
+# optional one-shot (detects Postgres/Supabase, optional NocoBase)
+bash scripts/install/install.sh
+```
+
+### SaaS web console (Open Design–style skills + live UI)
+
+```bash
+# terminal 1 — agent host
+export LLM_PROVIDER=mock HOST_API_KEY=change-me
+python3 -m texllm.host.app
+
+# terminal 2 — hyper-agentic console
+cd apps/web && npm install && npm run dev
+# → http://127.0.0.1:5173  (onboarding → jobs → brand → settings)
 ```
 
 ### Run a team job offline (no API key)
@@ -93,10 +110,14 @@ See [docs/architecture.md](./docs/architecture.md).
 ## Repo layout
 
 ```
+apps/web/               # SaaS console (Vite/React) — onboarding, jobs, brand, settings
+design-systems/         # DESIGN.md tokens (Open Design–style)
 texllm/                 # Python package (host, workers, providers, firmware loader)
 firmware/sample-assistant/   # Demo agentic firmware
 playbooks/              # Tool-agnostic playbooks (any terminal AI)
-skills/                 # Skill packs for Grok / adapters
+skills/                 # Skill packs (agentic + saas-console / saas-onboarding)
+scripts/install/        # OS installer + Postgres/Supabase auto-detect
+deploy/                 # Docker host + optional NocoBase
 examples/               # Demos
 tests/                  # Pytest suite
 ```
