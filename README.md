@@ -32,7 +32,8 @@ python3 -m texllm.cli serve
 Open **http://127.0.0.1:3006/**
 
 Full multi-OS guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)**  
-Tailscale / LAN / DNS A-record: **[docs/REMOTE-ACCESS.md](./docs/REMOTE-ACCESS.md)**
+Tailscale / LAN / DNS A-record: **[docs/REMOTE-ACCESS.md](./docs/REMOTE-ACCESS.md)**  
+Provider auth (API keys vs CLI session vs OAuth): **[docs/AUTH.md](./docs/AUTH.md)**
 
 ```bash
 # Custom port

@@ -18,6 +18,11 @@ from texllm.agents.local_cli import LocalCliError, run_local_agent
 from texllm.config import Settings, get_settings
 from texllm.firmware.loader import list_firmware
 from texllm.host.aliases import AgentAliases, alias_store
+from texllm.host.credentials import (
+    AuthProfileCreate,
+    credential_store,
+    probe_cli_auth,
+)
 from texllm.host.store import JobStore
 from texllm.schemas import Job, JobCreate, JobStatus, utcnow
 from texllm.workers.runner import TeamRunner
@@ -66,6 +71,55 @@ class LocalAgentRunRequest(BaseModel):
         default=True,
         description="Prepend agent/user name aliases to the prompt",
     )
+
+
+# ----- Auth profiles (API keys + local CLI sessions) -----
+
+
+@app.get("/v1/auth/profiles")
+def auth_profiles_list(_: None = Depends(require_api_key)) -> dict:
+    """List auth profiles (secrets redacted). See docs/AUTH.md."""
+    return credential_store.list_public()
+
+
+@app.put("/v1/auth/profiles")
+def auth_profiles_upsert(
+    body: AuthProfileCreate,
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Create or update a profile. api_key is stored only on the host disk."""
+    profile = credential_store.upsert(body)
+    return profile.model_dump()
+
+
+@app.post("/v1/auth/profiles/{profile_id}/default")
+def auth_profiles_default(
+    profile_id: str,
+    _: None = Depends(require_api_key),
+) -> dict:
+    try:
+        credential_store.set_default(profile_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Profile not found") from exc
+    return {"default_profile_id": profile_id}
+
+
+@app.delete("/v1/auth/profiles/{profile_id}")
+def auth_profiles_delete(
+    profile_id: str,
+    _: None = Depends(require_api_key),
+) -> dict:
+    credential_store.delete(profile_id)
+    return {"ok": True}
+
+
+@app.get("/v1/auth/cli-status/{agent_id}")
+def auth_cli_status(
+    agent_id: str,
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Probe whether a local CLI appears logged in (does not return tokens)."""
+    return probe_cli_auth(agent_id)
 
 
 @app.get("/v1/settings/aliases", response_model=AgentAliases)

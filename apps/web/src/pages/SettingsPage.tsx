@@ -1,11 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  cliAuthStatus,
+  deleteAuthProfile,
   getAliases,
   health,
+  listAuthProfiles,
   loadBackendConfigLocal,
   putAliases,
+  setDefaultAuthProfile,
+  upsertAuthProfile,
   type AgentAliases,
+  type AuthProfile,
 } from "../lib/api";
 import { useSettings, type DbMode } from "../state/settings";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
@@ -40,6 +46,35 @@ export function SettingsPage() {
   const [aliasError, setAliasError] = useState<string | null>(null);
   const [aliasSaving, setAliasSaving] = useState(false);
 
+  const [profiles, setProfiles] = useState<AuthProfile[]>([]);
+  const [defaultProfileId, setDefaultProfileId] = useState<string | null>(null);
+  const [authNotes, setAuthNotes] = useState<string[]>([]);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authMsg, setAuthMsg] = useState<string | null>(null);
+  const [cliProbe, setCliProbe] = useState<string | null>(null);
+  const [newProfile, setNewProfile] = useState({
+    id: "openai-default",
+    provider: "openai",
+    method: "api_key",
+    label: "OpenAI-compatible key",
+    base_url: "https://api.openai.com/v1",
+    model: "",
+    api_key: "",
+    agent_id: "claude",
+  });
+
+  async function refreshAuth() {
+    try {
+      const r = await listAuthProfiles(settings);
+      setProfiles(r.profiles || []);
+      setDefaultProfileId(r.default_profile_id);
+      setAuthNotes(r.honest_notes || []);
+      setAuthError(null);
+    } catch (e) {
+      setAuthError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -57,6 +92,16 @@ export function SettingsPage() {
             ? e.message
             : "Could not load aliases from host (using defaults until save)."
         );
+      }
+      try {
+        const r = await listAuthProfiles(settings);
+        if (!alive) return;
+        setProfiles(r.profiles || []);
+        setDefaultProfileId(r.default_profile_id);
+        setAuthNotes(r.honest_notes || []);
+      } catch (e) {
+        if (!alive) return;
+        setAuthError(e instanceof Error ? e.message : String(e));
       }
     })();
     return () => {
@@ -113,7 +158,253 @@ export function SettingsPage() {
         </div>
       )}
 
-      {/* Agent aliases — primary new section */}
+      {/* Provider auth — OpenClaw-style profiles */}
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <h2>Provider auth (API keys & CLI sessions)</h2>
+        <p className="empty-hint" style={{ marginBottom: "0.75rem" }}>
+          OpenClaw-style: use official <strong>API keys</strong>, or reuse a{" "}
+          <strong>local CLI login</strong> on this host (Claude Code / Codex /
+          Gemini). We do <strong>not</strong> scrape ChatGPT/Claude browser
+          cookies. Full guide:{" "}
+          <span className="mono">docs/AUTH.md</span>
+        </p>
+
+        {authNotes.length > 0 && (
+          <ul style={{ marginTop: 0, color: "var(--tex-muted)", fontSize: "0.88rem" }}>
+            {authNotes.map((n, i) => (
+              <li key={i}>{n}</li>
+            ))}
+          </ul>
+        )}
+
+        <div className="btn-row" style={{ marginTop: 0 }}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => void refreshAuth()}>
+            Refresh profiles
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={async () => {
+              try {
+                const s = await cliAuthStatus(settings, "claude");
+                setCliProbe(JSON.stringify(s, null, 2));
+              } catch (e) {
+                setCliProbe(e instanceof Error ? e.message : String(e));
+              }
+            }}
+          >
+            Probe Claude CLI session
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={async () => {
+              try {
+                const s = await cliAuthStatus(settings, "codex");
+                setCliProbe(JSON.stringify(s, null, 2));
+              } catch (e) {
+                setCliProbe(e instanceof Error ? e.message : String(e));
+              }
+            }}
+          >
+            Probe Codex CLI
+          </button>
+        </div>
+
+        {cliProbe && (
+          <pre className="mono" style={{ whiteSpace: "pre-wrap", fontSize: "0.78rem" }}>
+            {cliProbe}
+          </pre>
+        )}
+
+        {profiles.length > 0 && (
+          <table className="data-table" style={{ marginTop: "0.75rem" }}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Provider</th>
+                <th>Method</th>
+                <th>Key?</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {profiles.map((p) => (
+                <tr key={p.id}>
+                  <td>
+                    <strong>{p.label || p.id}</strong>
+                    {defaultProfileId === p.id && (
+                      <span className="chip ok" style={{ marginLeft: 6 }}>
+                        default
+                      </span>
+                    )}
+                  </td>
+                  <td>{p.provider}</td>
+                  <td>
+                    <span className="chip">{p.method}</span>
+                    {p.agent_id ? (
+                      <span className="mono"> {p.agent_id}</span>
+                    ) : null}
+                  </td>
+                  <td>{p.has_api_key ? "yes" : p.method === "local_cli" ? "CLI" : "no"}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={async () => {
+                        await setDefaultAuthProfile(settings, p.id);
+                        setDefaultProfileId(p.id);
+                        setAuthMsg(`Default profile: ${p.id}`);
+                      }}
+                    >
+                      Set default
+                    </button>{" "}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost"
+                      onClick={async () => {
+                        await deleteAuthProfile(settings, p.id);
+                        await refreshAuth();
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <h3 style={{ marginTop: "1rem" }}>Add / update profile</h3>
+        <div className="grid-2">
+          <div className="field">
+            <label htmlFor="ap-id">Profile id</label>
+            <input
+              id="ap-id"
+              value={newProfile.id}
+              onChange={(e) => setNewProfile((p) => ({ ...p, id: e.target.value }))}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="ap-method">Method</label>
+            <select
+              id="ap-method"
+              value={newProfile.method}
+              onChange={(e) =>
+                setNewProfile((p) => ({ ...p, method: e.target.value }))
+              }
+            >
+              <option value="api_key">API key (official)</option>
+              <option value="local_cli">Local CLI session (OpenClaw-style)</option>
+              <option value="oauth_google">Google OAuth (Vertex — configure later)</option>
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="ap-provider">Provider</label>
+            <select
+              id="ap-provider"
+              value={newProfile.provider}
+              onChange={(e) =>
+                setNewProfile((p) => ({ ...p, provider: e.target.value }))
+              }
+            >
+              <option value="openai">OpenAI / ChatGPT API</option>
+              <option value="anthropic">Anthropic / Claude</option>
+              <option value="xai">xAI / Grok</option>
+              <option value="gemini">Google / Gemini</option>
+              <option value="custom">Custom OpenAI-compatible</option>
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="ap-label">Label</label>
+            <input
+              id="ap-label"
+              value={newProfile.label}
+              onChange={(e) =>
+                setNewProfile((p) => ({ ...p, label: e.target.value }))
+              }
+            />
+          </div>
+          {newProfile.method === "api_key" && (
+            <>
+              <div className="field">
+                <label htmlFor="ap-url">Base URL</label>
+                <input
+                  id="ap-url"
+                  value={newProfile.base_url}
+                  onChange={(e) =>
+                    setNewProfile((p) => ({ ...p, base_url: e.target.value }))
+                  }
+                  placeholder="https://api.x.ai/v1"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="ap-key">API key (stored on host only)</label>
+                <input
+                  id="ap-key"
+                  type="password"
+                  autoComplete="off"
+                  value={newProfile.api_key}
+                  onChange={(e) =>
+                    setNewProfile((p) => ({ ...p, api_key: e.target.value }))
+                  }
+                  placeholder="sk-… / xai-…"
+                />
+              </div>
+            </>
+          )}
+          {newProfile.method === "local_cli" && (
+            <div className="field">
+              <label htmlFor="ap-agent">CLI agent id</label>
+              <select
+                id="ap-agent"
+                value={newProfile.agent_id}
+                onChange={(e) =>
+                  setNewProfile((p) => ({ ...p, agent_id: e.target.value }))
+                }
+              >
+                <option value="claude">claude (Claude Code)</option>
+                <option value="codex">codex</option>
+                <option value="gemini">gemini</option>
+              </select>
+            </div>
+          )}
+        </div>
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={async () => {
+              try {
+                await upsertAuthProfile(settings, newProfile);
+                setAuthMsg("Profile saved on host (.texllm/credentials.json)");
+                setNewProfile((p) => ({ ...p, api_key: "" }));
+                await refreshAuth();
+              } catch (e) {
+                setAuthError(e instanceof Error ? e.message : String(e));
+              }
+            }}
+          >
+            Save auth profile
+          </button>
+          <span className="mono" style={{ fontSize: "0.8rem", color: "var(--tex-muted)" }}>
+            GET/PUT /v1/auth/profiles
+          </span>
+        </div>
+        {authMsg && (
+          <div className="status-banner ok" style={{ marginTop: "0.75rem" }}>
+            {authMsg}
+          </div>
+        )}
+        {authError && (
+          <div className="status-banner error" style={{ marginTop: "0.75rem" }} role="alert">
+            {authError}
+          </div>
+        )}
+      </div>
+
+      {/* Agent aliases */}
       <form className="card" onSubmit={saveAliases} style={{ marginBottom: "1rem" }}>
         <h2>Agent aliases</h2>
         <p className="empty-hint" style={{ marginBottom: "0.85rem" }}>

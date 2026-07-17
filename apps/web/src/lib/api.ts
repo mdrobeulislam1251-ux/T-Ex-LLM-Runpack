@@ -136,6 +136,76 @@ export function putAliases(settings: AppSettings, body: AgentAliases) {
   });
 }
 
+export type AuthProfile = {
+  id: string;
+  provider: string;
+  method: "api_key" | "local_cli" | "oauth_google";
+  label: string;
+  base_url?: string;
+  model?: string;
+  has_api_key?: boolean;
+  agent_id?: string;
+  notes?: string;
+};
+
+export type AuthProfilesResponse = {
+  default_profile_id: string | null;
+  profiles: AuthProfile[];
+  methods_explained?: Record<string, string>;
+  honest_notes?: string[];
+};
+
+export function listAuthProfiles(settings: AppSettings) {
+  return request<AuthProfilesResponse>(settings, "/v1/auth/profiles");
+}
+
+export function upsertAuthProfile(
+  settings: AppSettings,
+  body: {
+    id: string;
+    provider: string;
+    method: string;
+    label?: string;
+    base_url?: string;
+    model?: string;
+    api_key?: string;
+    agent_id?: string;
+    notes?: string;
+  }
+) {
+  return request<AuthProfile>(settings, "/v1/auth/profiles", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function setDefaultAuthProfile(settings: AppSettings, profileId: string) {
+  return request<{ default_profile_id: string }>(
+    settings,
+    `/v1/auth/profiles/${encodeURIComponent(profileId)}/default`,
+    { method: "POST" }
+  );
+}
+
+export function deleteAuthProfile(settings: AppSettings, profileId: string) {
+  return request<{ ok: boolean }>(
+    settings,
+    `/v1/auth/profiles/${encodeURIComponent(profileId)}`,
+    { method: "DELETE" }
+  );
+}
+
+export function cliAuthStatus(settings: AppSettings, agentId: string) {
+  return request<{
+    agent_id: string;
+    installed: boolean;
+    logged_in: boolean | null;
+    detail: string;
+    path?: string;
+    version?: string;
+  }>(settings, `/v1/auth/cli-status/${encodeURIComponent(agentId)}`);
+}
+
 /** Friendly chat via team job (or mock offline reply). */
 export async function friendlyChat(
   settings: AppSettings,
