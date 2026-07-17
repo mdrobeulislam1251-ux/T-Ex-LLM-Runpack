@@ -7,6 +7,7 @@ import { ProjectsProvider } from "./state/projects";
 import { SettingsProvider } from "./state/settings";
 import { TaskProvider } from "./state/task";
 import { ThemeProvider } from "./state/theme";
+import "./tailwind.css";
 import "./styles/global.css";
 
 createRoot(document.getElementById("root")!).render(

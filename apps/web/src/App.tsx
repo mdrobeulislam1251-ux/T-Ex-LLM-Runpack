@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import RuntimeConsole from "./components/RuntimeConsole";
 import { Shell } from "./components/Shell";
 import { BrandPage } from "./pages/BrandPage";
 import { BrainsPage } from "./pages/BrainsPage";
@@ -23,19 +24,20 @@ import { useSettings } from "./state/settings";
 
 function HomeRedirect() {
   const { settings } = useSettings();
+  // Default into the Grok-style runtime console for product review
   return (
-    <Navigate
-      to={settings.onboarded ? "/workspace" : "/onboarding"}
-      replace
-    />
+    <Navigate to={settings.onboarded ? "/console" : "/console"} replace />
   );
 }
 
 export default function App() {
   return (
     <Routes>
+      {/* Full-bleed Grok aesthetic runtime console (no legacy shell) */}
+      <Route path="console" element={<RuntimeConsole />} />
+      <Route index element={<HomeRedirect />} />
+
       <Route element={<Shell />}>
-        <Route index element={<HomeRedirect />} />
         <Route path="workspace" element={<WorkspacePage />} />
         <Route path="teams/:slug" element={<TeamDashboardPage />} />
         <Route path="domain-review" element={<DomainReviewPage />} />
@@ -55,7 +57,7 @@ export default function App() {
         <Route path="brand" element={<BrandPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/console" replace />} />
       </Route>
     </Routes>
   );
