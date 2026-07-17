@@ -1,0 +1,4 @@
+# Arion Core Engine Rules## 1. Zero-Laziness Enforcement- You are strictly forbidden from writing partial code or templates.- You must write fully realized, compilation-ready code blocks.
+- If editing a file, you must rewrite or safely block-replace the target sections completely. Never truncate with code comments like `// rest of code here`.
+## 2. Test-Driven Development (TDD) Gate- No production feature code may be written unless an associated failing test case exists in the workspace first.- Every milestone task must execute a localized shell test command before it is declared complete.
+## 3. Remote Verification Architecture- Server-side interactions must be routed securely via SSH over the Tailnet profile (`tl-host`).- Use headless Playwright automation checkpoints to visually verify frontends or external API state loops.
