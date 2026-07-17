@@ -33,8 +33,8 @@ Open **http://127.0.0.1:3006/**
 
 Full multi-OS guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)**  
 Tailscale / LAN / DNS A-record: **[docs/REMOTE-ACCESS.md](./docs/REMOTE-ACCESS.md)**  
-**Claude-first (recommended path):** **[docs/CLAUDE-FIRST.md](./docs/CLAUDE-FIRST.md)**  
-Provider auth reference: **[docs/AUTH.md](./docs/AUTH.md)**
+**Multi-team workspace:** **[docs/WORKSPACE.md](./docs/WORKSPACE.md)** (`tex` / `@T-ex`)  
+**Claude-first:** **[docs/CLAUDE-FIRST.md](./docs/CLAUDE-FIRST.md)** · Auth: **[docs/AUTH.md](./docs/AUTH.md)**
 
 ```bash
 # Custom port
@@ -45,10 +45,17 @@ python3 -m texllm.cli serve --port 8088
 ## Useful commands
 
 ```bash
-python3 -m texllm.cli agents                 # detect installed terminal AIs
-python3 -m texllm.cli spawn claude "Hello"   # backend CLI spawn
-python3 -m texllm.cli run "Your goal" --provider mock
-curl -s http://127.0.0.1:3006/v1/system
+# Multi-team workspace (shared DB with web UI)
+tex teams
+tex dash sales
+tex run ops "Stabilize onboarding SLA"
+tex review example.com
+tex bd "Partnership plan"
+tex @T-ex "Weekly CEO priorities"
+# or: python3 -m texllm.tex_cli teams
+
+python3 -m texllm.cli agents
+python3 -m texllm.cli serve   # web + API :3006
 ```
 
 ## Layout

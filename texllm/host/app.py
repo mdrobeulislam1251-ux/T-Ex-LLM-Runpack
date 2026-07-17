@@ -289,6 +289,160 @@ def chat(
     }
 
 
+# ----- Multi-team workspace (shared SQLite: web + CLI) -----
+
+
+@app.get("/v1/workspace")
+def workspace_overview(_: None = Depends(require_api_key)) -> dict:
+    from texllm.workspace import get_workspace
+
+    return get_workspace().overview()
+
+
+@app.get("/v1/workspace/teams")
+def workspace_teams(_: None = Depends(require_api_key)) -> dict:
+    from texllm.workspace import get_workspace
+
+    return {"teams": get_workspace().list_teams()}
+
+
+@app.post("/v1/workspace/teams")
+def workspace_create_team(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    slug = str(body.get("slug") or "").strip().lower().replace(" ", "-")
+    name = str(body.get("name") or "").strip()
+    if not slug or not name:
+        raise HTTPException(status_code=400, detail="slug and name required")
+    try:
+        team = get_workspace().create_team(
+            slug=slug,
+            name=name,
+            kind=str(body.get("kind") or "custom"),
+            description=str(body.get("description") or ""),
+            color=str(body.get("color") or "#64748b"),
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return team
+
+
+@app.get("/v1/workspace/teams/{slug}")
+def workspace_team_dashboard(
+    slug: str,
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    try:
+        return get_workspace().dashboard(slug)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Team not found") from exc
+
+
+@app.post("/v1/workspace/teams/{slug}/run")
+def workspace_team_run(
+    slug: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace.team_run import run_team_flow
+
+    goal = str(body.get("goal") or "").strip()
+    if not goal:
+        raise HTTPException(status_code=400, detail="goal required")
+    try:
+        return run_team_flow(slug, goal)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Team not found") from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.post("/v1/workspace/domain-review")
+def workspace_domain_review(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Review a domain/website → ideas, brains, skills in shared DB."""
+    from texllm.workspace.domain_review import review_domain
+
+    domain = str(body.get("domain") or body.get("url") or "").strip()
+    if not domain:
+        raise HTTPException(status_code=400, detail="domain or url required")
+    try:
+        return review_domain(domain, notes=str(body.get("notes") or ""))
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/v1/workspace/ideas")
+def workspace_ideas(_: None = Depends(require_api_key)) -> dict:
+    from texllm.workspace import get_workspace
+
+    return {"ideas": get_workspace().list_ideas()}
+
+
+@app.post("/v1/workspace/brains")
+def workspace_add_brain(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    ws = get_workspace()
+    team = ws.get_team(str(body.get("team_slug") or body.get("team_id") or ""))
+    if not team:
+        raise HTTPException(status_code=400, detail="team_slug required")
+    return ws.add_brain(
+        team["id"],
+        name=str(body.get("name") or "Brain"),
+        role=str(body.get("role") or "specialist"),
+        prompt=str(body.get("prompt") or ""),
+        model_tier=str(body.get("model_tier") or "default"),
+    )
+
+
+@app.post("/v1/workspace/skills")
+def workspace_add_skill(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    ws = get_workspace()
+    team_id = None
+    if body.get("team_slug"):
+        team = ws.get_team(str(body["team_slug"]))
+        team_id = team["id"] if team else None
+    return ws.add_skill(
+        name=str(body.get("name") or "Skill"),
+        description=str(body.get("description") or ""),
+        body=str(body.get("body") or ""),
+        path=str(body.get("path") or ""),
+        team_id=team_id,
+    )
+
+
+@app.post("/v1/workspace/personal-bd/run")
+def workspace_personal_bd(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace.team_run import run_personal_bd
+
+    goal = str(body.get("goal") or "").strip()
+    if not goal:
+        raise HTTPException(status_code=400, detail="goal required")
+    try:
+        return run_personal_bd(goal)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @app.get("/v1/settings/aliases", response_model=AgentAliases)
 def get_aliases(_: None = Depends(require_api_key)) -> AgentAliases:
     """Names: what the user calls the agent, and what the agent calls the user."""

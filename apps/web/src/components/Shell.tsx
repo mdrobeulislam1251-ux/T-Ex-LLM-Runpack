@@ -5,19 +5,18 @@ import { TaskPanel } from "./TaskPanel";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 const links = [
+  { to: "/workspace", label: "Workspace" },
+  { to: "/domain-review", label: "Domain review" },
+  { to: "/personal-bd", label: "Personal BD" },
+  { to: "/ideas", label: "Ideas" },
   { to: "/jobs", label: "Jobs" },
-  { to: "/projects", label: "Projects" },
-  { to: "/onboarding", label: "Onboarding" },
-  { to: "/memory", label: "Memory" },
+  { to: "/chat", label: "Claude chat" },
   { to: "/brains", label: "Brains" },
   { to: "/skills", label: "Skills" },
-  { to: "/idea-to-agentic", label: "Idea to Agentic" },
-  { to: "/chat", label: "Chat" },
-  { to: "/integrations", label: "Integrations" },
-  { to: "/mcp", label: "MCP" },
-  { to: "/brand", label: "Brand Base Brains" },
   { to: "/settings", label: "Settings" },
-  { to: "/profile", label: "User Profile" },
+  { to: "/brand", label: "Brand" },
+  { to: "/onboarding", label: "Onboarding" },
+  { to: "/profile", label: "Profile" },
 ];
 
 export function Shell() {

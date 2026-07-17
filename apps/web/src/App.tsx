@@ -3,23 +3,31 @@ import { Shell } from "./components/Shell";
 import { BrandPage } from "./pages/BrandPage";
 import { BrainsPage } from "./pages/BrainsPage";
 import { ChatPage } from "./pages/ChatPage";
+import { DomainReviewPage } from "./pages/DomainReviewPage";
 import { IdeaToAgenticPage } from "./pages/IdeaToAgenticPage";
+import { IdeasPage } from "./pages/IdeasPage";
 import { IntegrationsPage } from "./pages/IntegrationsPage";
 import { JobDetailPage } from "./pages/JobDetailPage";
 import { JobsPage } from "./pages/JobsPage";
 import { MCPPage } from "./pages/MCPPage";
 import { MemoryPage } from "./pages/MemoryPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { PersonalBdPage } from "./pages/PersonalBdPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SkillsPage } from "./pages/SkillsPage";
+import { TeamDashboardPage } from "./pages/TeamDashboardPage";
+import { WorkspacePage } from "./pages/WorkspacePage";
 import { useSettings } from "./state/settings";
 
 function HomeRedirect() {
   const { settings } = useSettings();
   return (
-    <Navigate to={settings.onboarded ? "/jobs" : "/onboarding"} replace />
+    <Navigate
+      to={settings.onboarded ? "/workspace" : "/onboarding"}
+      replace
+    />
   );
 }
 
@@ -28,6 +36,11 @@ export default function App() {
     <Routes>
       <Route element={<Shell />}>
         <Route index element={<HomeRedirect />} />
+        <Route path="workspace" element={<WorkspacePage />} />
+        <Route path="teams/:slug" element={<TeamDashboardPage />} />
+        <Route path="domain-review" element={<DomainReviewPage />} />
+        <Route path="personal-bd" element={<PersonalBdPage />} />
+        <Route path="ideas" element={<IdeasPage />} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/:id" element={<JobDetailPage />} />
         <Route path="projects" element={<ProjectsPage />} />

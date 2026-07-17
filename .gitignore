@@ -60,3 +60,6 @@ data/local/
 .claude/
 .codex/sessions/
 .texllm/
+# keep structure but ignore local workspace DB
+*.db
+*.db-journal

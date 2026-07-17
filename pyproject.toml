@@ -23,6 +23,8 @@ dependencies = [
 dev = ["pytest>=7.4.0,<9"]
 
 [project.scripts]
+tex = "texllm.tex_cli:main"
+t-ex = "texllm.tex_cli:main"
 texllm = "texllm.cli:main"
 texllm-host = "texllm.host.app:main"
 texllm-run = "texllm.cli:main"
