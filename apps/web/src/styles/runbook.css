@@ -260,6 +260,22 @@
   color: #166534;
 }
 
+.rb-phase.running {
+  border-color: #ca8a04;
+}
+
+.rb-phase.running .num {
+  background: #fef3c7;
+  color: #92400e;
+  animation: rbPulse 1s ease-in-out infinite;
+}
+
+@keyframes rbPulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .rb-detail {
   background: #fff;
   border: 1px solid #e4e4e7;

@@ -3,10 +3,26 @@
 from __future__ import annotations
 
 import json
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from texllm.runbook.catalog import RUNBOOK_PHASES, catalog
+
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump()
+    if hasattr(obj, "dict"):
+        return obj.dict()
+    return str(obj)
+
+
+def json_safe(obj: Any) -> Any:
+    """Deep-convert to JSON-serializable structure."""
+    return json.loads(json.dumps(obj, default=_json_default))
 
 
 class RunbookState:
@@ -33,10 +49,27 @@ class RunbookState:
             "company_name": "[Your Company]",
             "active_phase": "intent",
             "phases": phases,
+            "activity": [],
         }
 
     def save(self) -> None:
-        self.path.write_text(json.dumps(self._data, indent=2), encoding="utf-8")
+        self.path.write_text(
+            json.dumps(self._data, indent=2, default=_json_default),
+            encoding="utf-8",
+        )
+
+    def log(self, title: str, detail: str = "") -> None:
+        act = self._data.setdefault("activity", [])
+        act.insert(
+            0,
+            {
+                "title": title,
+                "detail": detail,
+                "ts": datetime.utcnow().isoformat() + "Z",
+            },
+        )
+        self._data["activity"] = act[:40]
+        self.save()
 
     def snapshot(self) -> Dict[str, Any]:
         cat = catalog()
@@ -62,6 +95,7 @@ class RunbookState:
                 "total": len(phases_out),
                 "pct": int(100 * done / max(1, len(phases_out))),
             },
+            "activity": self._data.get("activity") or [],
         }
 
     def update_phase(
@@ -79,17 +113,14 @@ class RunbookState:
         if status:
             ph["status"] = status
         if placeholder is not None:
-            ph["placeholder"] = placeholder
+            ph["placeholder"] = json_safe(placeholder)
         if result is not None:
-            ph["result"] = result
+            ph["result"] = json_safe(result)
         if company_name:
             self._data["company_name"] = company_name
         self._data["active_phase"] = phase_id
         self.save()
         return self.snapshot()
-
-    def mark_done(self, phase_id: str, result: Any = None) -> Dict[str, Any]:
-        return self.update_phase(phase_id, status="done", result=result)
 
 
 _runbook: Optional[RunbookState] = None
@@ -100,3 +131,8 @@ def get_runbook() -> RunbookState:
     if _runbook is None:
         _runbook = RunbookState()
     return _runbook
+
+
+def reset_runbook_singleton() -> None:
+    global _runbook
+    _runbook = None

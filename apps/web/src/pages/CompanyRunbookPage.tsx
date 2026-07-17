@@ -1,7 +1,6 @@
 /**
- * T-ex Company Runbook Agent — the actual product.
- * Intent → Domain → Product → Teams → Build → GTM → Deploy
- * Providers: Claude / ChatGPT / Gemini / Grok (API key or OAuth/CLI)
+ * T-ex Company Runbook — Intent → Deploy
+ * Workable without AI; updates visibly when you run a phase.
  */
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -24,8 +23,17 @@ type Phase = {
   placeholder: Record<string, unknown>;
   outputs: string[];
   playbook: string;
-  result?: unknown;
+  result?: {
+    summary?: string;
+    content?: string;
+    provider?: string;
+    auth_method?: string;
+    error?: string;
+    mode?: string;
+  } | null;
 };
+
+type Activity = { title: string; detail: string; ts: string };
 
 type RunbookSnap = {
   product: string;
@@ -42,6 +50,7 @@ type RunbookSnap = {
   progress: { done: number; total: number; pct: number };
   auth_profiles: AuthProfile[];
   auth_default: string | null;
+  activity?: Activity[];
   cli: Record<string, string>;
 };
 
@@ -56,40 +65,49 @@ async function api<T>(
 ): Promise<T> {
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
-  if (settings.apiKey) headers.set("X-API-Key", settings.apiKey);
+  // Always send a key; host accepts "change-me" without strict match
+  headers.set("X-API-Key", settings.apiKey || "change-me");
   const res = await fetch(`${base(settings)}${path}`, { ...init, headers });
-  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    let detail = await res.text();
+    try {
+      detail = JSON.parse(detail).detail || detail;
+    } catch {
+      /* keep text */
+    }
+    throw new Error(String(detail));
+  }
   return res.json() as Promise<T>;
 }
 
 const PROVIDER_DEFAULTS: Record<
   string,
-  { base_url: string; method: string; id: string }
+  { base_url: string; id: string; provider: string }
 > = {
   claude: {
     id: "claude-key",
     base_url: "https://api.anthropic.com",
-    method: "api_key",
+    provider: "anthropic",
   },
   openai: {
     id: "openai-key",
     base_url: "https://api.openai.com/v1",
-    method: "api_key",
+    provider: "openai",
   },
   gemini: {
     id: "gemini-key",
     base_url: "https://generativelanguage.googleapis.com/v1beta",
-    method: "api_key",
+    provider: "gemini",
   },
   grok: {
     id: "grok-key",
     base_url: "https://api.x.ai/v1",
-    method: "api_key",
+    provider: "xai",
   },
 };
 
 export function CompanyRunbookPage() {
-  const { settings } = useSettings();
+  const { settings, setSettings } = useSettings();
   const [rb, setRb] = useState<RunbookSnap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState("intent");
@@ -97,28 +115,33 @@ export function CompanyRunbookPage() {
   const [notes, setNotes] = useState("");
   const [domain, setDomain] = useState("");
   const [busy, setBusy] = useState(false);
+  const [statusLine, setStatusLine] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
-  // provider connect
   const [prov, setProv] = useState("claude");
   const [apiKey, setApiKey] = useState("");
   const [claudeToken, setClaudeToken] = useState("");
 
   const refresh = useCallback(async () => {
-    try {
-      const data = await api<RunbookSnap>(settings, "/v1/runbook");
-      setRb(data);
-      setCompany(data.company_name || "");
-      if (!selected) setSelected(data.active_phase || "intent");
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
-  }, [settings, selected]);
+    const data = await api<RunbookSnap>(settings, "/v1/runbook");
+    setRb(data);
+    setCompany(data.company_name || "");
+    setError(null);
+    return data;
+  }, [settings]);
 
   useEffect(() => {
-    void refresh();
+    void refresh().catch((e) =>
+      setError(e instanceof Error ? e.message : String(e))
+    );
   }, [refresh]);
+
+  // Keep API key aligned for local demos
+  useEffect(() => {
+    if (!settings.apiKey || settings.apiKey === "dev-secret") {
+      setSettings({ apiKey: "change-me" });
+    }
+  }, [settings.apiKey, setSettings]);
 
   const phase = rb?.phases.find((p) => p.id === selected);
 
@@ -127,20 +150,53 @@ export function CompanyRunbookPage() {
     setBusy(true);
     setMsg(null);
     setError(null);
+    setStatusLine(`Running “${phase.title}”…`);
+
+    // Optimistic UI: show running
+    setRb((prev) =>
+      prev
+        ? {
+            ...prev,
+            phases: prev.phases.map((p) =>
+              p.id === phase.id ? { ...p, status: "running" } : p
+            ),
+          }
+        : prev
+    );
+
     try {
       const body: Record<string, string> = {
         notes,
-        company_name: company || "[Your Company]",
+        company_name: company || "Your Company",
       };
       if (phase.id === "domain" && domain.trim()) body.domain = domain.trim();
-      await api(settings, `/v1/runbook/phases/${phase.id}/run`, {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
-      setMsg(`Phase “${phase.title}” completed (or drafted).`);
-      await refresh();
+
+      const snap = await api<RunbookSnap>(
+        settings,
+        `/v1/runbook/phases/${phase.id}/run`,
+        { method: "POST", body: JSON.stringify(body) }
+      );
+      setRb(snap);
+      setCompany(snap.company_name || company);
+      const updated = snap.phases.find((p) => p.id === phase.id);
+      const summary =
+        updated?.result?.summary ||
+        `Phase “${phase.title}” marked ${updated?.status || "done"}.`;
+      setMsg(summary);
+      setStatusLine(
+        `Done · provider=${updated?.result?.provider || "?"} · ${
+          updated?.result?.auth_method || ""
+        }`
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      setStatusLine("Failed — see error");
+      // reload truth from server
+      try {
+        await refresh();
+      } catch {
+        /* ignore */
+      }
     } finally {
       setBusy(false);
     }
@@ -150,36 +206,68 @@ export function CompanyRunbookPage() {
     e.preventDefault();
     if (!phase) return;
     try {
-      await api(settings, `/v1/runbook/phases/${phase.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          company_name: company,
-          placeholder: phase.placeholder,
-          status: phase.status === "done" ? "done" : "ready",
-        }),
-      });
-      setMsg("Placeholders saved.");
-      await refresh();
+      const snap = await api<RunbookSnap>(
+        settings,
+        `/v1/runbook/phases/${phase.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            company_name: company,
+            placeholder: phase.placeholder,
+            status: phase.status === "done" ? "done" : "ready",
+          }),
+        }
+      );
+      setRb(snap);
+      setMsg("Placeholders saved — progress bar will move when you Run or Mark done.");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
+  async function markDoneOnly() {
+    if (!phase) return;
+    const snap = await api<RunbookSnap>(
+      settings,
+      `/v1/runbook/phases/${phase.id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "done",
+          company_name: company,
+          result: {
+            summary: "Marked done without AI",
+            content: "User marked this phase done (no model call).",
+            mode: "manual",
+          },
+        }),
+      }
+    );
+    setRb(snap);
+    setMsg(`Marked “${phase.title}” done.`);
+  }
+
   async function connectApiKey() {
     const d = PROVIDER_DEFAULTS[prov];
-    if (!d || !apiKey.trim()) return;
+    if (!d || !apiKey.trim()) {
+      setError("Paste an API key first.");
+      return;
+    }
     try {
       await upsertAuthProfile(settings, {
         id: d.id,
-        provider: prov === "grok" ? "xai" : prov === "claude" ? "anthropic" : prov,
+        provider: d.provider,
         method: "api_key",
         label: `${prov} API key`,
         base_url: d.base_url,
         api_key: apiKey.trim(),
       });
       await setDefaultAuthProfile(settings, d.id);
+      // Host must not force mock
       setApiKey("");
-      setMsg(`${prov} API key saved as default provider.`);
+      setMsg(
+        `${prov} API key saved. Restart host without LLM_PROVIDER=mock for live model (or keep mock for offline drafts).`
+      );
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -187,13 +275,17 @@ export function CompanyRunbookPage() {
   }
 
   async function connectClaudeMax() {
+    if (!claudeToken.trim()) {
+      setError("Paste setup-token from: claude setup-token");
+      return;
+    }
     try {
       await saveClaudeSetupToken(settings, {
         token: claudeToken.trim(),
         set_default: true,
       });
       setClaudeToken("");
-      setMsg("Claude Max/Pro setup-token saved.");
+      setMsg("Claude Max token saved. Restart host with LLM_PROVIDER=auto to use it.");
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -203,7 +295,9 @@ export function CompanyRunbookPage() {
   async function connectClaudeCli() {
     try {
       await useClaudeCli(settings);
-      setMsg("Using local Claude Code login.");
+      setMsg(
+        "Claude CLI profile set. Host must run with LLM_PROVIDER=auto (not mock) and `claude` on PATH."
+      );
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -216,10 +310,7 @@ export function CompanyRunbookPage() {
       ...rb,
       phases: rb.phases.map((p) =>
         p.id === phase.id
-          ? {
-              ...p,
-              placeholder: { ...p.placeholder, [key]: value },
-            }
+          ? { ...p, placeholder: { ...p.placeholder, [key]: value } }
           : p
       ),
     });
@@ -231,7 +322,7 @@ export function CompanyRunbookPage() {
         <div className="rb-error">
           {error}
           <p className="rb-muted">
-            Start host: <code>python3 -m texllm.cli serve</code>
+            Start: <code>HOST_API_KEY=change-me python3 -m texllm.cli serve</code>
           </p>
         </div>
       </div>
@@ -250,13 +341,13 @@ export function CompanyRunbookPage() {
     <div className="runbook">
       <header className="rb-hero">
         <div>
-          <p className="rb-kicker">T-ex product</p>
+          <p className="rb-kicker">Product · not a telemetry dashboard</p>
           <h1>{rb.product}</h1>
           <p className="rb-tagline">{rb.tagline}</p>
         </div>
         <div className="rb-progress-block">
           <div className="rb-progress-label">
-            Progress {rb.progress.done}/{rb.progress.total}
+            Progress {rb.progress.done}/{rb.progress.total} ({rb.progress.pct}%)
           </div>
           <div className="rb-progress-track">
             <div
@@ -265,27 +356,33 @@ export function CompanyRunbookPage() {
             />
           </div>
           <div className="rb-company">
-            <label htmlFor="co">Company</label>
+            <label htmlFor="co">Company name</label>
             <input
               id="co"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="[Your Company]"
+              placeholder="Your Company"
             />
           </div>
+          {statusLine && (
+            <p className="rb-muted" style={{ marginTop: 8 }}>
+              {busy ? "⏳ " : "✓ "}
+              {statusLine}
+            </p>
+          )}
         </div>
       </header>
 
       {error && <div className="rb-error">{error}</div>}
       {msg && <div className="rb-ok">{msg}</div>}
 
-      {/* Providers — API key or OAuth/subscription */}
       <section className="rb-card">
-        <h2>AI providers — connect when ready</h2>
+        <h2>1) Connect AI (optional for now)</h2>
         <p className="rb-muted">
-          Claude · ChatGPT · Gemini · Grok via <strong>API key</strong> or{" "}
-          <strong>subscription/OAuth/CLI</strong>. You can fill the whole
-          runbook with placeholders first; agent runs use the default profile.
+          <strong>Grok / ChatGPT / Gemini / Claude</strong> via API key. Claude
+          also supports Max setup-token or local <code>claude</code> CLI. There
+          is no Grok “local CLI” like Claude Code — use an{" "}
+          <strong>xAI API key</strong> for Grok.
         </p>
         <div className="rb-providers">
           {rb.providers.map((p) => (
@@ -302,26 +399,32 @@ export function CompanyRunbookPage() {
         </div>
         <div className="rb-connect">
           <div className="rb-field">
-            <label>API key ({prov})</label>
+            <label>API key for {prov}</label>
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Paste API key"
+              placeholder={
+                prov === "grok"
+                  ? "xai-… API key"
+                  : prov === "claude"
+                    ? "sk-ant-…"
+                    : "API key"
+              }
             />
             <button type="button" className="rb-btn" onClick={() => void connectApiKey()}>
-              Save as default
+              Save API key as default
             </button>
           </div>
           {prov === "claude" && (
             <>
               <div className="rb-field">
-                <label>Claude Max / Pro setup-token</label>
+                <label>Or Claude Max setup-token</label>
                 <input
                   type="password"
                   value={claudeToken}
                   onChange={(e) => setClaudeToken(e.target.value)}
-                  placeholder="claude setup-token output"
+                  placeholder="from: claude setup-token"
                 />
                 <button
                   type="button"
@@ -336,19 +439,24 @@ export function CompanyRunbookPage() {
                 className="rb-btn ghost"
                 onClick={() => void connectClaudeCli()}
               >
-                Use local Claude Code login
+                Use local Claude CLI
               </button>
             </>
           )}
         </div>
         <p className="rb-muted mono">
-          Default profile: {rb.auth_default || "none"} · profiles:{" "}
-          {(rb.auth_profiles || []).map((p) => p.id).join(", ") || "—"}
+          Default: {rb.auth_default || "none (mock drafts)"} ·{" "}
+          {(rb.auth_profiles || []).map((p) => `${p.id}(${p.method})`).join(", ") ||
+            "no profiles yet"}
+        </p>
+        <p className="rb-muted">
+          For live models, restart host with{" "}
+          <code>LLM_PROVIDER=auto</code> (not mock). Offline: keep mock —{" "}
+          <strong>Run phase</strong> still fills placeholders and moves progress.
         </p>
       </section>
 
       <div className="rb-layout">
-        {/* Phase rail */}
         <nav className="rb-phases" aria-label="Runbook phases">
           {rb.phases.map((p) => (
             <button
@@ -357,7 +465,8 @@ export function CompanyRunbookPage() {
               className={
                 "rb-phase" +
                 (selected === p.id ? " active" : "") +
-                (p.status === "done" ? " done" : "")
+                (p.status === "done" ? " done" : "") +
+                (p.status === "running" ? " running" : "")
               }
               onClick={() => setSelected(p.id)}
             >
@@ -370,7 +479,6 @@ export function CompanyRunbookPage() {
           ))}
         </nav>
 
-        {/* Phase detail */}
         {phase && (
           <section className="rb-detail">
             <h2>
@@ -378,11 +486,11 @@ export function CompanyRunbookPage() {
             </h2>
             <p className="rb-muted">{phase.subtitle}</p>
             <p className="rb-agent">
-              Agent: <strong>{phase.agent_role}</strong> · Playbook:{" "}
+              Agent: <strong>{phase.agent_role}</strong> ·{" "}
               <code>{phase.playbook}</code>
             </p>
 
-            <h3>Placeholders (pre-loaded company runbook)</h3>
+            <h3>Placeholders</h3>
             <form onSubmit={savePlaceholders}>
               <div className="rb-placeholders">
                 {Object.entries(phase.placeholder || {}).map(([k, v]) => (
@@ -404,15 +512,12 @@ export function CompanyRunbookPage() {
                         value={JSON.stringify(v, null, 2)}
                         onChange={(e) => {
                           try {
-                            updatePlaceholderKey(
-                              k,
-                              JSON.parse(e.target.value)
-                            );
+                            updatePlaceholderKey(k, JSON.parse(e.target.value));
                           } catch {
-                            /* keep typing */
+                            /* typing */
                           }
                         }}
-                        rows={4}
+                        rows={3}
                       />
                     ) : (
                       <input
@@ -428,7 +533,7 @@ export function CompanyRunbookPage() {
 
               {phase.id === "domain" && (
                 <div className="rb-field">
-                  <label>Domain / URL (for live review)</label>
+                  <label>Domain / URL (optional live review)</label>
                   <input
                     value={domain}
                     onChange={(e) => setDomain(e.target.value)}
@@ -438,12 +543,12 @@ export function CompanyRunbookPage() {
               )}
 
               <div className="rb-field">
-                <label>Notes for agent run</label>
+                <label>Notes for this run</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  placeholder="Optional context when you run this phase"
+                  placeholder="Anything the agent should know"
                 />
               </div>
 
@@ -457,18 +562,13 @@ export function CompanyRunbookPage() {
                   disabled={busy}
                   onClick={() => void runPhase()}
                 >
-                  {busy ? "Running…" : "Run phase agent"}
+                  {busy ? "Running phase…" : "Run phase agent"}
                 </button>
                 <button
                   type="button"
                   className="rb-btn ghost"
-                  onClick={async () => {
-                    await api(settings, `/v1/runbook/phases/${phase.id}`, {
-                      method: "PATCH",
-                      body: JSON.stringify({ status: "done" }),
-                    });
-                    await refresh();
-                  }}
+                  disabled={busy}
+                  onClick={() => void markDoneOnly()}
                 >
                   Mark done (no AI)
                 </button>
@@ -484,11 +584,16 @@ export function CompanyRunbookPage() {
 
             {phase.result != null && (
               <>
-                <h3>Last result</h3>
+                <h3>Result (this updates after Run)</h3>
+                <p className="rb-muted">
+                  {phase.result.summary || "—"}
+                  {phase.result.provider
+                    ? ` · provider=${phase.result.provider}`
+                    : ""}
+                </p>
                 <pre className="rb-result">
-                  {typeof phase.result === "string"
-                    ? phase.result
-                    : JSON.stringify(phase.result, null, 2)}
+                  {phase.result.content ||
+                    JSON.stringify(phase.result, null, 2)}
                 </pre>
               </>
             )}
@@ -496,17 +601,30 @@ export function CompanyRunbookPage() {
         )}
       </div>
 
+      {(rb.activity || []).length > 0 && (
+        <section className="rb-card" style={{ marginTop: 16 }}>
+          <h2>Activity (proof of updates)</h2>
+          <ul className="rb-outputs">
+            {(rb.activity || []).slice(0, 12).map((a, i) => (
+              <li key={i}>
+                <strong>{a.title}</strong>
+                {a.detail ? ` — ${a.detail}` : ""}
+                <span className="rb-muted"> · {a.ts}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <footer className="rb-footer">
         <div>
-          <strong>CLI / Claude Code</strong>
+          <strong>CLI</strong>
           <code>tex @T-ex "Start company from intent"</code>
           <code>tex review example.com</code>
-          <code>tex export sales</code>
         </div>
         <div className="rb-links">
-          <Link to="/workspace">Team workspace</Link>
+          <Link to="/workspace">Teams</Link>
           <Link to="/settings">Settings</Link>
-          <Link to="/console">Runtime console</Link>
         </div>
       </footer>
     </div>

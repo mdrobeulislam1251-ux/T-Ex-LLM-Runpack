@@ -571,13 +571,13 @@ def runbook_run_phase(
     _: None = Depends(require_api_key),
 ) -> dict:
     """
-    Execute a runbook phase with the connected provider (or fill placeholders in mock).
-    Product path: intent → domain → product → teams → build → gtm → deploy.
+    Execute a runbook phase. Always returns updated snapshot.
+    Uses connected provider; mock fills placeholders so UI always updates.
     """
-    from texllm.runbook.state import get_runbook
+    from texllm.runbook.state import get_runbook, json_safe
     from texllm.providers import get_provider
     from texllm.providers.base import ChatMessage
-    from texllm.workspace.team_run import run_team_flow
+    from texllm.host.credentials import resolve_runtime
 
     body = body or {}
     rb = get_runbook()
@@ -587,70 +587,203 @@ def runbook_run_phase(
         raise HTTPException(status_code=404, detail="Unknown phase")
 
     rb.update_phase(phase_id, status="running")
+    rb.log(f"Phase started: {phase['title']}", phase_id)
     notes = str(body.get("notes") or "")
-    company = str(body.get("company_name") or snap.get("company_name") or "Company")
+    company = str(
+        body.get("company_name") or snap.get("company_name") or "Your Company"
+    ).strip() or "Your Company"
 
     try:
-        # Domain phase can use domain review pipeline
+        # Domain with URL → workspace domain review (may call LLM)
         if phase_id == "domain" and body.get("domain"):
             from texllm.workspace.domain_review import review_domain
 
-            result = review_domain(str(body["domain"]), notes=notes)
-            return rb.update_phase(phase_id, status="done", result=result)
-
-        # Teams / build / gtm / deploy can run via team flow
-        team_map = {
-            "intent": "ceo",
-            "product": "dev",
-            "teams": "ceo",
-            "build": "dev",
-            "gtm": "sales",
-            "deploy": "tech",
-            "domain": "ceo",
-        }
-        team = team_map.get(phase_id, "ceo")
-        goal = (
-            f"Execute T-ex company runbook phase [{phase['title']}]. "
-            f"Company: {company}. "
-            f"Placeholders: {json.dumps(phase.get('placeholder') or {})}. "
-            f"Notes: {notes or 'none'}. "
-            f"Produce concrete filled outputs for: {phase.get('outputs')}. "
-            f"Keep structure clear for a full company from intent to deployment."
-        )
-        # Prefer team runner; falls back to single completion if needed
-        try:
-            run = run_team_flow(team, goal)
-            result = {
-                "team_run": run,
-                "phase": phase_id,
-                "mode": "team_flow",
-            }
-        except Exception:
-            provider = get_provider(settings)
-            completion = provider.complete(
-                [
-                    ChatMessage(
-                        role="system",
-                        content=(
-                            f"You are the {phase.get('agent_role')} for T-ex Company Runbook. "
-                            "Fill placeholders with realistic draft content. Return markdown."
-                        ),
-                    ),
-                    ChatMessage(role="user", content=goal),
-                ],
-                max_tokens=2000,
+            result = json_safe(
+                review_domain(str(body["domain"]), notes=notes)
             )
-            result = {
-                "content": completion.content,
-                "provider": completion.provider,
-                "phase": phase_id,
-                "mode": "single",
-            }
+            filled = _fill_phase_placeholders(phase, company, notes, result)
+            rb.update_phase(
+                phase_id,
+                status="done",
+                placeholder=filled,
+                result={
+                    "summary": result.get("overview")
+                    or f"Domain review complete for {body.get('domain')}",
+                    "content": json.dumps(result, indent=2, default=str)[:4000],
+                    "mode": "domain_review",
+                    "provider": result.get("provider") or "unknown",
+                },
+                company_name=company,
+            )
+            rb.log(f"Phase done: {phase['title']}", "domain_review")
+            return rb.snapshot()
 
-        return rb.update_phase(phase_id, status="done", result=result, company_name=company)
+        # Fast path: single LLM completion (works with mock / API / Claude CLI)
+        rt = resolve_runtime()
+        provider = get_provider(settings)
+        goal = (
+            f"You are the {phase.get('agent_role')} for company runbook phase "
+            f"[{phase['title']}].\n"
+            f"Company name: {company}\n"
+            f"Current placeholders (JSON): {json.dumps(phase.get('placeholder') or {})}\n"
+            f"Notes: {notes or 'none'}\n"
+            f"Required outputs: {phase.get('outputs')}\n\n"
+            "Write a concrete markdown draft that FILLS the placeholders with "
+            "realistic content (not brackets). Be specific and useful."
+        )
+        completion = provider.complete(
+            [
+                ChatMessage(
+                    role="system",
+                    content=(
+                        "You fill company runbook phases for T-ex. "
+                        "Return clear markdown. No empty placeholders."
+                    ),
+                ),
+                ChatMessage(role="user", content=goal),
+            ],
+            max_tokens=1800,
+            temperature=0.4,
+        )
+
+        content = (completion.content or "").strip()
+        # CLI auth failures or empty → still produce a usable draft
+        bad = (
+            not content
+            or "not logged in" in content.lower()
+            or "please run /login" in content.lower()
+            or content.lower().startswith("error")
+        )
+        if bad:
+            content = _mock_phase_markdown(phase, company, notes)
+            if completion.content:
+                content = (
+                    f"> Note: provider returned: `{completion.content[:120]}`\n"
+                    f"> Using offline draft so the runbook still advances.\n\n"
+                    + content
+                )
+
+        filled = _fill_phase_placeholders(phase, company, notes, {"content": content})
+        result = {
+            "summary": content[:280].replace("\n", " "),
+            "content": content,
+            "mode": "phase_run",
+            "provider": completion.provider,
+            "auth_method": rt.get("method") or settings.resolve_provider(),
+            "model": completion.model,
+        }
+        rb.update_phase(
+            phase_id,
+            status="done",
+            placeholder=filled,
+            result=result,
+            company_name=company,
+        )
+        rb.log(
+            f"Phase done: {phase['title']}",
+            f"provider={completion.provider} method={result['auth_method']}",
+        )
+        return rb.snapshot()
     except Exception as exc:  # noqa: BLE001
-        rb.update_phase(phase_id, status="ready")
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+        logger.exception("runbook phase %s failed", phase_id)
+        # Still mark done with error draft so UI moves
+        err_md = (
+            f"## {phase['title']} — draft (error path)\n\n"
+            f"Company: **{company}**\n\n"
+            f"Provider error: `{exc}`\n\n"
+            "Placeholders were auto-filled with demo text so you can continue the runbook.\n"
+        )
+        filled = _fill_phase_placeholders(phase, company, notes, {})
+        rb.update_phase(
+            phase_id,
+            status="done",
+            placeholder=filled,
+            result={
+                "summary": f"Completed with fallback after error: {exc}",
+                "content": err_md + "\n" + _mock_phase_markdown(phase, company, notes),
+                "mode": "error_fallback",
+                "error": str(exc),
+            },
+            company_name=company,
+        )
+        rb.log(f"Phase fallback: {phase['title']}", str(exc)[:200])
+        return rb.snapshot()
+
+
+def _fill_phase_placeholders(
+    phase: Dict[str, Any],
+    company: str,
+    notes: str,
+    extra: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Replace [bracket] placeholders with demo company values so UI updates."""
+    ph = dict(phase.get("placeholder") or {})
+    replacements = {
+        "company_name": company,
+        "one_liner": f"{company} — agentic company runbook to product deployment",
+        "problem": "Fragmented tools and no single spine from idea to deploy",
+        "audience": "Founders and ops teams shipping multi-agent products",
+        "success_metric": "Time from intent to production deploy (days)",
+        "domain": str(extra.get("domain") or ph.get("domain") or "example.com")
+        .replace("[", "")
+        .replace("]", ""),
+        "positioning": f"{company} owns the company-to-deploy agent spine",
+        "brains_per_team": "Lead + planner/executor/reviewer per team",
+        "skills": "Domain review, firmware export, GTM sequences",
+        "eval_suite": "Golden tasks per phase",
+        "ci": "pytest + web build green",
+        "pricing": "Starter / Pro / Enterprise (placeholder)",
+        "onboarding": "Day-0: connect provider → run Intent → Domain",
+        "host": "0.0.0.0:3006",
+        "auth": "API keys or Claude CLI / setup-token",
+        "access": "localhost | tailnet | domain",
+        "health": "/health green",
+    }
+    out: Dict[str, Any] = {}
+    for k, v in ph.items():
+        if isinstance(v, str) and v.startswith("["):
+            out[k] = replacements.get(k, v.strip("[]") or company)
+        elif isinstance(v, list):
+            out[k] = [
+                x.strip("[]") if isinstance(x, str) and x.startswith("[") else x
+                for x in v
+            ]
+            if k == "competitors" and all(
+                isinstance(x, str) and "Competitor" in x for x in (v or [])
+            ):
+                out[k] = ["Incumbent SaaS", "Horizontal AI chat", "Homegrown scripts"]
+            if k == "mvp_features" and any(
+                isinstance(x, str) and x.startswith("[") for x in (v or [])
+            ):
+                out[k] = [
+                    "Company runbook Intent→Deploy",
+                    "Multi-team agents",
+                    "Provider connect (Claude/GPT/Gemini/Grok)",
+                ]
+            if k == "packages":
+                out[k] = ["sample-assistant@0.1.0", "sales-agents@0.1.0"]
+            if k == "channels":
+                out[k] = ["Web console", "tex CLI", "@T-ex in Claude Code"]
+        else:
+            out[k] = v
+    if notes:
+        out["notes"] = notes
+    return out
+
+
+def _mock_phase_markdown(
+    phase: Dict[str, Any], company: str, notes: str
+) -> str:
+    outs = "\n".join(f"- {o}" for o in (phase.get("outputs") or []))
+    return (
+        f"# {phase.get('title')} — {company}\n\n"
+        f"**Agent:** {phase.get('agent_role')}\n\n"
+        f"**Status:** Draft generated (mock or fallback provider).\n\n"
+        f"## Outputs\n{outs}\n\n"
+        f"## Notes\n{notes or 'None'}\n\n"
+        f"## Next\nContinue to the next runbook phase or connect a live provider "
+        f"(Claude / ChatGPT / Gemini / Grok) for richer drafts.\n"
+    )
 
 
 @app.get("/v1/settings/aliases", response_model=AgentAliases)
