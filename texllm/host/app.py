@@ -443,6 +443,89 @@ def workspace_personal_bd(
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
+@app.patch("/v1/workspace/kpis/{kpi_id}")
+def workspace_update_kpi(
+    kpi_id: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    try:
+        return get_workspace().update_kpi(
+            kpi_id,
+            value=body.get("value"),
+            trend=body.get("trend"),
+            target=body.get("target"),
+            label=body.get("label"),
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="KPI not found") from exc
+
+
+@app.post("/v1/workspace/teams/{slug}/kanban")
+def workspace_add_card(
+    slug: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    ws = get_workspace()
+    team = ws.get_team(slug)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    title = str(body.get("title") or "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="title required")
+    return ws.add_kanban_card(
+        team["id"],
+        title,
+        detail=str(body.get("detail") or ""),
+        column_key=str(body.get("column_key") or "backlog"),
+        priority=str(body.get("priority") or "med"),
+        assignee=str(body.get("assignee") or "agent"),
+    )
+
+
+@app.post("/v1/workspace/kanban/{card_id}/move")
+def workspace_move_card(
+    card_id: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.workspace import get_workspace
+
+    col = str(body.get("column_key") or "").strip()
+    if not col:
+        raise HTTPException(status_code=400, detail="column_key required")
+    try:
+        return get_workspace().move_kanban_card(card_id, col)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Card not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/workspace/teams/{slug}/export-firmware")
+def workspace_export_firmware(
+    slug: str,
+    body: Dict[str, Any] = None,
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Export team brains/skills to firmware/<slug>-agents/ for TeamRunner."""
+    from texllm.workspace.export_firmware import export_team_firmware
+
+    body = body or {}
+    version = str(body.get("version") or "0.1.0")
+    try:
+        return export_team_firmware(slug, version=version)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Team not found") from exc
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
 @app.get("/v1/settings/aliases", response_model=AgentAliases)
 def get_aliases(_: None = Depends(require_api_key)) -> AgentAliases:
     """Names: what the user calls the agent, and what the agent calls the user."""

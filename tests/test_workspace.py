@@ -27,6 +27,34 @@ def test_workspace_seed_and_custom_team(tmp_path: Path, monkeypatch):
     dash = db.dashboard("support")
     assert dash["brains"]
     assert dash["flows"]
+    assert dash["kpis"]
+    assert dash["kanban"]["columns"]
+    assert dash["stats"]["brains"] >= 1
+
+    card = db.add_kanban_card(t["id"], "Test card", column_key="todo")
+    moved = db.move_kanban_card(card["id"], "doing")
+    assert moved["column_key"] == "doing"
+
+
+def test_export_firmware(tmp_path: Path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    from texllm.workspace.db import WorkspaceDB
+    from texllm.workspace.export_firmware import export_team_firmware
+
+    db = WorkspaceDB(path=tmp_path / "w.db")
+    sales = db.get_team("sales")
+    assert sales
+    db.add_brain(sales["id"], "Closer", role="closer", prompt="Close deals")
+    db.add_skill("Pitch", description="Pitch deck", team_id=sales["id"], body="steps")
+
+    out = export_team_firmware(
+        "sales", version="0.1.0", firmware_root=tmp_path / "firmware", db=db
+    )
+    assert out["package_id"] == "sales-agents"
+    assert out["brains_exported"] >= 2
+    man = tmp_path / "firmware" / "sales-agents" / "manifest.yaml"
+    assert man.is_file()
+    assert (tmp_path / "firmware" / "sales-agents" / "prompts" / "planner.md").is_file()
 
 
 def test_workspace_api(tmp_path: Path, monkeypatch):

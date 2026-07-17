@@ -74,6 +74,20 @@ def main(argv: list[str] | None = None) -> int:
     p_ideas = sub.add_parser("ideas", help="List ideas from domain reviews")
     p_ideas.add_argument("--json", action="store_true")
 
+    p_export = sub.add_parser(
+        "export",
+        help="Export team brains/skills to firmware/<team>-agents package",
+    )
+    p_export.add_argument("team", help="Team slug")
+    p_export.add_argument("--version", default="0.1.0")
+    p_export.add_argument("--json", action="store_true")
+
+    p_card = sub.add_parser("card", help="Add kanban card to team board")
+    p_card.add_argument("team")
+    p_card.add_argument("title")
+    p_card.add_argument("--column", default="backlog")
+    p_card.add_argument("--detail", default="")
+
     sub.add_parser("serve", help="Start host + web (same as texllm serve)")
 
     args = parser.parse_args(argv)
@@ -161,6 +175,38 @@ def main(argv: list[str] | None = None) -> int:
         else:
             for i in ideas:
                 print(f"[{i.get('team_slug')}] {i.get('title')}")
+        return 0
+
+    if args.cmd == "export":
+        from texllm.workspace.export_firmware import export_team_firmware
+
+        try:
+            out = export_team_firmware(args.team, version=args.version)
+        except KeyError:
+            print(f"Unknown team: {args.team}", file=sys.stderr)
+            return 1
+        if args.json:
+            print(json.dumps(out, indent=2, default=str))
+        else:
+            print(f"exported: {out['package_id']}@{out['version']}")
+            print(f"path: {out['path']}")
+            print(
+                f"brains: {out['brains_exported']} skills: {out['skills_exported']}"
+            )
+        return 0
+
+    if args.cmd == "card":
+        from texllm.workspace import get_workspace
+
+        ws = get_workspace()
+        team = ws.get_team(args.team)
+        if not team:
+            print("Unknown team", file=sys.stderr)
+            return 1
+        c = ws.add_kanban_card(
+            team["id"], args.title, detail=args.detail, column_key=args.column
+        )
+        print(json.dumps(c, indent=2))
         return 0
 
     if args.cmd == "serve":

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from texllm.config import get_settings
@@ -39,9 +40,23 @@ def run_team_flow(
     )
 
     settings = get_settings()
+    # Prefer auto-exported team firmware if present
+    fw_id = "sample-assistant"
+    fw_ver = "0.1.0"
+    pkg = Path(settings.firmware_dir) / f"{team['slug']}-agents"
+    if (pkg / "manifest.yaml").is_file():
+        fw_id = f"{team['slug']}-agents"
+        try:
+            import yaml
+
+            man = yaml.safe_load((pkg / "manifest.yaml").read_text(encoding="utf-8")) or {}
+            fw_ver = str(man.get("version") or "0.1.0")
+        except Exception:  # noqa: BLE001
+            fw_ver = "0.1.0"
+
     job = Job(
-        firmware_id="sample-assistant",
-        firmware_version="0.1.0",
+        firmware_id=fw_id,
+        firmware_version=fw_ver,
         goal=full_goal,
         input={"goal": goal, "team": team["slug"]},
     )

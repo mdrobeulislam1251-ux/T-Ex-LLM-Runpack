@@ -53,12 +53,28 @@ tex @T-ex "Coordinate ops and sales handoff"
 | POST | `/v1/workspace/skills` |
 | POST | `/v1/workspace/personal-bd/run` |
 
+## Team dashboard UX
+
+- **KPI cards** — per-team metrics (editable +/−)
+- **Kanban board** — backlog → todo → doing → review → done
+- **Export brains → firmware** — `tex export <team>` writes `firmware/<team>-agents/`
+
 ## Flow
 
 ```
 Domain review ──► ideas + brains + skills (SQLite)
                       │
-Team dashboard ◄──────┤
+Team dashboard (KPI + kanban) ◄──┤
                       │
-tex @sales / Web run ─┴──► TeamRunner (Claude-first provider)
+tex export <team> ──► firmware/<team>-agents/
+                      │
+tex @sales / Web run ─┴──► TeamRunner (prefers exported firmware)
+```
+
+## Export firmware
+
+```bash
+tex export sales
+# → firmware/sales-agents/manifest.yaml + prompts from brains
+tex run sales "Weekly pipeline review"   # uses sales-agents if present
 ```

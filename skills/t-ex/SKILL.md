@@ -46,6 +46,13 @@ tex bd "Map 3 partnership paths for our agent platform"
 # add brain / skill
 tex brain sales "Closer" --role closer --prompt "Qualify and close"
 tex skill dev "PR checklist" --description "Review PR quality"
+
+# export brains → firmware package (used by team runs)
+tex export sales
+tex export dev --version 0.2.0
+
+# kanban card
+tex card ops "Page on-call" --column todo
 ```
 
 If `tex` not on PATH:

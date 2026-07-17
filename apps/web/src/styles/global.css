@@ -682,6 +682,138 @@ h3 {
   font-size: 0.9rem;
 }
 
+/* Team KPI + Kanban */
+.kpi-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin: 0.75rem 0 0.25rem;
+}
+
+.kpi-card {
+  background: var(--tex-surface);
+  border: 1px solid var(--tex-border);
+  border-radius: var(--tex-radius);
+  padding: 0.75rem 0.85rem;
+  box-shadow: var(--tex-shadow);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tex-muted);
+}
+
+.kpi-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.kpi-unit {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--tex-muted);
+}
+
+.kpi-trend {
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.trend-up {
+  color: var(--tex-accent);
+}
+.trend-down {
+  color: var(--tex-danger);
+}
+.trend-flat {
+  color: var(--tex-muted);
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 1100px) {
+  .kanban {
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+  }
+}
+
+.kanban-col {
+  background: var(--tex-surface-2);
+  border: 1px solid var(--tex-border);
+  border-radius: var(--tex-radius);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--tex-border);
+}
+
+.kanban-col-body {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.kanban-card {
+  background: var(--tex-surface);
+  border: 1px solid var(--tex-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.6rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  font-size: 0.88rem;
+}
+
+.kanban-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+
+.kanban-card-meta select {
+  font-size: 0.75rem;
+  background: var(--tex-bg);
+  border: 1px solid var(--tex-border);
+  border-radius: 6px;
+  padding: 0.15rem 0.3rem;
+}
+
+.pri-high {
+  color: var(--tex-danger);
+}
+.pri-med {
+  color: var(--tex-warn);
+}
+.pri-low {
+  color: var(--tex-muted);
+}
+
 .badge-count {
   display: inline-flex;
   align-items: center;
