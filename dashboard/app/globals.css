@@ -1,0 +1,171 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #05060f;
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+/* ── Aurora backdrop ───────────────────────────────────────────── */
+.aurora-stage {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
+    #05060f;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.aurora-blob.one {
+  width: 55vw;
+  height: 55vw;
+  top: -18%;
+  left: -12%;
+  background: radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.4), rgba(34, 211, 238, 0) 65%);
+  animation: aurora 18s ease-in-out infinite alternate;
+}
+
+.aurora-blob.two {
+  width: 48vw;
+  height: 48vw;
+  bottom: -22%;
+  right: -10%;
+  background: radial-gradient(circle at 60% 40%, rgba(139, 92, 246, 0.42), rgba(139, 92, 246, 0) 65%);
+  animation: aurora 26s ease-in-out infinite alternate-reverse;
+}
+
+.aurora-blob.three {
+  width: 34vw;
+  height: 34vw;
+  top: 35%;
+  left: 42%;
+  background: radial-gradient(circle at 50% 50%, rgba(232, 121, 249, 0.28), rgba(232, 121, 249, 0) 60%);
+  animation: aurora 22s ease-in-out 3s infinite alternate;
+}
+
+/* ── Animated grid floor ───────────────────────────────────────── */
+.grid-floor {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(120, 140, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 140, 255, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPan 30s linear infinite;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 75%);
+}
+
+/* ── Glass panels & glow ───────────────────────────────────────── */
+.glass {
+  background: linear-gradient(160deg, rgba(20, 24, 48, 0.72), rgba(10, 12, 28, 0.6));
+  border: 1px solid rgba(120, 140, 255, 0.14);
+  backdrop-filter: blur(18px);
+  border-radius: 1rem;
+}
+
+.glass-hover {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s, box-shadow 0.35s;
+}
+
+.glass-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 12px 40px -12px rgba(34, 211, 238, 0.25);
+}
+
+.glow-text {
+  text-shadow: 0 0 24px rgba(34, 211, 238, 0.45);
+}
+
+.neon-ring {
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.35),
+    0 0 24px -4px rgba(34, 211, 238, 0.4),
+    inset 0 0 18px -8px rgba(34, 211, 238, 0.5);
+}
+
+/* ── Shimmer line for headers ──────────────────────────────────── */
+.shimmer-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.6), rgba(139, 92, 246, 0.6), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.8s linear infinite;
+}
+
+/* ── Scanline sweep on cards ───────────────────────────────────── */
+.scan-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(160, 200, 255, 0.06) 48%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.scan-card:hover::after {
+  transform: translateX(100%);
+}
+
+/* ── Status dot ────────────────────────────────────────────────── */
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+}
+
+.status-dot.live {
+  background: #22d3ee;
+  animation: pulseRing 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 140, 255, 0.2);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob,
+  .grid-floor,
+  .shimmer-line,
+  .status-dot.live {
+    animation: none !important;
+  }
+}

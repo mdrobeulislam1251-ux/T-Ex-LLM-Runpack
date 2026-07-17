@@ -1,89 +1,107 @@
 ---
 name: company-onboarding
-description: Onboard a new company (or app project) into the Arion runpack. ALWAYS run this before any team does work for a company that has no profile yet. Collects company name, app name, brand assets, DB credentials, n8n credentials, and other config, then builds the company brain that all 52 agents load.
+description: Onboard a new company (or app project) into the Arion runpack. ALWAYS run this before any team does work for a company that has no profile yet. The user only provides the company name and what they know about structure & vision — the research team GENERATES the full brain. Only credentials (DB, n8n, other config) and brand asset files are ever asked for directly.
 ---
 
-# Company Onboarding — Building the Company Brain
+# Company Onboarding — Smart Brain Generation
 
 Every Arion agent loads a "company brain" before working. This skill creates that brain.
-Run it when: the user names a new company/app, `companies/active-company.json` is missing,
-or the user asks to switch to a company that has no profile.
+**The user never hand-fills brain fields.** They know their company and vision; the
+research team derives everything else. Run this when: the user names a new company/app,
+`companies/active-company.json` is missing, or a `brain-request.json` exists for a
+company (created by the Arion dashboard's Brain Studio).
 
-## Step 1 — Always ask the onboarding questions
+## Step 0 — Check for a dashboard brain request
 
-Ask the user (use AskUserQuestion where available, otherwise ask in chat). Never skip,
-never invent answers. Ask in groups, not one giant wall:
+If `companies/<slug>/brain-request.json` exists, the user already provided their
+briefing through the dashboard. Read `company_name` and `user_briefing` from it and
+skip straight to Step 2 (do NOT re-ask what they already wrote). Delete the file after
+Step 3 completes.
 
-**Identity**
-1. Company name (becomes the slug, e.g. "Acme Labs" → `acme-labs`)
-2. App / product name (may differ from company name)
-3. One-sentence description of what the product does
+## Step 1 — Ask only what the user actually knows
 
-**Brain: scope, vision, emotion**
-4. Scope — what the company does and explicitly does NOT do
-5. Vision — where this is going in 1–3 years
-6. Emotion / tone — how the brand should feel (e.g. "premium and calm", "playful and fast",
-   "serious and trustworthy"). This drives design, copy, and even code comment style.
-7. Target audience — who this is for
+Two questions. That's the whole interview at this stage:
 
-**Brand assets**
-8. Logo files or links (store files under `companies/<slug>/brand/assets/`)
-9. Brand colors (hex values) — primary, secondary, any others
-10. Fonts / typography preferences
-11. Any existing brand guidelines documents
+1. **Company name** (becomes the slug, e.g. "Acme Labs" → `acme-labs`) — and app name
+   if it differs.
+2. **"Tell me about your company — structure and vision, in your own words."**
+   Free text. Whatever they say is the briefing. Do not interrogate them about scope
+   documents, tone adjectives, or audience segments — deriving those is OUR job.
 
-**Technical config**
-12. Database credentials — host, port, database name, user, password, provider
-13. n8n credentials — instance URL, API key
-14. Other credentials the project needs (Stripe, cloud provider, SMTP, analytics, …)
-15. Preferred tech stack (or "let the CTO decide" — then cto + solutions-architect pick
-    and record it)
+## Step 2 — Research team GENERATES the brain
 
-## Step 2 — Store secrets SAFELY (hard rule)
+Run the `research-strategy` skill loop on the briefing:
 
-- Raw secret values go ONLY into `.env` at the project root. Create it if missing.
-- Ensure `.env` is in `.gitignore` BEFORE writing any secret to it. If not, add it first.
-- Name vars with the company slug prefix: `ACME_LABS_DB_HOST`, `ACME_LABS_DB_PASSWORD`,
-  `ACME_LABS_N8N_URL`, `ACME_LABS_N8N_API_KEY`, …
-- The profile.json stores ONLY the env var names, never the values.
-- Never echo secret values back in chat, logs, commits, or generated code.
+1. **research-lead** frames the briefing into research questions and sweeps: what this
+   kind of company is, who its market is, what users of such products expect,
+   terminology, comparable companies.
+2. **market-analyst** maps the competitive landscape and target-audience reality.
+3. **product-strategist** derives: scope (does / does-not), vision (1–3 year), mission,
+   and structural differentiation — aligned with, never contradicting, the user's own
+   words.
+4. **content-strategist** drafts `emotion_tone` and 2–3 `voice_examples` that fit the
+   company's market position and the user's phrasing style.
+5. **cto** proposes a default tech stack sized for the product (recorded with
+   `decided_by: "cto"`), unless the briefing named one.
 
-## Step 3 — Write the company brain
+Fill EVERY brain field in the profile from this work. Empty brain fields after
+onboarding are a defect.
 
-Create `companies/<slug>/profile.json` from `templates/company-profile.template.json`,
-filling every field from the answers. Also create:
+## Step 3 — One confirm pass (not a questionnaire)
 
-- `companies/<slug>/brand/brand.md` — brand-designer formalizes colors, type, logo rules
-- `companies/<slug>/decisions.md` — empty decision log for cto
-- `companies/<slug>/incidents.md` — empty incident/pattern log
-- `companies/<slug>/research/` — empty dir for research team output
+Present the generated brain to the user as a compact summary: scope, vision, mission,
+tone, audience, proposed stack. Ask a single question: "Adjust anything, or lock it
+in?" Apply their adjustments verbatim — their words always beat our research.
 
-Then write `companies/active-company.json`:
+## Step 4 — Ask ONLY for what cannot be researched
 
-```json
-{ "active": "<slug>", "switched_at": "<ISO date>" }
-```
+These are the only other things ever asked, because no research can produce them:
 
-## Step 4 — Data foundation (automatic, with review)
+- **Brand assets** — logo files/links, brand colors, fonts, existing guideline docs
+  (if the user has none, brand-designer generates a starter identity from the brain's
+  emotion_tone instead — mark it `generated: true` in brand.md).
+- **Database credentials** — host, port, database, user, password, provider.
+- **n8n credentials** — instance URL, API key.
+- **Other config** the project needs (Stripe, cloud, SMTP, analytics, …).
 
-Immediately after the brain exists:
+### Secrets rule (hard)
 
-1. **data-engineer** derives the initial data table schema from the product description
-   and scope — entities, relationships, full DDL — following the `data-schema-design` skill.
-   It designs autonomously; it asks the user only what genuinely cannot be inferred.
-2. **cto** reviews the schema against the checklist. CHANGES REQUIRED loops back to
-   data-engineer; only APPROVED schemas proceed.
-3. On approval, data-engineer applies it: SQL migrations for the configured database,
-   and/or n8n data tables via the configured n8n instance if the project uses them.
+- Raw secret values go ONLY into `.env` at the project root; create it if missing and
+  ensure `.env` is in `.gitignore` BEFORE writing.
+- Env var names use the company slug prefix: `ACME_LABS_DB_HOST`,
+  `ACME_LABS_N8N_API_KEY`, …
+- `profile.json` stores ONLY env var names. Never echo secret values in chat, logs,
+  commits, or generated code.
 
-## Step 5 — Confirm
+## Step 5 — Write the company brain
 
-Report to the user: company brain created at `companies/<slug>/`, which env vars were
-registered (names only), schema status (approved/pending), and that all 52 agents will
-now operate under this brain. Remind them `/company <name>` switches brains at any time.
+Create from `templates/company-profile.template.json`:
+
+- `companies/<slug>/profile.json` — fully filled (brain generated, credentials as env
+  var names). If the dashboard already created a draft profile, fill its empty fields
+  in place and remove the `brain.generation.status: "pending-research"` marker.
+- `companies/<slug>/brand/brand.md` + `brand/assets/`
+- `companies/<slug>/decisions.md`, `incidents.md`, `research/` (keep the research
+  team's onboarding findings in `research/onboarding-brief.md`)
+- `companies/active-company.json` → `{ "active": "<slug>", "switched_at": "<ISO>" }`
+- Delete `brain-request.json` if it existed.
+
+## Step 6 — Data foundation (automatic, with review)
+
+1. **data-engineer** derives the initial data table schema from the generated brain
+   per the `data-schema-design` skill — autonomously.
+2. **cto** reviews against the checklist; loop until APPROVED (logged in decisions.md).
+3. On approval, apply: SQL migrations for the configured database and/or n8n data
+   tables via the configured n8n instance.
+
+## Step 7 — Confirm
+
+Report: brain generated at `companies/<slug>/` (research-derived, user-confirmed),
+env vars registered (names only), schema status, and that all 52 agents now operate
+under this brain. `/company <name>` switches brains any time.
 
 ## Switching companies
 
 `/company <name>`: if `companies/<slug>/profile.json` exists, update
-`active-company.json`. If not, run this onboarding from Step 1. Multiple companies can
-coexist; only one is active at a time.
+`active-company.json`. If not, run this onboarding from Step 0. Multiple companies
+coexist; one is active at a time.
