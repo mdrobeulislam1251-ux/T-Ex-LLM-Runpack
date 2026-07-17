@@ -39,6 +39,11 @@
       "cloud": "",
       "decided_by": ""
     },
+    "remote_access": {
+      "method": "",
+      "host": "",
+      "notes": "Optional. e.g. method: ssh|bastion|tailscale, host: env var name for the target. Leave empty to work locally."
+    },
     "multi_tenant": false,
     "compliance_notes": "",
     "performance_budgets": {

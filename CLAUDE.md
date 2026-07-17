@@ -24,7 +24,10 @@
   names only. Never print, log, or commit secret values.
 
 ## 4. Remote Verification Architecture
-- Server-side interactions are routed securely (SSH over the Tailnet profile `tl-host`
-  where configured).
+- Server-side interactions are routed securely using whatever remote-access method the
+  active company brain configures (`tech.remote_access` in its profile) — e.g. plain
+  SSH, a bastion host, or a mesh VPN profile such as Tailscale. Nothing is hardcoded
+  to any specific host or VPN; if a company has no remote_access configured, work
+  locally.
 - Use headless Playwright automation checkpoints to visually verify frontends or
   external API state loops.
