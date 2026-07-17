@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import threading
 from pathlib import Path
@@ -524,6 +525,132 @@ def workspace_export_firmware(
         raise HTTPException(status_code=404, detail="Team not found") from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+# ----- Company Runbook Agent (product spine: intent → deploy) -----
+
+
+@app.get("/v1/runbook")
+def runbook_get(_: None = Depends(require_api_key)) -> dict:
+    """Pre-loaded company runbook phases + progress + provider list."""
+    from texllm.runbook.state import get_runbook
+
+    snap = get_runbook().snapshot()
+    # attach auth profile summary (no secrets)
+    auth = credential_store.list_public()
+    snap["auth_profiles"] = auth.get("profiles") or []
+    snap["auth_default"] = auth.get("default_profile_id")
+    return snap
+
+
+@app.patch("/v1/runbook/phases/{phase_id}")
+def runbook_patch_phase(
+    phase_id: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    from texllm.runbook.state import get_runbook
+
+    try:
+        return get_runbook().update_phase(
+            phase_id,
+            status=body.get("status"),
+            placeholder=body.get("placeholder"),
+            result=body.get("result"),
+            company_name=body.get("company_name"),
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown phase") from exc
+
+
+@app.post("/v1/runbook/phases/{phase_id}/run")
+def runbook_run_phase(
+    phase_id: str,
+    body: Dict[str, Any] = None,
+    settings: Settings = Depends(_settings),
+    _: None = Depends(require_api_key),
+) -> dict:
+    """
+    Execute a runbook phase with the connected provider (or fill placeholders in mock).
+    Product path: intent → domain → product → teams → build → gtm → deploy.
+    """
+    from texllm.runbook.state import get_runbook
+    from texllm.providers import get_provider
+    from texllm.providers.base import ChatMessage
+    from texllm.workspace.team_run import run_team_flow
+
+    body = body or {}
+    rb = get_runbook()
+    snap = rb.snapshot()
+    phase = next((p for p in snap["phases"] if p["id"] == phase_id), None)
+    if not phase:
+        raise HTTPException(status_code=404, detail="Unknown phase")
+
+    rb.update_phase(phase_id, status="running")
+    notes = str(body.get("notes") or "")
+    company = str(body.get("company_name") or snap.get("company_name") or "Company")
+
+    try:
+        # Domain phase can use domain review pipeline
+        if phase_id == "domain" and body.get("domain"):
+            from texllm.workspace.domain_review import review_domain
+
+            result = review_domain(str(body["domain"]), notes=notes)
+            return rb.update_phase(phase_id, status="done", result=result)
+
+        # Teams / build / gtm / deploy can run via team flow
+        team_map = {
+            "intent": "ceo",
+            "product": "dev",
+            "teams": "ceo",
+            "build": "dev",
+            "gtm": "sales",
+            "deploy": "tech",
+            "domain": "ceo",
+        }
+        team = team_map.get(phase_id, "ceo")
+        goal = (
+            f"Execute T-ex company runbook phase [{phase['title']}]. "
+            f"Company: {company}. "
+            f"Placeholders: {json.dumps(phase.get('placeholder') or {})}. "
+            f"Notes: {notes or 'none'}. "
+            f"Produce concrete filled outputs for: {phase.get('outputs')}. "
+            f"Keep structure clear for a full company from intent to deployment."
+        )
+        # Prefer team runner; falls back to single completion if needed
+        try:
+            run = run_team_flow(team, goal)
+            result = {
+                "team_run": run,
+                "phase": phase_id,
+                "mode": "team_flow",
+            }
+        except Exception:
+            provider = get_provider(settings)
+            completion = provider.complete(
+                [
+                    ChatMessage(
+                        role="system",
+                        content=(
+                            f"You are the {phase.get('agent_role')} for T-ex Company Runbook. "
+                            "Fill placeholders with realistic draft content. Return markdown."
+                        ),
+                    ),
+                    ChatMessage(role="user", content=goal),
+                ],
+                max_tokens=2000,
+            )
+            result = {
+                "content": completion.content,
+                "provider": completion.provider,
+                "phase": phase_id,
+                "mode": "single",
+            }
+
+        return rb.update_phase(phase_id, status="done", result=result, company_name=company)
+    except Exception as exc:  # noqa: BLE001
+        rb.update_phase(phase_id, status="ready")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @app.get("/v1/settings/aliases", response_model=AgentAliases)

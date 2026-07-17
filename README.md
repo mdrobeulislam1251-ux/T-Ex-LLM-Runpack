@@ -1,8 +1,10 @@
 # T-ex LLM
 
-Open-source multi-agent host: **team runners**, **web console**, and **local terminal AI CLI detection/spawn**.
+**Product:** Company Runbook Agent — pre-loaded **Intent → Deploy** spine for a full company, multi-team agents, multi-provider AI (Claude / ChatGPT / Gemini / Grok via API key or subscription/CLI).
 
-Apache-2.0 · single setup · default port **3006**
+Also: host API, team workspace, firmware packages, `tex` / `@T-ex` CLI.
+
+Apache-2.0 · default port **3006**
 
 ## Honest feature matrix
 

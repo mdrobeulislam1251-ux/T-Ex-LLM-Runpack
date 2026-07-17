@@ -9,6 +9,7 @@ import { TaskProvider } from "./state/task";
 import { ThemeProvider } from "./state/theme";
 import "./tailwind.css";
 import "./styles/global.css";
+import "./styles/runbook.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

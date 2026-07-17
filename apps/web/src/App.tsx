@@ -4,6 +4,7 @@ import { Shell } from "./components/Shell";
 import { BrandPage } from "./pages/BrandPage";
 import { BrainsPage } from "./pages/BrainsPage";
 import { ChatPage } from "./pages/ChatPage";
+import { CompanyRunbookPage } from "./pages/CompanyRunbookPage";
 import { DomainReviewPage } from "./pages/DomainReviewPage";
 import { IdeaToAgenticPage } from "./pages/IdeaToAgenticPage";
 import { IdeasPage } from "./pages/IdeasPage";
@@ -20,22 +21,16 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { SkillsPage } from "./pages/SkillsPage";
 import { TeamDashboardPage } from "./pages/TeamDashboardPage";
 import { WorkspacePage } from "./pages/WorkspacePage";
-import { useSettings } from "./state/settings";
-
-function HomeRedirect() {
-  const { settings } = useSettings();
-  // Default into the Grok-style runtime console for product review
-  return (
-    <Navigate to={settings.onboarded ? "/console" : "/console"} replace />
-  );
-}
 
 export default function App() {
   return (
     <Routes>
-      {/* Full-bleed Grok aesthetic runtime console (no legacy shell) */}
+      {/* PRODUCT: full company runbook intent → deploy */}
+      <Route path="/" element={<CompanyRunbookPage />} />
+      <Route path="runbook" element={<CompanyRunbookPage />} />
+
+      {/* Optional ops console (not the product) */}
       <Route path="console" element={<RuntimeConsole />} />
-      <Route index element={<HomeRedirect />} />
 
       <Route element={<Shell />}>
         <Route path="workspace" element={<WorkspacePage />} />
@@ -57,7 +52,7 @@ export default function App() {
         <Route path="brand" element={<BrandPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/console" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );
