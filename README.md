@@ -33,7 +33,8 @@ Open **http://127.0.0.1:3006/**
 
 Full multi-OS guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)**  
 Tailscale / LAN / DNS A-record: **[docs/REMOTE-ACCESS.md](./docs/REMOTE-ACCESS.md)**  
-Provider auth (API keys vs CLI session vs OAuth): **[docs/AUTH.md](./docs/AUTH.md)**
+**Claude-first (recommended path):** **[docs/CLAUDE-FIRST.md](./docs/CLAUDE-FIRST.md)**  
+Provider auth reference: **[docs/AUTH.md](./docs/AUTH.md)**
 
 ```bash
 # Custom port

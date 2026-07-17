@@ -69,13 +69,14 @@ export function ChatPage() {
 
   return (
     <div>
-      <h1>Friendly chat</h1>
+      <h1>Claude chat</h1>
       <p className="lede">
         You → agent: <strong>{agentName}</strong>
         {" · "}
         Agent → you: <strong>{userName}</strong>
         {" · "}
-        Change names in Settings.
+        Uses Settings Claude auth (setup-token / CLI / API key) via{" "}
+        <span className="mono">/v1/chat</span>.
       </p>
       <FriendlyAgentOnboard
         name={agentName}

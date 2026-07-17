@@ -211,6 +211,84 @@ def auth_claude_setup_token(
     return {"ok": True, "profile": profile.model_dump()}
 
 
+class ClaudeCliSessionBody(BaseModel):
+    profile_id: str = "claude-cli"
+    set_default: bool = True
+
+
+@app.post("/v1/auth/claude/use-cli")
+def auth_claude_use_cli(
+    body: ClaudeCliSessionBody = ClaudeCliSessionBody(),
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Set default profile to local Claude Code session (`claude auth login`)."""
+    profile = credential_store.upsert(
+        AuthProfileCreate(
+            id=body.profile_id,
+            provider="anthropic",
+            method="local_cli",
+            agent_id="claude",
+            label="Claude Code CLI session",
+            notes="Uses host `claude` login — no API key",
+        )
+    )
+    if body.set_default:
+        credential_store.set_default(profile.id)
+    status = probe_cli_auth("claude")
+    return {"ok": True, "profile": profile.model_dump(), "cli_status": status}
+
+
+class ChatBody(BaseModel):
+    message: str = Field(..., min_length=1)
+    use_aliases: bool = True
+
+
+@app.post("/v1/chat")
+def chat(
+    body: ChatBody,
+    settings: Settings = Depends(_settings),
+    _: None = Depends(require_api_key),
+) -> dict:
+    """
+    Claude-first chat — uses default auth profile
+    (setup-token → claude CLI, local_cli, or Anthropic API key).
+    """
+    from texllm.providers import get_provider
+    from texllm.providers.base import ChatMessage
+
+    aliases = alias_store.get()
+    system = (
+        f"You are {aliases.agent_name}, a helpful agent for T-ex LLM. "
+        f"Address the user as {aliases.user_name}. Be clear and concise."
+    )
+    if body.use_aliases:
+        system = aliases.prompt_preamble() + "\n" + system
+
+    try:
+        provider = get_provider(settings)
+        result = provider.complete(
+            [
+                ChatMessage(role="system", content=system),
+                ChatMessage(role="user", content=body.message),
+            ],
+            temperature=0.3,
+            max_tokens=2048,
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    rt = resolve_runtime()
+    return {
+        "role": "assistant",
+        "content": result.content,
+        "model": result.model,
+        "provider": result.provider,
+        "auth_method": rt.get("method"),
+        "agent_name": aliases.agent_name,
+        "user_name": aliases.user_name,
+    }
+
+
 @app.get("/v1/settings/aliases", response_model=AgentAliases)
 def get_aliases(_: None = Depends(require_api_key)) -> AgentAliases:
     """Names: what the user calls the agent, and what the agent calls the user."""

@@ -1,4 +1,4 @@
-"""Anthropic Messages API — API key or Claude setup-token (subscription)."""
+"""Anthropic Messages API (console API keys sk-ant-…)."""
 
 from __future__ import annotations
 
@@ -10,12 +10,6 @@ from texllm.providers.base import ChatMessage, CompletionResult, LLMProvider
 
 
 class AnthropicProvider(LLMProvider):
-    """
-    Calls Anthropic Messages API.
-    For Claude Max/Pro setup-token path (NanoClaw/OpenClaw style), pass the
-    token as api_key (Bearer) — same material `claude setup-token` prints.
-    """
-
     name = "anthropic"
 
     def __init__(
@@ -47,7 +41,6 @@ class AnthropicProvider(LLMProvider):
             for m in messages
             if m.role in ("user", "assistant")
         ]
-        # Anthropic requires alternating user/assistant starting with user
         if not chat:
             chat = [{"role": "user", "content": "Hello"}]
         if chat[0]["role"] != "user":
@@ -55,7 +48,6 @@ class AnthropicProvider(LLMProvider):
 
         headers = {
             "x-api-key": self.api_key,
-            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "anthropic-version": "2023-06-01",
             **self.extra_headers,
@@ -72,7 +64,10 @@ class AnthropicProvider(LLMProvider):
         url = f"{self.base_url}/v1/messages"
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=headers, json=body)
-            resp.raise_for_status()
+            if resp.status_code >= 400:
+                raise RuntimeError(
+                    f"Anthropic API {resp.status_code}: {resp.text[:500]}"
+                )
             data = resp.json()
 
         content_blocks = data.get("content") or []

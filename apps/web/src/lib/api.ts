@@ -244,7 +244,7 @@ export function getAuthRuntime(settings: AppSettings) {
   return request<Record<string, unknown>>(settings, "/v1/auth/runtime");
 }
 
-/** Friendly chat via team job (or mock offline reply). */
+/** Claude-first chat via host /v1/chat (setup-token / CLI / API key). */
 export async function friendlyChat(
   settings: AppSettings,
   message: string,
@@ -253,31 +253,33 @@ export async function friendlyChat(
   const agentName = aliases?.agent_name || "Tex";
   const userName = aliases?.user_name || "Operator";
   try {
-    const job = await createJob(settings, {
-      goal:
-        `You are ${agentName}. Address the user as ${userName}. ` +
-        `Friendly support reply (warm, clear, short): ${message}`,
+    const res = await request<{
+      content: string;
+      provider?: string;
+      auth_method?: string;
+      agent_name?: string;
+      user_name?: string;
+    }>(settings, "/v1/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, use_aliases: true }),
     });
-    for (let i = 0; i < 40; i++) {
-      await new Promise((r) => setTimeout(r, 200));
-      const j = await getJob(settings, job.id);
-      if (j.status === "succeeded" && j.result) {
-        const answer =
-          (j.result.output?.answer as string) ||
-          j.result.summary ||
-          `I'm here to help, ${userName}.`;
-        return { role: "agent", content: answer };
-      }
-      if (j.status === "failed") break;
-    }
-  } catch {
-    /* fall through */
+    return { role: "agent", content: res.content };
+  } catch (e) {
+    const err = e instanceof Error ? e.message : String(e);
+    return {
+      role: "agent",
+      content:
+        `I'm ${agentName}. Claude path failed: ${err}\n\n` +
+        `${userName}, open Settings → connect Claude Max (setup-token) or Use local Claude CLI, ` +
+        `then ensure host is running: python3 -m texllm.cli serve`,
+    };
   }
-  return {
-    role: "agent",
-    content:
-      `I'm ${agentName}, your friendly workspace guide. I couldn't reach the host just now — start ` +
-      "`python3 -m texllm.cli serve` or check Settings. " +
-      `Meanwhile, ${userName}: use Onboarding, Jobs, and Tasks from the sidebar.`,
-  };
+}
+
+export async function useClaudeCli(settings: AppSettings) {
+  return request<{ ok: boolean; cli_status: unknown }>(
+    settings,
+    "/v1/auth/claude/use-cli",
+    { method: "POST", body: JSON.stringify({ set_default: true }) }
+  );
 }

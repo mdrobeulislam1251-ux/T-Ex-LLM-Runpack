@@ -10,8 +10,9 @@ import {
   putAliases,
   saveClaudeSetupToken,
   setDefaultAuthProfile,
-  startOAuth,
+  useClaudeCli,
   upsertAuthProfile,
+  getAuthRuntime,
   type AgentAliases,
   type AuthProfile,
 } from "../lib/api";
@@ -50,28 +51,18 @@ export function SettingsPage() {
 
   const [profiles, setProfiles] = useState<AuthProfile[]>([]);
   const [defaultProfileId, setDefaultProfileId] = useState<string | null>(null);
-  const [authNotes, setAuthNotes] = useState<string[]>([]);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authMsg, setAuthMsg] = useState<string | null>(null);
   const [cliProbe, setCliProbe] = useState<string | null>(null);
   const [claudeToken, setClaudeToken] = useState("");
+  const [runtimeInfo, setRuntimeInfo] = useState<string | null>(null);
   const [apiKeyDraft, setApiKeyDraft] = useState({
-    id: "api-default",
-    provider: "openai",
-    base_url: "https://api.openai.com/v1",
-    model: "",
+    id: "anthropic-key",
+    provider: "anthropic",
+    base_url: "https://api.anthropic.com",
+    model: "claude-sonnet-4-20250514",
     api_key: "",
-    label: "API key",
-  });
-  const [newProfile, setNewProfile] = useState({
-    id: "openai-default",
-    provider: "openai",
-    method: "api_key",
-    label: "OpenAI-compatible key",
-    base_url: "https://api.openai.com/v1",
-    model: "",
-    api_key: "",
-    agent_id: "claude",
+    label: "Anthropic API key",
   });
 
   async function refreshAuth() {
@@ -79,16 +70,6 @@ export function SettingsPage() {
       const r = await listAuthProfiles(settings);
       setProfiles(r.profiles || []);
       setDefaultProfileId(r.default_profile_id);
-      setAuthNotes(
-        (r as { honest_notes?: string[] }).honest_notes ||
-          (r as { methods?: unknown }).methods
-            ? [
-                "NanoClaw: Claude setup-token or API key + vault.",
-                "OpenClaw: Codex PKCE + Claude CLI/setup-token sink.",
-                "AionUi: API keys + CLI agents keep own login.",
-              ]
-            : []
-      );
       setAuthError(null);
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : String(e));
@@ -118,7 +99,6 @@ export function SettingsPage() {
         if (!alive) return;
         setProfiles(r.profiles || []);
         setDefaultProfileId(r.default_profile_id);
-        setAuthNotes(r.honest_notes || []);
       } catch (e) {
         if (!alive) return;
         setAuthError(e instanceof Error ? e.message : String(e));
@@ -178,22 +158,20 @@ export function SettingsPage() {
         </div>
       )}
 
-      {/* Same product model as NanoClaw / OpenClaw / AionUi */}
+      {/* Claude-first only */}
       <div className="card" style={{ marginBottom: "1rem" }}>
-        <h2>Connect accounts (subscription + API key)</h2>
+        <h2>Claude only (first path)</h2>
         <p className="empty-hint" style={{ marginBottom: "0.85rem" }}>
-          Same idea as <strong>NanoClaw</strong> (Claude setup-token / API key +
-          vault), <strong>OpenClaw</strong> (Codex OAuth PKCE + Claude CLI
-          token sink), and <strong>AionUi</strong> (API keys + CLI keeps own
-          login). Guide: <span className="mono">docs/AUTH.md</span>
+          Chat + Jobs use the <strong>default Claude profile</strong>. See{" "}
+          <span className="mono">docs/CLAUDE-FIRST.md</span>
         </p>
 
         <div className="grid-2">
           <div className="card" style={{ background: "var(--tex-surface-2)", boxShadow: "none" }}>
-            <h3>Claude Max / Pro</h3>
+            <h3>1) Claude Max / Pro setup-token</h3>
             <p className="empty-hint">
-              Terminal: <span className="mono">claude setup-token</span> → paste
-              here (NanoClaw path). Or use local CLI login below.
+              Run <span className="mono">claude setup-token</span> → paste. Host
+              runs <span className="mono">claude -p</span> with that token.
             </p>
             <div className="field">
               <label htmlFor="claude-tok">Setup token</label>
@@ -218,21 +196,21 @@ export function SettingsPage() {
                   setClaudeToken("");
                   setAuthMsg("Claude Max/Pro setup-token saved & set default");
                   await refreshAuth();
+                  const rt = await getAuthRuntime(settings);
+                  setRuntimeInfo(JSON.stringify(rt, null, 2));
                 } catch (e) {
                   setAuthError(e instanceof Error ? e.message : String(e));
                 }
               }}
             >
-              Save Claude subscription token
+              Save Claude Max token
             </button>
           </div>
 
           <div className="card" style={{ background: "var(--tex-surface-2)", boxShadow: "none" }}>
-            <h3>ChatGPT / Codex account</h3>
+            <h3>2) Local Claude Code login</h3>
             <p className="empty-hint">
-              OpenClaw-style PKCE at auth.openai.com (needs{" "}
-              <span className="mono">CODEX_OAUTH_CLIENT_ID</span>), or local{" "}
-              <span className="mono">codex</span> CLI login.
+              On the host: <span className="mono">claude auth login</span>
             </p>
             <div className="btn-row">
               <button
@@ -240,123 +218,37 @@ export function SettingsPage() {
                 className="btn btn-primary btn-sm"
                 onClick={async () => {
                   try {
-                    const r = await startOAuth(settings, "openai", "chatgpt-codex");
-                    if (r.authorize_url) {
-                      window.open(r.authorize_url, "_blank", "noopener");
-                      setAuthMsg("Browser OAuth opened — finish login, then Refresh profiles");
-                    } else {
-                      setAuthError(r.error || r.hint || "OAuth not configured");
-                    }
+                    const r = await useClaudeCli(settings);
+                    setAuthMsg("Default = Claude Code CLI session");
+                    setCliProbe(JSON.stringify(r.cli_status, null, 2));
+                    await refreshAuth();
+                    const rt = await getAuthRuntime(settings);
+                    setRuntimeInfo(JSON.stringify(rt, null, 2));
                   } catch (e) {
                     setAuthError(e instanceof Error ? e.message : String(e));
                   }
                 }}
               >
-                Start ChatGPT / Codex OAuth
+                Use local Claude CLI
               </button>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={async () => {
-                  await upsertAuthProfile(settings, {
-                    id: "codex-cli",
-                    provider: "openai",
-                    method: "local_cli",
-                    agent_id: "codex",
-                    label: "Codex CLI session",
-                  });
-                  await setDefaultAuthProfile(settings, "codex-cli");
-                  setAuthMsg("Default = local Codex CLI (log in with codex on this host)");
-                  await refreshAuth();
+                  const s = await cliAuthStatus(settings, "claude");
+                  setCliProbe(JSON.stringify(s, null, 2));
                 }}
               >
-                Use local Codex CLI
+                Probe CLI status
               </button>
             </div>
           </div>
 
           <div className="card" style={{ background: "var(--tex-surface-2)", boxShadow: "none" }}>
-            <h3>Gemini / Google</h3>
+            <h3>3) Anthropic API key</h3>
             <p className="empty-hint">
-              Google OAuth (set GOOGLE_OAUTH_CLIENT_ID) or Gemini CLI / API key.
+              Console key <span className="mono">sk-ant-…</span>
             </p>
-            <div className="btn-row">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={async () => {
-                  try {
-                    const r = await startOAuth(settings, "google", "gemini-oauth");
-                    if (r.authorize_url) {
-                      window.open(r.authorize_url, "_blank", "noopener");
-                      setAuthMsg("Google OAuth opened");
-                    } else {
-                      setAuthError(r.error || "Set GOOGLE_OAUTH_CLIENT_ID on host");
-                    }
-                  } catch (e) {
-                    setAuthError(e instanceof Error ? e.message : String(e));
-                  }
-                }}
-              >
-                Start Google OAuth
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={async () => {
-                  await upsertAuthProfile(settings, {
-                    id: "gemini-cli",
-                    provider: "gemini",
-                    method: "local_cli",
-                    agent_id: "gemini",
-                    label: "Gemini CLI session",
-                  });
-                  setAuthMsg("Gemini CLI profile added — run gemini auth on host");
-                  await refreshAuth();
-                }}
-              >
-                Use Gemini CLI
-              </button>
-            </div>
-          </div>
-
-          <div className="card" style={{ background: "var(--tex-surface-2)", boxShadow: "none" }}>
-            <h3>API key (any provider)</h3>
-            <div className="field">
-              <label htmlFor="ak-prov">Provider</label>
-              <select
-                id="ak-prov"
-                value={apiKeyDraft.provider}
-                onChange={(e) => {
-                  const provider = e.target.value;
-                  const base =
-                    provider === "xai"
-                      ? "https://api.x.ai/v1"
-                      : provider === "anthropic"
-                        ? "https://api.anthropic.com"
-                        : provider === "gemini"
-                          ? "https://generativelanguage.googleapis.com/v1beta"
-                          : "https://api.openai.com/v1";
-                  setApiKeyDraft((p) => ({ ...p, provider, base_url: base }));
-                }}
-              >
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic</option>
-                <option value="xai">xAI Grok</option>
-                <option value="gemini">Gemini</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="ak-url">Base URL</label>
-              <input
-                id="ak-url"
-                value={apiKeyDraft.base_url}
-                onChange={(e) =>
-                  setApiKeyDraft((p) => ({ ...p, base_url: e.target.value }))
-                }
-              />
-            </div>
             <div className="field">
               <label htmlFor="ak-key">API key</label>
               <input
@@ -367,6 +259,7 @@ export function SettingsPage() {
                 onChange={(e) =>
                   setApiKeyDraft((p) => ({ ...p, api_key: e.target.value }))
                 }
+                placeholder="sk-ant-…"
               />
             </div>
             <button
@@ -376,49 +269,47 @@ export function SettingsPage() {
                 await upsertAuthProfile(settings, {
                   ...apiKeyDraft,
                   method: "api_key",
+                  provider: "anthropic",
                 });
                 await setDefaultAuthProfile(settings, apiKeyDraft.id);
                 setApiKeyDraft((p) => ({ ...p, api_key: "" }));
-                setAuthMsg("API key profile saved & default");
+                setAuthMsg("Anthropic API key saved & default");
                 await refreshAuth();
+                const rt = await getAuthRuntime(settings);
+                setRuntimeInfo(JSON.stringify(rt, null, 2));
               }}
             >
-              Save API key
+              Save Anthropic API key
             </button>
+          </div>
+
+          <div className="card" style={{ background: "var(--tex-surface-2)", boxShadow: "none" }}>
+            <h3>Active runtime</h3>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={async () => {
+                try {
+                  const rt = await getAuthRuntime(settings);
+                  setRuntimeInfo(JSON.stringify(rt, null, 2));
+                } catch (e) {
+                  setAuthError(e instanceof Error ? e.message : String(e));
+                }
+              }}
+            >
+              Refresh runtime
+            </button>
+            {runtimeInfo && (
+              <pre className="mono" style={{ whiteSpace: "pre-wrap", fontSize: "0.78rem" }}>
+                {runtimeInfo}
+              </pre>
+            )}
           </div>
         </div>
 
         <div className="btn-row">
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => void refreshAuth()}>
             Refresh profiles
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={async () => {
-              const s = await cliAuthStatus(settings, "claude");
-              setCliProbe(JSON.stringify(s, null, 2));
-            }}
-          >
-            Probe Claude CLI
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={async () => {
-              await upsertAuthProfile(settings, {
-                id: "claude-cli",
-                provider: "anthropic",
-                method: "local_cli",
-                agent_id: "claude",
-                label: "Claude Code CLI session",
-              });
-              await setDefaultAuthProfile(settings, "claude-cli");
-              setAuthMsg("Default = local Claude Code (claude auth login)");
-              await refreshAuth();
-            }}
-          >
-            Use local Claude CLI
           </button>
         </div>
 
@@ -448,9 +339,6 @@ export function SettingsPage() {
                         default
                       </span>
                     )}
-                    <div className="mono" style={{ fontSize: "0.75rem" }}>
-                      {p.provider}
-                    </div>
                   </td>
                   <td>
                     <span className="chip">{p.method}</span>
@@ -491,13 +379,6 @@ export function SettingsPage() {
           </table>
         )}
 
-        {authNotes.length > 0 && (
-          <ul style={{ color: "var(--tex-muted)", fontSize: "0.85rem" }}>
-            {authNotes.map((n, i) => (
-              <li key={i}>{n}</li>
-            ))}
-          </ul>
-        )}
         {authMsg && (
           <div className="status-banner ok" style={{ marginTop: "0.75rem" }}>
             {authMsg}
@@ -508,67 +389,6 @@ export function SettingsPage() {
             {authError}
           </div>
         )}
-
-        {/* Advanced manual profile */}
-        <details style={{ marginTop: "1rem" }}>
-          <summary style={{ cursor: "pointer", fontWeight: 600 }}>
-            Advanced: manual profile JSON fields
-          </summary>
-          <div className="grid-2" style={{ marginTop: "0.75rem" }}>
-            <div className="field">
-              <label>id</label>
-              <input
-                value={newProfile.id}
-                onChange={(e) => setNewProfile((p) => ({ ...p, id: e.target.value }))}
-              />
-            </div>
-            <div className="field">
-              <label>method</label>
-              <select
-                value={newProfile.method}
-                onChange={(e) =>
-                  setNewProfile((p) => ({ ...p, method: e.target.value }))
-                }
-              >
-                <option value="api_key">api_key</option>
-                <option value="setup_token">setup_token</option>
-                <option value="oauth_codex">oauth_codex</option>
-                <option value="oauth_google">oauth_google</option>
-                <option value="local_cli">local_cli</option>
-              </select>
-            </div>
-            <div className="field">
-              <label>api_key / token</label>
-              <input
-                type="password"
-                value={newProfile.api_key}
-                onChange={(e) =>
-                  setNewProfile((p) => ({ ...p, api_key: e.target.value }))
-                }
-              />
-            </div>
-            <div className="field">
-              <label>agent_id (local_cli)</label>
-              <input
-                value={newProfile.agent_id}
-                onChange={(e) =>
-                  setNewProfile((p) => ({ ...p, agent_id: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn btn-sm"
-            onClick={async () => {
-              await upsertAuthProfile(settings, newProfile);
-              setAuthMsg("Manual profile saved");
-              await refreshAuth();
-            }}
-          >
-            Save manual profile
-          </button>
-        </details>
       </div>
 
       {/* Agent aliases */}
