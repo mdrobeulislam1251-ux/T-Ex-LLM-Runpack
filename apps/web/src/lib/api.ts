@@ -139,13 +139,20 @@ export function putAliases(settings: AppSettings, body: AgentAliases) {
 export type AuthProfile = {
   id: string;
   provider: string;
-  method: "api_key" | "local_cli" | "oauth_google";
+  method:
+    | "api_key"
+    | "local_cli"
+    | "oauth_google"
+    | "oauth_codex"
+    | "setup_token";
   label: string;
   base_url?: string;
   model?: string;
   has_api_key?: boolean;
+  has_secret?: boolean;
   agent_id?: string;
   notes?: string;
+  account_hint?: string;
 };
 
 export type AuthProfilesResponse = {
@@ -204,6 +211,37 @@ export function cliAuthStatus(settings: AppSettings, agentId: string) {
     path?: string;
     version?: string;
   }>(settings, `/v1/auth/cli-status/${encodeURIComponent(agentId)}`);
+}
+
+export function saveClaudeSetupToken(
+  settings: AppSettings,
+  body: { token: string; profile_id?: string; model?: string; set_default?: boolean }
+) {
+  return request<{ ok: boolean; profile: AuthProfile }>(
+    settings,
+    "/v1/auth/claude/setup-token",
+    { method: "POST", body: JSON.stringify(body) }
+  );
+}
+
+export function startOAuth(
+  settings: AppSettings,
+  provider: string,
+  profile_id: string
+) {
+  return request<{
+    authorize_url?: string;
+    state?: string;
+    error?: string;
+    hint?: string;
+  }>(settings, "/v1/auth/oauth/start", {
+    method: "POST",
+    body: JSON.stringify({ provider, profile_id }),
+  });
+}
+
+export function getAuthRuntime(settings: AppSettings) {
+  return request<Record<string, unknown>>(settings, "/v1/auth/runtime");
 }
 
 /** Friendly chat via team job (or mock offline reply). */

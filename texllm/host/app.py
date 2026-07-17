@@ -22,6 +22,7 @@ from texllm.host.credentials import (
     AuthProfileCreate,
     credential_store,
     probe_cli_auth,
+    resolve_runtime,
 )
 from texllm.host.store import JobStore
 from texllm.schemas import Job, JobCreate, JobStatus, utcnow
@@ -120,6 +121,94 @@ def auth_cli_status(
 ) -> dict:
     """Probe whether a local CLI appears logged in (does not return tokens)."""
     return probe_cli_auth(agent_id)
+
+
+@app.get("/v1/auth/runtime")
+def auth_runtime(_: None = Depends(require_api_key)) -> dict:
+    """Resolved default profile (secret redacted) — vault injection point."""
+    rt = resolve_runtime()
+    safe = {k: v for k, v in rt.items() if k != "api_key"}
+    if rt.get("api_key"):
+        safe["has_secret"] = True
+        safe["secret_preview"] = str(rt["api_key"])[:6] + "…"
+    return safe
+
+
+class OAuthStartBody(BaseModel):
+    provider: str = Field(..., description="openai|codex|google|gemini")
+    profile_id: str = Field(default="default-oauth")
+
+
+@app.post("/v1/auth/oauth/start")
+def auth_oauth_start(
+    body: OAuthStartBody,
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Start PKCE OAuth (Codex ChatGPT or Google Gemini) — OpenClaw-style."""
+    return credential_store.begin_oauth(body.provider, body.profile_id)
+
+
+@app.get("/v1/auth/oauth/codex/callback")
+def auth_oauth_codex_callback(code: str = "", state: str = "") -> dict:
+    if not code or not state:
+        raise HTTPException(status_code=400, detail="code and state required")
+    try:
+        profile = credential_store.finish_oauth_codex(code, state)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    credential_store.set_default(profile.id)
+    return {
+        "ok": True,
+        "profile": profile.model_dump(),
+        "message": "ChatGPT/Codex OAuth saved. Set as default profile.",
+    }
+
+
+@app.get("/v1/auth/oauth/google/callback")
+def auth_oauth_google_callback(code: str = "", state: str = "") -> dict:
+    if not code or not state:
+        raise HTTPException(status_code=400, detail="code and state required")
+    try:
+        profile = credential_store.finish_oauth_google(code, state)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    credential_store.set_default(profile.id)
+    return {
+        "ok": True,
+        "profile": profile.model_dump(),
+        "message": "Google/Gemini OAuth saved.",
+    }
+
+
+class SetupTokenBody(BaseModel):
+    """Paste Claude Max/Pro token from `claude setup-token` (NanoClaw path)."""
+
+    profile_id: str = "claude-max"
+    token: str = Field(..., min_length=10)
+    model: str = "claude-sonnet-4-20250514"
+    label: str = "Claude Max/Pro setup-token"
+    set_default: bool = True
+
+
+@app.post("/v1/auth/claude/setup-token")
+def auth_claude_setup_token(
+    body: SetupTokenBody,
+    _: None = Depends(require_api_key),
+) -> dict:
+    profile = credential_store.upsert(
+        AuthProfileCreate(
+            id=body.profile_id,
+            provider="anthropic",
+            method="setup_token",
+            label=body.label,
+            model=body.model,
+            api_key=body.token.strip(),
+            notes="From `claude setup-token` — NanoClaw/OpenClaw subscription path",
+        )
+    )
+    if body.set_default:
+        credential_store.set_default(profile.id)
+    return {"ok": True, "profile": profile.model_dump()}
 
 
 @app.get("/v1/settings/aliases", response_model=AgentAliases)
