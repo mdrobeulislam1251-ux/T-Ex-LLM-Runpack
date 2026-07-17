@@ -1,15 +1,21 @@
 import { useBrand } from "../state/brand";
+import { ThemeSwitcher } from "../components/ThemeSwitcher";
 
 export function BrandPage() {
   const { brand, setBrand, resetBrand } = useBrand();
 
   return (
     <div>
-      <h1>Brand & details</h1>
+      <h1>Brand base brains</h1>
       <p className="lede">
-        Customize the operator console. Tokens persist in this browser and map
-        to CSS variables from the Neutral Modern design system.
+        Visual identity tokens for the console. Theme (light/sky/blue/dark)
+        switches global CSS; brand colors refine the product mark.
       </p>
+
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <h2>Theme</h2>
+        <ThemeSwitcher />
+      </div>
 
       <div className="grid-2">
         <div className="card">
@@ -40,24 +46,6 @@ export function BrandPage() {
             />
           </div>
           <div className="field">
-            <label htmlFor="bg">Background</label>
-            <input
-              id="bg"
-              type="color"
-              value={brand.bg}
-              onChange={(e) => setBrand({ bg: e.target.value })}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="surface">Surface</label>
-            <input
-              id="surface"
-              type="color"
-              value={brand.surface}
-              onChange={(e) => setBrand({ surface: e.target.value })}
-            />
-          </div>
-          <div className="field">
             <label htmlFor="radius">Radius ({brand.radius}px)</label>
             <input
               id="radius"
@@ -82,16 +70,13 @@ export function BrandPage() {
           </div>
           <div className="btn-row">
             <button className="btn btn-ghost" type="button" onClick={resetBrand}>
-              Reset defaults
+              Reset brand defaults
             </button>
           </div>
         </div>
 
         <div className="card">
           <h2>Live preview</h2>
-          <p style={{ color: "var(--tex-muted)" }}>
-            Buttons, chips, and surfaces use your tokens.
-          </p>
           <div className="btn-row">
             <button className="btn btn-primary" type="button">
               Primary action
@@ -103,16 +88,15 @@ export function BrandPage() {
           <p style={{ marginTop: "1rem" }}>
             <span className="chip ok">succeeded</span>{" "}
             <span className="chip run">running</span>{" "}
-            <span className="chip warn">review</span>{" "}
-            <span className="chip fail">failed</span>
+            <span className="chip warn">review</span>
           </p>
           <div
             className="card"
             style={{ marginTop: "1rem", background: "var(--tex-surface-2)" }}
           >
             <strong>{brand.logoText}</strong>
-            <p style={{ margin: "0.35rem 0 0", color: "var(--tex-muted)" }}>
-              Path-to-path UX · accessible motion · durable local brand
+            <p className="empty-hint">
+              Light-first · path-to-path · brand + theme layers
             </p>
           </div>
         </div>

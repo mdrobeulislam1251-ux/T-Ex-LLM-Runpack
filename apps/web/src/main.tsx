@@ -3,17 +3,26 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { BrandProvider } from "./state/brand";
+import { ProjectsProvider } from "./state/projects";
 import { SettingsProvider } from "./state/settings";
+import { TaskProvider } from "./state/task";
+import { ThemeProvider } from "./state/theme";
 import "./styles/global.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <SettingsProvider>
-        <BrandProvider>
-          <App />
-        </BrandProvider>
-      </SettingsProvider>
+      <ThemeProvider>
+        <SettingsProvider>
+          <BrandProvider>
+            <ProjectsProvider>
+              <TaskProvider>
+                <App />
+              </TaskProvider>
+            </ProjectsProvider>
+          </BrandProvider>
+        </SettingsProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );

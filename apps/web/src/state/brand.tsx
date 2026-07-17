@@ -12,18 +12,14 @@ export type BrandTokens = {
   logoText: string;
   primary: string;
   accent: string;
-  bg: string;
-  surface: string;
   radius: number;
   density: number;
 };
 
 const DEFAULTS: BrandTokens = {
   logoText: "T-ex LLM",
-  primary: "#5B8CFF",
-  accent: "#3DDC97",
-  bg: "#070A12",
-  surface: "#0F1524",
+  primary: "#2563eb",
+  accent: "#059669",
   radius: 12,
   density: 1,
 };
@@ -40,10 +36,9 @@ const Ctx = createContext<BrandCtx | null>(null);
 
 function applyCss(b: BrandTokens) {
   const r = document.documentElement;
+  // Theme owns bg/surface/text; brand owns action colors + density
   r.style.setProperty("--tex-primary", b.primary);
   r.style.setProperty("--tex-accent", b.accent);
-  r.style.setProperty("--tex-bg", b.bg);
-  r.style.setProperty("--tex-surface", b.surface);
   r.style.setProperty("--tex-radius", `${b.radius}px`);
   r.style.setProperty("--tex-density", String(b.density));
 }
@@ -52,7 +47,10 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [brand, setBrandState] = useState<BrandTokens>(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<BrandTokens>;
+        return { ...DEFAULTS, ...parsed };
+      }
     } catch {
       /* ignore */
     }

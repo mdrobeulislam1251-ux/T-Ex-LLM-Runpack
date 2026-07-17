@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { health } from "../lib/api";
+import { health, loadBackendConfigLocal } from "../lib/api";
 import { useSettings, type DbMode } from "../state/settings";
+import { ThemeSwitcher } from "../components/ThemeSwitcher";
 
 export function SettingsPage() {
   const { settings, setSettings, resetSettings } = useSettings();
   const [probe, setProbe] = useState<string | null>(null);
+  const backend = loadBackendConfigLocal();
 
   async function testHost() {
     try {
@@ -20,9 +22,17 @@ export function SettingsPage() {
     <div>
       <h1>Settings</h1>
       <p className="lede">
-        Host connection, database mode, optional NocoBase admin, and Tailscale
-        SSH notes for private ops access.
+        Host, database mode, backends, Tailscale, and theme. Onboarding config is
+        also stored for agents.
       </p>
+
+      {backend && (
+        <div className="status-banner ok">
+          Onboarding saved: <strong>{backend.company || "workspace"}</strong> ·{" "}
+          {backend.db}
+          {backend.domain ? ` · ${backend.domain}` : ""}
+        </div>
+      )}
 
       <div className="grid-2">
         <div className="card">
@@ -45,7 +55,11 @@ export function SettingsPage() {
             />
           </div>
           <div className="btn-row">
-            <button className="btn btn-primary" type="button" onClick={() => void testHost()}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={() => void testHost()}
+            >
               Probe /health
             </button>
           </div>
@@ -57,11 +71,12 @@ export function SettingsPage() {
         </div>
 
         <div className="card">
+          <h2>Theme</h2>
+          <ThemeSwitcher />
+        </div>
+
+        <div className="card">
           <h2>Database</h2>
-          <p style={{ color: "var(--tex-muted)", fontSize: "0.9rem" }}>
-            Installer auto-detects Postgres or Supabase. Values here are for
-            the console operator profile (persistence wiring lands next).
-          </p>
           <div className="field">
             <label htmlFor="dbMode">Mode</label>
             <select
@@ -114,12 +129,7 @@ export function SettingsPage() {
         </div>
 
         <div className="card">
-          <h2>Lightweight backend (NocoBase)</h2>
-          <p style={{ color: "var(--tex-muted)", fontSize: "0.9rem" }}>
-            Optional low-code admin pulled by{" "}
-            <span className="mono">scripts/install</span>. Paste URL when
-            running.
-          </p>
+          <h2>NocoBase & Tailscale</h2>
           <div className="field">
             <label htmlFor="noco">NocoBase URL</label>
             <input
@@ -129,69 +139,40 @@ export function SettingsPage() {
               placeholder="http://127.0.0.1:13000"
             />
           </div>
-          {settings.nocobaseUrl && (
-            <a href={settings.nocobaseUrl} target="_blank" rel="noreferrer">
-              Open NocoBase →
-            </a>
-          )}
-        </div>
-
-        <div className="card">
-          <h2>Tailscale SSH (ops)</h2>
-          <p style={{ color: "var(--tex-muted)", fontSize: "0.9rem" }}>
-            Private path to the host without opening public ports. Install
-            Tailscale on the server, then SSH via MagicDNS name.
-          </p>
           <div className="field">
-            <label htmlFor="ts">Hostname</label>
+            <label htmlFor="ts">Tailscale hostname</label>
             <input
               id="ts"
               value={settings.tailscaleHostname}
               onChange={(e) =>
                 setSettings({ tailscaleHostname: e.target.value })
               }
-              placeholder="tex-host.tailnet-name.ts.net"
+              placeholder="tex-host.tailnet.ts.net"
             />
           </div>
           {settings.tailscaleHostname && (
-            <p className="mono">
-              ssh {settings.tailscaleHostname}
-            </p>
+            <p className="mono">ssh {settings.tailscaleHostname}</p>
           )}
-          <p style={{ fontSize: "0.85rem", color: "var(--tex-muted)" }}>
-            Docs:{" "}
-            <a
-              href="https://tailscale.com/kb/1193/tailscale-ssh"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Tailscale SSH
-            </a>
-          </p>
         </div>
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
-        <h2>Onboarding & data</h2>
+        <h2>Onboarding</h2>
         <div className="btn-row">
           <button
             className="btn btn-ghost"
             type="button"
             onClick={() => setSettings({ onboarded: false })}
           >
-            Replay onboarding
+            Mark not onboarded
           </button>
           <Link className="btn btn-ghost" to="/onboarding">
-            Open onboarding
+            Open wizard
           </Link>
           <button className="btn btn-ghost" type="button" onClick={resetSettings}>
             Reset settings
           </button>
         </div>
-        <p style={{ color: "var(--tex-muted)", fontSize: "0.85rem" }}>
-          Run installer:{" "}
-          <span className="mono">bash scripts/install/install.sh</span>
-        </p>
       </div>
     </div>
   );

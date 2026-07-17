@@ -32,6 +32,17 @@ export type Job = {
   updated_at: string;
 };
 
+export type BackendConfigPayload = {
+  db: "postgres" | "supabase" | "other" | "none";
+  port: string;
+  domain: string;
+  company: string;
+  vision: string;
+  theme: string;
+  hostUrl?: string;
+  apiKey?: string;
+};
+
 function baseUrl(settings: AppSettings) {
   return (settings.hostUrl || "").replace(/\/$/, "");
 }
@@ -90,4 +101,51 @@ export function listFirmware(settings: AppSettings) {
     settings,
     "/v1/firmware"
   );
+}
+
+/** Persist onboarding config locally; host may add /v1/config later. */
+export function saveBackendConfigLocal(config: BackendConfigPayload) {
+  localStorage.setItem("texllm.backendConfig.v1", JSON.stringify(config));
+  return config;
+}
+
+export function loadBackendConfigLocal(): BackendConfigPayload | null {
+  try {
+    const raw = localStorage.getItem("texllm.backendConfig.v1");
+    return raw ? (JSON.parse(raw) as BackendConfigPayload) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Friendly chat via team job (or mock offline reply). */
+export async function friendlyChat(
+  settings: AppSettings,
+  message: string
+): Promise<{ role: "agent"; content: string }> {
+  try {
+    const job = await createJob(settings, {
+      goal: `Friendly support reply (warm, clear, short): ${message}`,
+    });
+    // Poll briefly
+    for (let i = 0; i < 40; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      const j = await getJob(settings, job.id);
+      if (j.status === "succeeded" && j.result) {
+        const answer =
+          (j.result.output?.answer as string) ||
+          j.result.summary ||
+          "I'm here to help with your agent workspace.";
+        return { role: "agent", content: answer };
+      }
+      if (j.status === "failed") break;
+    }
+  } catch {
+    /* fall through to local persona */
+  }
+  return {
+    role: "agent",
+    content:
+      "I'm Tex, your friendly workspace guide. I couldn't reach the host just now — start `python3 -m texllm.host.app` or check Settings. Meanwhile: use Onboarding for backend setup, Jobs for team runners, and Tasks for your checklist.",
+  };
 }
