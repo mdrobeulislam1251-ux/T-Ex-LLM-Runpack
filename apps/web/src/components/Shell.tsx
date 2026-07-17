@@ -4,19 +4,34 @@ import { useTaskStore } from "../state/task";
 import { TaskPanel } from "./TaskPanel";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
-const links = [
-  { to: "/workspace", label: "Workspace" },
-  { to: "/domain-review", label: "Domain review" },
-  { to: "/personal-bd", label: "Personal BD" },
-  { to: "/ideas", label: "Ideas" },
-  { to: "/jobs", label: "Jobs" },
-  { to: "/chat", label: "Claude chat" },
-  { to: "/brains", label: "Brains" },
-  { to: "/skills", label: "Skills" },
-  { to: "/settings", label: "Settings" },
-  { to: "/brand", label: "Brand" },
-  { to: "/onboarding", label: "Onboarding" },
-  { to: "/profile", label: "Profile" },
+const sections = [
+  {
+    label: "Workspace",
+    links: [
+      { to: "/workspace", label: "Overview" },
+      { to: "/domain-review", label: "Domain review" },
+      { to: "/personal-bd", label: "Personal BD" },
+      { to: "/ideas", label: "Ideas" },
+    ],
+  },
+  {
+    label: "Agents",
+    links: [
+      { to: "/jobs", label: "Jobs" },
+      { to: "/chat", label: "Chat" },
+      { to: "/brains", label: "Brains" },
+      { to: "/skills", label: "Skills" },
+    ],
+  },
+  {
+    label: "System",
+    links: [
+      { to: "/settings", label: "Settings" },
+      { to: "/brand", label: "Brand" },
+      { to: "/profile", label: "Profile" },
+      { to: "/onboarding", label: "Onboarding" },
+    ],
+  },
 ];
 
 export function Shell() {
@@ -34,27 +49,33 @@ export function Shell() {
         <nav className="nav-rail" aria-label="Primary">
           <div className="brand-mark">
             <span className="orb" aria-hidden />
-            <span>{brand.logoText}</span>
+            <span>{brand.logoText || "T-ex"}</span>
           </div>
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                "nav-link" + (isActive ? " active" : "")
-              }
-            >
-              {l.label}
-            </NavLink>
+
+          {sections.map((sec) => (
+            <div key={sec.label} className="nav-section">
+              <div className="nav-section-label">{sec.label}</div>
+              {sec.links.map((l) => (
+                <NavLink
+                  key={l.to}
+                  to={l.to}
+                  className={({ isActive }) =>
+                    "nav-link" + (isActive ? " active" : "")
+                  }
+                >
+                  {l.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
+
           <div className="nav-footer">
             <ThemeSwitcher />
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost btn-sm"
               onClick={() => setOpen(!open)}
               aria-expanded={open}
-              aria-controls="task-panel"
             >
               Tasks
               {openCount > 0 && (
@@ -63,15 +84,6 @@ export function Shell() {
                 </span>
               )}
             </button>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "0.72rem",
-                color: "var(--tex-muted)",
-              }}
-            >
-              Hyper-agentic console
-            </p>
           </div>
         </nav>
         <main id="main" className="main-pane page-enter" key={loc.pathname}>

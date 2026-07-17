@@ -17,10 +17,10 @@ export type BrandTokens = {
 };
 
 const DEFAULTS: BrandTokens = {
-  logoText: "T-ex LLM",
-  primary: "#2563eb",
-  accent: "#059669",
-  radius: 12,
+  logoText: "T-ex",
+  primary: "#18181b",
+  accent: "#16a34a",
+  radius: 8,
   density: 1,
 };
 

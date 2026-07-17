@@ -125,26 +125,32 @@ export function TeamDashboardPage() {
 
   return (
     <div>
-      <p>
-        <Link to="/workspace">← Workspace</Link>
-      </p>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: "0.75rem",
-          alignItems: "flex-start",
-        }}
-      >
+      <div className="breadcrumb">
+        <Link to="/workspace">Workspace</Link>
+        <span>/</span>
+        <span>{t.slug}</span>
+      </div>
+
+      <div className="page-header">
         <div>
-          <h1 style={{ borderLeft: `4px solid ${t.color}`, paddingLeft: "0.65rem" }}>
+          <h1>
+            <span
+              className="team-dot"
+              style={{
+                display: "inline-block",
+                marginRight: 10,
+                verticalAlign: "middle",
+                background: t.color || "var(--text)",
+              }}
+            />
             {t.name}
           </h1>
           <p className="lede">
-            {t.description} ·{" "}
-            <span className="mono">tex run {t.slug} "…"</span> ·{" "}
-            <span className="mono">@{t.slug}</span>
+            {t.description}
+            <br />
+            <span className="mono">
+              tex run {t.slug} "…" · @{t.slug}
+            </span>
           </p>
         </div>
         <div className="btn-row" style={{ marginTop: 0 }}>
@@ -154,7 +160,7 @@ export function TeamDashboardPage() {
             disabled={exporting}
             onClick={() => void onExport()}
           >
-            {exporting ? "Exporting…" : "Export brains → firmware"}
+            {exporting ? "Exporting…" : "Export firmware"}
           </button>
         </div>
       </div>
@@ -170,7 +176,6 @@ export function TeamDashboardPage() {
         </div>
       )}
 
-      {/* KPI strip */}
       <div className="kpi-grid">
         {kpis.map((k) => (
           <div key={k.id} className="kpi-card">
@@ -182,7 +187,7 @@ export function TeamDashboardPage() {
                 {trendIcon(k.trend)}
               </span>
             </div>
-            <div className="btn-row" style={{ marginTop: "0.4rem" }}>
+            <div className="btn-row" style={{ marginTop: 8 }}>
               <button
                 type="button"
                 className="btn btn-sm btn-ghost"
@@ -214,8 +219,9 @@ export function TeamDashboardPage() {
         </div>
       </div>
 
-      {/* Kanban */}
-      <h2 style={{ marginTop: "1.25rem" }}>Agentic flow board</h2>
+      <div className="section-title">
+        <h2>Flow board</h2>
+      </div>
       <form className="card" onSubmit={onAddCard} style={{ marginBottom: "0.75rem" }}>
         <div className="field" style={{ marginBottom: 0 }}>
           <label htmlFor="card">New card</label>
