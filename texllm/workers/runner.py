@@ -220,8 +220,15 @@ class TeamRunner:
     ) -> list:
         system = fw.prompt_for(role.value)
         tools = self.base_tools.allowlist(fw.tools_for(role.value))
+        try:
+            from texllm.host.aliases import alias_store
+
+            address = alias_store.get().prompt_preamble()
+        except Exception:  # noqa: BLE001
+            address = ""
         system = (
             f"{system}\n\nYou are the **{role.value}** role.\n"
+            f"{address}\n"
             f"Available tools (allowlist):\n{tools.describe_for_prompt()}\n"
             "Prefer structured output when asked for JSON."
         )

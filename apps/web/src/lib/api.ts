@@ -118,16 +118,38 @@ export function loadBackendConfigLocal(): BackendConfigPayload | null {
   }
 }
 
+export type AgentAliases = {
+  agent_name: string;
+  user_name: string;
+  agent_aliases: string[];
+  user_aliases: string[];
+};
+
+export function getAliases(settings: AppSettings) {
+  return request<AgentAliases>(settings, "/v1/settings/aliases");
+}
+
+export function putAliases(settings: AppSettings, body: AgentAliases) {
+  return request<AgentAliases>(settings, "/v1/settings/aliases", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
 /** Friendly chat via team job (or mock offline reply). */
 export async function friendlyChat(
   settings: AppSettings,
-  message: string
+  message: string,
+  aliases?: AgentAliases | null
 ): Promise<{ role: "agent"; content: string }> {
+  const agentName = aliases?.agent_name || "Tex";
+  const userName = aliases?.user_name || "Operator";
   try {
     const job = await createJob(settings, {
-      goal: `Friendly support reply (warm, clear, short): ${message}`,
+      goal:
+        `You are ${agentName}. Address the user as ${userName}. ` +
+        `Friendly support reply (warm, clear, short): ${message}`,
     });
-    // Poll briefly
     for (let i = 0; i < 40; i++) {
       await new Promise((r) => setTimeout(r, 200));
       const j = await getJob(settings, job.id);
@@ -135,17 +157,19 @@ export async function friendlyChat(
         const answer =
           (j.result.output?.answer as string) ||
           j.result.summary ||
-          "I'm here to help with your agent workspace.";
+          `I'm here to help, ${userName}.`;
         return { role: "agent", content: answer };
       }
       if (j.status === "failed") break;
     }
   } catch {
-    /* fall through to local persona */
+    /* fall through */
   }
   return {
     role: "agent",
     content:
-      "I'm Tex, your friendly workspace guide. I couldn't reach the host just now — start `python3 -m texllm.host.app` or check Settings. Meanwhile: use Onboarding for backend setup, Jobs for team runners, and Tasks for your checklist.",
+      `I'm ${agentName}, your friendly workspace guide. I couldn't reach the host just now — start ` +
+      "`python3 -m texllm.cli serve` or check Settings. " +
+      `Meanwhile, ${userName}: use Onboarding, Jobs, and Tasks from the sidebar.`,
   };
 }

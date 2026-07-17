@@ -17,6 +17,7 @@ from texllm.agents.detect import detect_report
 from texllm.agents.local_cli import LocalCliError, run_local_agent
 from texllm.config import Settings, get_settings
 from texllm.firmware.loader import list_firmware
+from texllm.host.aliases import AgentAliases, alias_store
 from texllm.host.store import JobStore
 from texllm.schemas import Job, JobCreate, JobStatus, utcnow
 from texllm.workers.runner import TeamRunner
@@ -61,6 +62,38 @@ class LocalAgentRunRequest(BaseModel):
     agent_id: str = Field(..., description="Detected agent id, e.g. claude, codex")
     prompt: str = Field(..., min_length=1)
     timeout_sec: Optional[int] = None
+    use_aliases: bool = Field(
+        default=True,
+        description="Prepend agent/user name aliases to the prompt",
+    )
+
+
+@app.get("/v1/settings/aliases", response_model=AgentAliases)
+def get_aliases(_: None = Depends(require_api_key)) -> AgentAliases:
+    """Names: what the user calls the agent, and what the agent calls the user."""
+    return alias_store.get()
+
+
+@app.put("/v1/settings/aliases", response_model=AgentAliases)
+def put_aliases(
+    body: AgentAliases,
+    _: None = Depends(require_api_key),
+) -> AgentAliases:
+    """Save agent ↔ user addressing aliases."""
+    return alias_store.set(body)
+
+
+@app.patch("/v1/settings/aliases", response_model=AgentAliases)
+def patch_aliases(
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> AgentAliases:
+    """Partial update of aliases."""
+    allowed = {"agent_name", "user_name", "agent_aliases", "user_aliases"}
+    updates = {k: v for k, v in body.items() if k in allowed}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No valid alias fields")
+    return alias_store.patch(updates)
 
 
 @app.get("/health")
@@ -88,7 +121,9 @@ def system_info(settings: Settings = Depends(_settings)) -> dict:
             "local_cli_detect": True,
             "local_cli_spawn": settings.allow_local_cli,
             "web_ui": settings.serve_web,
+            "agent_aliases": True,
         },
+        "aliases": alias_store.get().model_dump(),
         "honest_notes": [
             "Local CLI mode uses tools already installed and authenticated on this machine (e.g. `claude auth login`). T-ex does not replace those logins with LLM_API_KEY.",
             "Not every detected CLI supports non-interactive spawn; the API reports noninteractive=true when a known prompt path exists.",
@@ -120,15 +155,20 @@ def run_agent(
             status_code=403,
             detail="Local CLI spawn disabled (ALLOW_LOCAL_CLI=false)",
         )
+    prompt = body.prompt
+    if body.use_aliases:
+        aliases = alias_store.get()
+        prompt = f"{aliases.prompt_preamble()}\n\n{body.prompt}"
     try:
         result = run_local_agent(
             body.agent_id,
-            body.prompt,
+            prompt,
             cwd=str(settings.local_cli_cwd),
             timeout_sec=body.timeout_sec or settings.local_cli_timeout_sec,
         )
     except LocalCliError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    result["aliases_applied"] = body.use_aliases
     return result
 
 
