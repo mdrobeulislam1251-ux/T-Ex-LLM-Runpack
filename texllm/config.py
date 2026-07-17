@@ -15,17 +15,27 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Model provider (OpenAI-compatible)
+    # Model provider (OpenAI-compatible) — optional; local CLI agents need no key
     llm_base_url: str = "https://api.openai.com/v1"
     llm_api_key: str = ""
     llm_model: str = "gpt-4o-mini"
     # "auto" | "mock" | "openai"
     llm_provider: str = "auto"
 
-    # Host
-    host_port: int = 8080
+    # Public bind (default 3006 — overridable at setup)
+    host_port: int = 3006
+    host_bind: str = "0.0.0.0"
     host_api_key: str = "change-me"
     log_level: str = "info"
+
+    # Serve built web UI from the same process when true
+    serve_web: bool = True
+    web_dist_dir: Path = Path("apps/web/dist")
+
+    # Local CLI agent spawn
+    allow_local_cli: bool = True
+    local_cli_timeout_sec: int = 180
+    local_cli_cwd: Path = Path(".")
 
     # Workers
     worker_concurrency: int = 4

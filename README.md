@@ -1,173 +1,64 @@
 # T-ex LLM
 
-**Portable multi-agent AI platform** — team runners, host runtime, and sellable agentic firmware for apps and products. Works with **Grok**, **Claude Code**, **Codex**, OpenAI-compatible APIs, or offline **mock** mode.
+Open-source multi-agent host: **team runners**, **web console**, and **local terminal AI CLI detection/spawn**.
 
-## Status
+Apache-2.0 · single setup · default port **3006**
 
-MVP runtime is live in this repo:
+## Honest feature matrix
 
-| Layer | Status |
-|-------|--------|
-| Team workers (plan → execute → review → integrate) | Done |
-| Host API (jobs, firmware list, health) | Done |
-| Sample firmware `sample-assistant@0.1.0` | Done |
-| Mock + OpenAI-compatible providers | Done |
-| Tool registry + allowlists | Done |
-| Durable queue / multi-tenant prod | Roadmap |
+| Capability | Status |
+|------------|--------|
+| Team runner (plan → execute → review → integrate) | Working |
+| Mock provider (no API key) | Working |
+| OpenAI-compatible HTTP provider | Working |
+| Auto-detect agent CLIs on PATH | Working |
+| Spawn local CLI from host (e.g. `claude -p`) | Working when CLI supports non-interactive mode + is logged in |
+| Web UI + API on one port | Working (`SERVE_WEB=true`) |
+| Interactive TUI inside the browser | Not this project — use Claude/Codex/etc. in a real terminal |
+| Durable Postgres job store | Not yet (in-memory jobs) |
+
+Local CLIs use **their own auth** (e.g. `claude auth login`). That is separate from `LLM_API_KEY`.
 
 ## Quick start
-
-Full product guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)** · SaaS vision: **[docs/saas-product.md](./docs/saas-product.md)**
 
 ```bash
 git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
 cd T-ex-LLM
-python3 -m pip install -e ".[dev]"
-
-# optional one-shot (detects Postgres/Supabase, optional NocoBase)
-bash scripts/install/install.sh
+bash scripts/setup.sh          # prompts for port (default 3006)
+set -a && source .env && set +a
+python3 -m texllm.cli serve
 ```
 
-### SaaS web console (Open Design–style skills + live UI)
+Open **http://127.0.0.1:3006/**
+
+Full multi-OS guide: **[docs/QUICKSTART.md](./docs/QUICKSTART.md)**  
+Tailscale / LAN / DNS A-record: **[docs/REMOTE-ACCESS.md](./docs/REMOTE-ACCESS.md)**
 
 ```bash
-# terminal 1 — agent host
-export LLM_PROVIDER=mock HOST_API_KEY=change-me
-python3 -m texllm.host.app
-
-# terminal 2 — hyper-agentic console
-cd apps/web && npm install && npm run dev
-# → http://127.0.0.1:5173  (onboarding → jobs → brand → settings)
+# Custom port
+bash scripts/setup.sh --port 8088 --non-interactive
+python3 -m texllm.cli serve --port 8088
 ```
 
-### Run a team job offline (no API key)
+## Useful commands
 
 ```bash
-export LLM_PROVIDER=mock
-python3 -m texllm.cli "Explain how to sell agentic firmware in a SaaS product"
-# or
-python3 examples/run_demo.py "Your goal here"
+python3 -m texllm.cli agents                 # detect installed terminal AIs
+python3 -m texllm.cli spawn claude "Hello"   # backend CLI spawn
+python3 -m texllm.cli run "Your goal" --provider mock
+curl -s http://127.0.0.1:3006/v1/system
 ```
 
-### Run the host API
+## Layout
 
-```bash
-export LLM_PROVIDER=mock
-export HOST_API_KEY=dev-secret
-python3 -m texllm.host.app
-# → http://0.0.0.0:8080
+```text
+scripts/setup.sh     single installer (macOS / Linux / Ubuntu / Windows via bash)
+texllm/              host, workers, CLI detect & spawn
+apps/web/            operator console
+firmware/            versioned agent packages
+playbooks/           instructions for any terminal agent
+docs/                quickstart + remote access
 ```
-
-```bash
-# health
-curl -s http://127.0.0.1:8080/health
-
-# create job
-curl -s -X POST http://127.0.0.1:8080/v1/jobs \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: dev-secret" \
-  -d '{"goal":"List benefits of multi-agent workers","firmware_id":"sample-assistant","firmware_version":"0.1.0"}'
-
-# poll (use job id from create)
-curl -s http://127.0.0.1:8080/v1/jobs/<JOB_ID> -H "X-API-Key: dev-secret"
-```
-
-### Use a real model (OpenAI-compatible)
-
-```bash
-cp .env.example .env
-# set LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
-export LLM_PROVIDER=openai
-# Examples:
-#   OpenAI:  LLM_BASE_URL=https://api.openai.com/v1
-#   xAI:     LLM_BASE_URL=https://api.x.ai/v1   LLM_MODEL=grok-...
-#   Local:   LLM_BASE_URL=http://127.0.0.1:11434/v1
-python3 -m texllm.cli "Draft an onboarding agent for our CRM"
-```
-
-### Tests
-
-```bash
-LLM_PROVIDER=mock python3 -m pytest -q
-```
-
-## Architecture
-
-```
-Customer apps  →  Integrate (SDK/webhooks)
-                      ↓
-              Firmware packages (versioned)
-                      ↓
-              Host API (jobs, auth)
-                      ↓
-         Team runners: planner → executor → reviewer → integrator
-                      ↓
-         Providers (mock | OpenAI-compat) + tools
-```
-
-See [docs/architecture.md](./docs/architecture.md).
-
-## Repo layout
-
-```
-apps/web/               # SaaS console (Vite/React) — onboarding, jobs, brand, settings
-design-systems/         # DESIGN.md tokens (Open Design–style)
-texllm/                 # Python package (host, workers, providers, firmware loader)
-firmware/sample-assistant/   # Demo agentic firmware
-playbooks/              # Tool-agnostic playbooks (any terminal AI)
-skills/                 # Skill packs (agentic + saas-console / saas-onboarding)
-scripts/install/        # OS installer + Postgres/Supabase auto-detect
-deploy/                 # Docker host + optional NocoBase
-examples/               # Demos
-tests/                  # Pytest suite
-```
-
-## Playbooks (any terminal AI)
-
-| Intent | File |
-|--------|------|
-| Route work | `playbooks/00-orchestrator.md` |
-| Host / deploy | `playbooks/01-host.md` |
-| Team workers | `playbooks/02-workers.md` |
-| ML / evals | `playbooks/03-ml-engineer.md` |
-| Firmware packages | `playbooks/04-firmware.md` |
-| Product integrate | `playbooks/05-integrate.md` |
-
-Point **Grok / Claude Code / Codex** at this repo and load the matching playbook or `skills/*/SKILL.md`.
-
-## Agentic firmware
-
-Ship agents as versioned packages:
-
-```
-firmware/<id>/
-  manifest.yaml
-  prompts/
-  tests/
-  README.md
-```
-
-Create a new package by copying `firmware/sample-assistant/` and editing prompts + tools.
-
-## API (host)
-
-| Method | Path | Notes |
-|--------|------|--------|
-| GET | `/health` | Liveness |
-| GET | `/v1/firmware` | List packages |
-| POST | `/v1/jobs` | Create job (`goal`, `firmware_id`, `firmware_version`) |
-| GET | `/v1/jobs/{id}` | Poll status + result |
-| GET | `/v1/jobs` | Recent jobs |
-| POST | `/v1/jobs/{id}/cancel` | Cancel if still queued |
-
-Auth: header `X-API-Key` (required when `HOST_API_KEY` is not the default `change-me`).
-
-## Principles
-
-1. **Model-agnostic** — swap providers via env.
-2. **Worker-first** — team runners over a single free-form agent.
-3. **Firmware as product** — versioned packages with I/O contracts.
-4. **Terminal + API** — same runners for CLI and host.
 
 ## License
 

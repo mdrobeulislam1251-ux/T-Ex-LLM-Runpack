@@ -23,8 +23,10 @@ dependencies = [
 dev = ["pytest>=7.4.0,<9"]
 
 [project.scripts]
+texllm = "texllm.cli:main"
 texllm-host = "texllm.host.app:main"
 texllm-run = "texllm.cli:main"
+texllm-serve = "texllm.host.app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
