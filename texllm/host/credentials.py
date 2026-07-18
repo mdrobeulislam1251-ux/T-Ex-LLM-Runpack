@@ -496,12 +496,37 @@ def probe_cli_auth(agent_id: str) -> Dict[str, Any]:
 def resolve_runtime() -> Dict[str, Any]:
     """
     Resolve default auth profile into something runners can use.
-    Mirrors OpenClaw token sink / NanoClaw vault injection point.
+    Prefer any profile that has a real API key over a broken local_cli default.
     """
     store = credential_store
+    data = store._load()
     profile = store.get_default()
+
+    # If default is empty local_cli (common broken state), pick first api_key profile
+    if profile and profile.method == "local_cli":
+        pack0 = store.get_secret_pack(profile.id)
+        has_key = bool(pack0.get("access_token") or pack0.get("api_key"))
+        if not has_key:
+            for p in data.profiles:
+                if p.method == "api_key":
+                    sec = store.get_secret_pack(p.id)
+                    if sec.get("access_token") or sec.get("api_key"):
+                        profile = p
+                        break
+            else:
+                # no API key profile — keep local_cli (caller may fall back)
+                pass
+
     if not profile:
-        # fall back to env LLM_*
+        # Prefer any api_key profile even if not default
+        for p in data.profiles:
+            if p.method in ("api_key", "setup_token"):
+                sec = store.get_secret_pack(p.id)
+                if sec.get("access_token") or sec.get("api_key"):
+                    profile = p
+                    break
+
+    if not profile:
         from texllm.config import get_settings
 
         s = get_settings()
@@ -523,7 +548,7 @@ def resolve_runtime() -> Dict[str, Any]:
         }
 
     pack = store.get_secret_pack(profile.id)
-    access = pack.get("access_token") or pack.get("api_key") or ""
+    access = (pack.get("access_token") or pack.get("api_key") or "").strip()
     if profile.method == "local_cli":
         return {
             "source": "profile",
@@ -533,6 +558,7 @@ def resolve_runtime() -> Dict[str, Any]:
             "agent_id": profile.agent_id or "claude",
             "use_local_cli": True,
             "model": profile.model,
+            "api_key": access,
         }
 
     base = profile.base_url
@@ -541,8 +567,13 @@ def resolve_runtime() -> Dict[str, Any]:
             "openai": "https://api.openai.com/v1",
             "anthropic": "https://api.anthropic.com",
             "xai": "https://api.x.ai/v1",
-            "gemini": "https://generativelanguage.googleapis.com/v1beta",
+            "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
+            "custom": "https://api.openai.com/v1",
         }.get(profile.provider, "https://api.openai.com/v1")
+
+    model = profile.model
+    if not model and profile.provider in ("xai",):
+        model = "grok-3"
 
     return {
         "source": "profile",
@@ -551,7 +582,7 @@ def resolve_runtime() -> Dict[str, Any]:
         "provider": profile.provider,
         "base_url": base,
         "api_key": access,
-        "model": profile.model,
+        "model": model,
         "use_local_cli": False,
         "extra_headers": _extra_headers(profile.method, profile.provider),
     }

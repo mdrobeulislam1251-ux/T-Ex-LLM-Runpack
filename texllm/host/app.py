@@ -90,8 +90,26 @@ def auth_profiles_upsert(
     _: None = Depends(require_api_key),
 ) -> dict:
     """Create or update a profile. api_key is stored only on the host disk."""
+    # Grok defaults
+    if body.provider in ("xai", "grok") and not body.base_url:
+        body.base_url = "https://api.x.ai/v1"
+    if body.provider in ("xai", "grok") and not body.model:
+        body.model = "grok-3"
+    if body.provider == "grok":
+        body.provider = "xai"
     profile = credential_store.upsert(body)
-    return profile.model_dump()
+    # Always make the profile just saved the default when it has a key
+    if body.api_key or body.method == "local_cli":
+        try:
+            credential_store.set_default(profile.id)
+        except Exception:  # noqa: BLE001
+            pass
+    from texllm.providers import describe_active_provider
+
+    return {
+        **profile.model_dump(),
+        "active_ai": describe_active_provider(),
+    }
 
 
 @app.post("/v1/auth/profiles/{profile_id}/default")
@@ -540,6 +558,9 @@ def runbook_get(_: None = Depends(require_api_key)) -> dict:
     auth = credential_store.list_public()
     snap["auth_profiles"] = auth.get("profiles") or []
     snap["auth_default"] = auth.get("default_profile_id")
+    from texllm.providers import describe_active_provider
+
+    snap["active_ai"] = describe_active_provider()
     return snap
 
 
@@ -687,11 +708,20 @@ def runbook_run_phase(
     except Exception as exc:  # noqa: BLE001
         logger.exception("runbook phase %s failed", phase_id)
         # Still mark done with error draft so UI moves
+        try:
+            from texllm.providers import describe_active_provider
+
+            ai = describe_active_provider()
+        except Exception:  # noqa: BLE001
+            ai = {}
         err_md = (
             f"## {phase['title']} — draft (error path)\n\n"
             f"Company: **{company}**\n\n"
             f"Provider error: `{exc}`\n\n"
+            f"Active AI: `{ai}`\n\n"
             "Placeholders were auto-filled with demo text so you can continue the runbook.\n"
+            "**Tip:** Grok needs a valid xAI API key (not Claude local CLI). "
+            "Paste key under Grok → Save, then Run again.\n"
         )
         filled = _fill_phase_placeholders(phase, company, notes, {})
         rb.update_phase(
@@ -699,10 +729,12 @@ def runbook_run_phase(
             status="done",
             placeholder=filled,
             result={
-                "summary": f"Completed with fallback after error: {exc}",
+                "summary": f"Fallback draft (provider error): {str(exc)[:120]}",
                 "content": err_md + "\n" + _mock_phase_markdown(phase, company, notes),
                 "mode": "error_fallback",
                 "error": str(exc),
+                "provider": ai.get("name"),
+                "auth_method": ai.get("method"),
             },
             company_name=company,
         )
@@ -816,13 +848,17 @@ def patch_aliases(
 
 @app.get("/health")
 def health(settings: Settings = Depends(_settings)) -> dict:
+    from texllm.providers import describe_active_provider
+
+    active = describe_active_provider()
     return {
         "status": "ok",
         "version": __version__,
         "port": settings.host_port,
         "serve_web": settings.serve_web,
         "allow_local_cli": settings.allow_local_cli,
-        "llm_provider": settings.resolve_provider(),
+        "llm_provider": active.get("name") or settings.resolve_provider(),
+        "ai": active,
     }
 
 

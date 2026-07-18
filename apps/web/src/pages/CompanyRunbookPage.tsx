@@ -51,6 +51,14 @@ type RunbookSnap = {
   auth_profiles: AuthProfile[];
   auth_default: string | null;
   activity?: Activity[];
+  active_ai?: {
+    name?: string;
+    method?: string;
+    provider?: string;
+    hint?: string;
+    usable?: boolean;
+    has_secret?: boolean;
+  };
   cli: Record<string, string>;
 };
 
@@ -266,7 +274,7 @@ export function CompanyRunbookPage() {
       // Host must not force mock
       setApiKey("");
       setMsg(
-        `${prov} API key saved. Restart host without LLM_PROVIDER=mock for live model (or keep mock for offline drafts).`
+        `${prov} API key saved and set as default. Check “Active AI now” above — then Run phase agent.`
       );
       await refresh();
     } catch (e) {
@@ -376,13 +384,27 @@ export function CompanyRunbookPage() {
       {error && <div className="rb-error">{error}</div>}
       {msg && <div className="rb-ok">{msg}</div>}
 
+      {rb.active_ai && (
+        <div
+          className={
+            rb.active_ai.name === "mock" ? "rb-error" : "rb-ok"
+          }
+          style={{ marginBottom: 16 }}
+        >
+          <strong>Active AI now:</strong> {rb.active_ai.name}
+          {rb.active_ai.provider ? ` (${rb.active_ai.provider})` : ""} ·{" "}
+          {rb.active_ai.method || "—"}
+          <br />
+          {rb.active_ai.hint}
+        </div>
+      )}
+
       <section className="rb-card">
-        <h2>1) Connect AI (optional for now)</h2>
+        <h2>1) Connect AI — required for real answers</h2>
         <p className="rb-muted">
-          <strong>Grok / ChatGPT / Gemini / Claude</strong> via API key. Claude
-          also supports Max setup-token or local <code>claude</code> CLI. There
-          is no Grok “local CLI” like Claude Code — use an{" "}
-          <strong>xAI API key</strong> for Grok.
+          <strong>Grok = paste xAI API key</strong> (not “local CLI”). Claude
+          can use API key, Max token, or <code>claude auth login</code>. ChatGPT
+          / Gemini = API keys.
         </p>
         <div className="rb-providers">
           {rb.providers.map((p) => (
