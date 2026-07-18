@@ -30,6 +30,7 @@ def test_no_profile_uses_mock(tmp_path: Path, monkeypatch):
 def test_local_cli_profile_selects_claude_cli(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("LLM_PROVIDER", "auto")
+    monkeypatch.delenv("TEXLLM_FORCE_MOCK", raising=False)
     from texllm import config as config_mod
     from texllm.host import credentials as cred
 
@@ -58,6 +59,7 @@ def test_local_cli_profile_selects_claude_cli(tmp_path: Path, monkeypatch):
 def test_setup_token_prefers_cli_when_present(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("LLM_PROVIDER", "auto")
+    monkeypatch.delenv("TEXLLM_FORCE_MOCK", raising=False)
     from texllm import config as config_mod
     from texllm.host import credentials as cred
 
