@@ -21,7 +21,7 @@ The launcher sets `CLAUDE_CONFIG_DIR` to the `.claude-tex` home next to it, then
 | Layer | Skills |
 |---|---|
 | Agentic core | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
-| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging` |
+| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `ui-ux-design`, `app-security` |
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
 | Strategy | `product-gtm-strategy`, `b2b-outbound-pipeline` |

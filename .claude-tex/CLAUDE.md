@@ -40,6 +40,8 @@ When the user hands docs/specs for a build: (1) `project-bootstrap` — map the 
 | Dashboards, metrics, alerting | `grafana-observability` |
 | CI/CD, releases, environments, deploy strategy | `devops-cicd` |
 | Feature work across frontend + backend | `fullstack-delivery` |
+| UI/UX: layout, typography, color, component states, accessibility | `ui-ux-design` |
+| App security: auth, authz/IDOR, headers, secrets, uploads, rate limits | `app-security` |
 | Anything broken, flaky, or unexplained | `systematic-debugging` |
 | Servers, services, deploys, anything with sudo | `server-ops-safety` |
 | "Can't connect", DNS, TLS, tunnels, timeouts | `network-diagnosis` |
