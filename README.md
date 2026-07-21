@@ -9,7 +9,9 @@ like a full company — with hard review gates so the output is accurate, not im
 
 **Two modes, one runpack:**
 
-- **Founder mode** — build a sellable product from scratch: `/onboard` → PRD →
+- **Founder mode** — build a sellable product from scratch, strategy-first: T-Ex wakes
+  as the **strategist** (`strategy-workspace`), locks direction with you, scaffolds the
+  workspace (`strategy/ dev/ marketing/ docs/ dashboard/`), then `/onboard` → PRD →
   architecture → schema (CTO gate) → design → build → QA → ship → launch.
 - **Developer mode** — join ANY existing codebase as the dev team: `project-bootstrap`
   probes the stack and live-verifies every credential first, then delivers doc-by-doc.
@@ -55,6 +57,15 @@ Then start with:
 - **Linear**: `claude mcp add --transport sse linear https://mcp.linear.app/sse` connects
   project management; the `linear-integration` skill maps build/fix cycles to issues and
   moves an issue to Done only after run-verification.
+
+## Runpacks for external agents
+
+`runpacks/` holds operating docs for agents OUTSIDE Claude Code. First one:
+`runpacks/grok-dashboard-builder.md` — a complete runpack for a **Grok** agent building
+dashboards for this workspace: the guaranteed data contract (repo file paths +
+`GET /api/runpack`, `POST /api/active`, `POST /api/brain`), segment/intent design
+doctrine, and run-verified done-gates. The dashboard package itself is the user's (or
+Grok's) responsibility — T-Ex LLM guarantees the endpoints and access.
 
 ## The Command Deck (dashboard)
 
@@ -120,6 +131,10 @@ Their live operational skills currently run in the separate `Outbound agent` wor
 (cold-email suite, consulti-scrape, lead-tracking-db, …). The placeholders reference them
 by name; porting + scrubbing them into this repo is a planned cycle.
 
+**Recommended, not required:** the three brands are the default stack, and every slot is
+swappable — bring your own data source, verifier, or sending tool. The brain's
+`credentials` env-var names record what's actually wired, and teams build against that.
+
 ## The 52-agent roster
 
 **Executive (4):** ceo-orchestrator · cto · cpo · coo
@@ -151,21 +166,21 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-**37 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
-run-verified playbooks), the six truly-native platform skills, and four new forges
-(`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`). The
-per-team mapping lives in `orchestration-runpack` → "Team skill libraries"; teams not
-routed to a task stay silent.
+**39 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six truly-native platform skills, and six new forges
+(`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`,
+`dashboard-design`, `strategy-workspace`). The per-team mapping lives in
+`orchestration-runpack` → "Team skill libraries"; teams not routed to a task stay silent.
 
 | Layer | Skills |
 |---|---|
 | Runpack core | `company-onboarding`, `orchestration-runpack`, `fullstack-65`, `data-schema-design`, `design-core`, `issue-fix-loop`, `research-strategy` |
 | Behavior core | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
-| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `app-security`, `ui-ux-design` |
+| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `app-security`, `ui-ux-design`, `dashboard-design` |
 | Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev` |
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
-| Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline` |
+| Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline`, `strategy-workspace` |
 | Integrations | `linear-integration` |
 
 ## Review gates (hard, non-negotiable)
@@ -191,7 +206,8 @@ plugins/arion-company/
   commands/*.md                      # /onboard /company /build /design /schema /fix /team
 dashboard/                           # Arion Command Deck (Next.js) — npm run dev
 templates/company-profile.template.json
-companies/                           # created per company by /onboard (brains live here)
+companies/                           # company brains; ships consulti / trusted-leads / lead-gen-jay placeholders
+runpacks/                            # operating docs for external agents (Grok dashboard builder)
 CLAUDE.md                            # core engine rules for this repo
 ```
 

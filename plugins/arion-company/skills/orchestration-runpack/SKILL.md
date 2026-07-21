@@ -24,6 +24,7 @@ description: The company runpack routing table — how the 52 Arion agents in 9 
 | Feature implementation plan | engineering-manager | cto (if architectural) |
 | Any-language / cross-stack implementation | fullstack-polyglot | engineering-manager |
 | UI implementation | frontend-engineer | design-system-engineer |
+| Product dashboards / analytics views | frontend-engineer | design-director (`dashboard-design`) |
 | Server/API implementation | backend-engineer | api-engineer (contract) |
 | Mobile feature | mobile-engineer | engineering-manager |
 | API contract design | api-engineer | cto (breaking changes) |
@@ -104,14 +105,14 @@ loads its team's skills:
 | Everyone (behavior core) | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
 | Engineering — web/API | `api-design`, `fullstack-delivery`, `systematic-debugging`, `postgres-patterns`, `app-security` |
 | Engineering — native apps | `native-app-delivery`, then the platform skill: `android-dev` / `ios-dev` / `macos-dev` / `windows-dev` / `linux-dev` / `harmony-dev` |
-| Design | `ui-ux-design`, `design-core` |
+| Design | `ui-ux-design`, `design-core`, `dashboard-design` |
 | Data | `data-schema-design`, `data-pipelines`, `sql-analytics`, `supabase-platform`, `clickhouse-analytics`, `elasticsearch-opensearch` |
 | DevOps / SRE / Cloud | `docker-operations`, `devops-cicd`, `grafana-observability`, `server-ops-safety`, `network-diagnosis` |
 | Security | `app-security`, `server-ops-safety` |
 | Issue fixers | `issue-fix-loop`, `systematic-debugging` |
 | Marketing | `product-gtm-strategy` |
 | Sales | `b2b-outbound-pipeline`, `product-gtm-strategy` |
-| Research & strategy | `research-strategy`, `product-gtm-strategy` |
+| Research & strategy | `research-strategy`, `product-gtm-strategy`, `strategy-workspace` |
 | Delivery & PM sync (coo, engineering-manager) | `linear-integration` |
 
 **On-need activation:** teams not named as owner or reviewer of the current task stay

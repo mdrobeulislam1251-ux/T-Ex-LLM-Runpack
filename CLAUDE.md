@@ -36,8 +36,10 @@
   external API state loops.
 
 ## 5. Operating Modes & Inputs
-- **Founder mode** (sellable product from scratch): `/onboard` creates the brain → PRD →
-  architecture → schema (CTO gate) → design → build → QA → ship → launch pipelines.
+- **Founder mode** (sellable product from scratch) is strategy-first: the
+  `strategy-workspace` skill wakes the strategist, locks direction with the user,
+  scaffolds `strategy/ dev/ marketing/ docs/ dashboard/`, THEN `/onboard` creates the
+  brain → PRD → architecture → schema (CTO gate) → design → build → QA → ship → launch.
 - **Developer mode** (any existing codebase): run the `project-bootstrap` skill first —
   probe the stack, live-verify every credential, at most one batched ask — then deliver
   doc-by-doc against the user's specs.
@@ -48,3 +50,10 @@
 - **Clients**: Claude Code in a terminal session (Anthropic API key or Claude Max/Pro
   login) is primary; Cursor and other agents follow `AGENTS.md`. Project management syncs
   through the `linear-integration` skill — issues reach Done only after run-verification.
+- **External dashboards**: the guaranteed read surface is the data contract in
+  `runpacks/grok-dashboard-builder.md` (repo files + `GET /api/runpack`,
+  `POST /api/active`, `POST /api/brain`). External agents write only inside `dashboard/`
+  and never read `.env`. Dashboard craft rules live in the `dashboard-design` skill.
+- **Ecosystem defaults are swappable**: Consulti / Trusted Leads / Lead Gen Jay are
+  recommended, never forced — the brain records the user's actual tools as env var names,
+  and teams build against what is wired, not what is recommended.

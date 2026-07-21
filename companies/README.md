@@ -29,4 +29,6 @@ Three brains ship as `"_placeholder": true` drafts for the outbound-business eco
 (flagship leadgen brand). Their DRAFT fields are completed and confirmed by running
 `/onboard <slug>`; their live operational skills currently run in the separate
 `Outbound agent` workspace and are referenced by name only. No placeholder is active
-by default.
+by default. They are **recommended defaults, not requirements** — swap any of them for
+your own data source, verifier, or sending tool by re-pointing the env var names in the
+brain's `credentials` section.
