@@ -112,6 +112,7 @@ loads its team's skills:
 | Marketing | `product-gtm-strategy` |
 | Sales | `b2b-outbound-pipeline`, `product-gtm-strategy` |
 | Research & strategy | `research-strategy`, `product-gtm-strategy` |
+| Delivery & PM sync (coo, engineering-manager) | `linear-integration` |
 
 **On-need activation:** teams not named as owner or reviewer of the current task stay
 silent — the dev team doesn't wake marketing, marketing doesn't wake the dev team.

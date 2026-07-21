@@ -34,3 +34,17 @@
   locally.
 - Use headless Playwright automation checkpoints to visually verify frontends or
   external API state loops.
+
+## 5. Operating Modes & Inputs
+- **Founder mode** (sellable product from scratch): `/onboard` creates the brain → PRD →
+  architecture → schema (CTO gate) → design → build → QA → ship → launch pipelines.
+- **Developer mode** (any existing codebase): run the `project-bootstrap` skill first —
+  probe the stack, live-verify every credential, at most one batched ask — then deliver
+  doc-by-doc against the user's specs.
+- **User-supplied architecture / data-model docs are first-class input**: store them under
+  `companies/<slug>/research/` (or the project's docs folder), route schema work through
+  `/schema` (data-engineer → cto gate), and never redesign what a doc already decides
+  without flagging the conflict in one line.
+- **Clients**: Claude Code in a terminal session (Anthropic API key or Claude Max/Pro
+  login) is primary; Cursor and other agents follow `AGENTS.md`. Project management syncs
+  through the `linear-integration` skill — issues reach Done only after run-verification.

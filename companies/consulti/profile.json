@@ -1,0 +1,52 @@
+{
+  "_placeholder": true,
+  "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (consulti-scrape, email-verification). Run /onboard consulti to have the research team complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
+  "company": {
+    "name": "Consulti",
+    "slug": "consulti",
+    "app_name": "Consulti",
+    "description": "B2B data engine: 500M+ contact database, Google Maps local businesses, and podcast/YouTube creator data, served via REST API with credit-based access; also provides server-side email verification (/verify).",
+    "created_at": "2026-07-22"
+  },
+  "brain": {
+    "scope": {
+      "does": "DRAFT — lead data sourcing at scale (B2B contacts, local businesses, creators), targeted list pulls via API, email verification as a service",
+      "does_not": "DRAFT — no outreach sending of its own; delivery/sequencing belongs to the campaign layer (Lead Gen Jay stack)"
+    },
+    "vision": "DRAFT — the data backbone of the outbound ecosystem",
+    "mission": "DRAFT",
+    "emotion_tone": "DRAFT — precise, data-first, no hype",
+    "target_audience": "DRAFT — B2B founders, agencies, and outbound teams that need targeted, verified lead data",
+    "voice_examples": []
+  },
+  "brand": {
+    "guidelines_file": "brand/brand.md",
+    "assets_dir": "brand/assets/",
+    "colors": { "primary": "", "secondary": "", "extra": {} },
+    "typography": { "heading": "", "body": "" }
+  },
+  "tech": {
+    "stack": {
+      "frontend": "",
+      "backend": "Consulti REST API (external product surface)",
+      "database": "",
+      "mobile": "",
+      "cloud": "",
+      "decided_by": ""
+    },
+    "remote_access": { "method": "", "host": "", "notes": "Works via public API — no remote host access." },
+    "multi_tenant": true,
+    "compliance_notes": "DRAFT — data-source compliance to be documented at onboarding",
+    "performance_budgets": { "api_p95_ms": 300, "lcp_ms": 2500 },
+    "monthly_cloud_budget_usd": null
+  },
+  "credentials": {
+    "_rule": "ENV VAR NAMES ONLY. Raw values live in .env (gitignored). Never store secret values in this file.",
+    "database": { "provider": "", "env": { "host": "", "port": "", "name": "", "user": "", "password": "" } },
+    "n8n": { "env": { "url": "", "api_key": "" } },
+    "other": {
+      "consulti_api": { "env": { "api_key": "CONSULTI_API_KEY" } }
+    }
+  },
+  "logs": { "decisions": "decisions.md", "incidents": "incidents.md", "research_dir": "research/" }
+}

@@ -1,0 +1,54 @@
+{
+  "_placeholder": true,
+  "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (cold-email-strategy, cold-email-copywriting, cold-email-campaign-deploy, cold-email-ab-testing, cold-email-quickstart, inbox-insiders). Run /onboard lead-gen-jay to complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
+  "company": {
+    "name": "Lead Gen Jay",
+    "slug": "lead-gen-jay",
+    "app_name": "Lead Gen Jay",
+    "description": "Flagship B2B lead-generation brand: end-to-end cold email operations — ICP strategy, offer positioning, sequence copywriting, mailbox/domain provisioning (Inbox Insiders), campaign deployment to Email Bison / Instantly, and lifecycle A/B testing.",
+    "created_at": "2026-07-22"
+  },
+  "brain": {
+    "scope": {
+      "does": "DRAFT — done-for-you and productized B2B lead generation: strategy, copy, infrastructure, deployment, optimization",
+      "does_not": "DRAFT — no consumer marketing; data sourcing delegated to Consulti; list verification delegated to Trusted Leads layer"
+    },
+    "vision": "DRAFT — the operating brand founders hire to fill their B2B pipeline",
+    "mission": "DRAFT",
+    "emotion_tone": "DRAFT — direct, practitioner, results-first",
+    "target_audience": "DRAFT — B2B founders and small teams that need meetings booked, not marketing theory",
+    "voice_examples": []
+  },
+  "brand": {
+    "guidelines_file": "brand/brand.md",
+    "assets_dir": "brand/assets/",
+    "colors": { "primary": "", "secondary": "", "extra": {} },
+    "typography": { "heading": "", "body": "" }
+  },
+  "tech": {
+    "stack": {
+      "frontend": "",
+      "backend": "",
+      "database": "Turso/SQLite lead-tracking DB (see lead-tracking-db skill)",
+      "mobile": "",
+      "cloud": "",
+      "decided_by": ""
+    },
+    "remote_access": { "method": "", "host": "", "notes": "" },
+    "multi_tenant": false,
+    "compliance_notes": "DRAFT — cold-email compliance (CAN-SPAM/GDPR posture) documented in the outbound skills' safety gates",
+    "performance_budgets": { "api_p95_ms": 300, "lcp_ms": 2500 },
+    "monthly_cloud_budget_usd": null
+  },
+  "credentials": {
+    "_rule": "ENV VAR NAMES ONLY. Raw values live in .env (gitignored). Never store secret values in this file.",
+    "database": { "provider": "turso", "env": { "host": "TURSO_DATABASE_URL", "port": "", "name": "", "user": "", "password": "TURSO_AUTH_TOKEN" } },
+    "n8n": { "env": { "url": "", "api_key": "" } },
+    "other": {
+      "email_bison": { "env": { "api_key": "EMAILBISON_API_KEY" } },
+      "instantly": { "env": { "api_key": "INSTANTLY_API_KEY" } },
+      "inbox_insiders": { "env": { "api_key": "INBOX_INSIDERS_API_KEY" } }
+    }
+  },
+  "logs": { "decisions": "decisions.md", "incidents": "incidents.md", "research_dir": "research/" }
+}

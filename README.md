@@ -1,9 +1,20 @@
-# Arion Multi-Agent — Company Runpack for Claude Code
+# T-Ex LLM — The Full Company Runpack
 
-An open-source **company-in-a-box** for Claude Code: **52 specialist agents in 9 teams**,
-all driven by a switchable **company brain** (scope, vision, emotion/tone, brand, stack,
-credentials). Install it into any app project and Claude works like a full company —
-with hard review gates so the output is accurate, not improvised.
+*(repo: Arion-Multi-Agent — the single combined version of the agent product)*
+
+A **company-in-a-box** for terminal AI sessions: **52 specialist agents in 9 teams backed
+by 37 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
+emotion/tone, brand, stack, credentials). Install it into any project and the AI works
+like a full company — with hard review gates so the output is accurate, not improvised.
+
+**Two modes, one runpack:**
+
+- **Founder mode** — build a sellable product from scratch: `/onboard` → PRD →
+  architecture → schema (CTO gate) → design → build → QA → ship → launch.
+- **Developer mode** — join ANY existing codebase as the dev team: `project-bootstrap`
+  probes the stack and live-verifies every credential first, then delivers doc-by-doc.
+  You share design/architecture docs (data models included); the team builds against
+  them — schema changes always pass the CTO gate.
 
 ## Why
 
@@ -34,6 +45,17 @@ Then start with:
 /onboard YourCompanyName
 ```
 
+## Run it from anywhere (terminal-first)
+
+- **Claude Code on a Max/Pro subscription**: run `claude`, sign in once — no API key needed.
+- **Claude Code on API billing**: set `ANTHROPIC_API_KEY` in the environment instead.
+- **Cursor / other agents**: the runpack is plain Markdown/JSON — `AGENTS.md` at the repo
+  root routes any agent through the same skills and gates (no slash commands there; the
+  files are the product).
+- **Linear**: `claude mcp add --transport sse linear https://mcp.linear.app/sse` connects
+  project management; the `linear-integration` skill maps build/fix cycles to issues and
+  moves an issue to Done only after run-verification.
+
 ## The Command Deck (dashboard)
 
 A SaaS-grade visual dashboard ships in [`dashboard/`](dashboard/): dark animated
@@ -43,6 +65,10 @@ CTO decision + incident logs — read live from the repo files.
 ```bash
 cd dashboard && npm install && npm run dev   # → http://localhost:4100
 ```
+
+Runs on any computer with Node.js ≥ 18 (`winget install OpenJS.NodeJS.LTS` on Windows /
+`brew install node` on macOS). Clone the repo on that machine, run the two commands,
+open the browser — the deck reads the live repo files next to it.
 
 Its **Brain Studio** creates companies from nothing but a name and a vision briefing —
 see the next section.
@@ -79,6 +105,21 @@ hand-design tables.
 | `/fix <bug>` | Issue loop: triage → root-cause fix → regression test → prevention |
 | `/team [task]` | Show the 52-agent roster, or route a task to the right owner |
 
+## The ecosystem (preloaded company placeholders)
+
+`companies/` ships three placeholder brains for the operating brands of the outbound
+business — complete each with `/onboard <slug>`:
+
+| Brand | Role in the ecosystem |
+|---|---|
+| **Consulti** (`consulti`) | Data engine — 500M+ B2B contacts, local businesses, creators, verification API |
+| **Trusted Leads** (`trusted-leads`) | Trust layer — list cleaning, ICP qualification, verification before any send |
+| **Lead Gen Jay** (`lead-gen-jay`) | Flagship leadgen brand — strategy, copy, mailbox infra, campaign deploy, A/B testing |
+
+Their live operational skills currently run in the separate `Outbound agent` workspace
+(cold-email suite, consulti-scrape, lead-tracking-db, …). The placeholders reference them
+by name; porting + scrubbing them into this repo is a planned cycle.
+
 ## The 52-agent roster
 
 **Executive (4):** ceo-orchestrator · cto · cpo · coo
@@ -110,10 +151,11 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-**36 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
-run-verified playbooks), the six truly-native platform skills, and three new forges
-(`native-app-delivery`, `ui-ux-design`, `app-security`). The per-team mapping lives in
-`orchestration-runpack` → "Team skill libraries"; teams not routed to a task stay silent.
+**37 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six truly-native platform skills, and four new forges
+(`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`). The
+per-team mapping lives in `orchestration-runpack` → "Team skill libraries"; teams not
+routed to a task stay silent.
 
 | Layer | Skills |
 |---|---|
@@ -124,6 +166,7 @@ run-verified playbooks), the six truly-native platform skills, and three new for
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
 | Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline` |
+| Integrations | `linear-integration` |
 
 ## Review gates (hard, non-negotiable)
 
