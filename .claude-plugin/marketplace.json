@@ -4,8 +4,8 @@
     "name": "mdrobeulislam1251-ux"
   },
   "metadata": {
-    "description": "Arion Multi-Agent — an open-source company runpack for Claude Code: 52 specialist agents in 9 teams, driven by a switchable per-company brain.",
-    "version": "1.0.0"
+    "description": "Arion Multi-Agent — an open-source company runpack for Claude Code: 52 specialist agents in 9 teams backed by 36 deep doctrine skills (native app, UI/UX, security, data, DevOps), driven by a switchable per-company brain.",
+    "version": "1.1.0"
   },
   "plugins": [
     {

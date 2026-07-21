@@ -93,6 +93,30 @@ marketing-director (brief) → content-strategist + seo-specialist + social-medi
 + email-marketing-specialist (deliverables) → brand-designer (compliance) →
 marketing-director (review) → publish
 
+## Team skill libraries (deep doctrine — load before work)
+
+Agent files are personas and routing; SKILLS carry the operational doctrine (exact
+commands, verbatim error→fix tables, numeric gates). Before working, the owning agent
+loads its team's skills:
+
+| Team / role | Skills |
+|---|---|
+| Everyone (behavior core) | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
+| Engineering — web/API | `api-design`, `fullstack-delivery`, `systematic-debugging`, `postgres-patterns`, `app-security` |
+| Engineering — native apps | `native-app-delivery`, then the platform skill: `android-dev` / `ios-dev` / `macos-dev` / `windows-dev` / `linux-dev` / `harmony-dev` |
+| Design | `ui-ux-design`, `design-core` |
+| Data | `data-schema-design`, `data-pipelines`, `sql-analytics`, `supabase-platform`, `clickhouse-analytics`, `elasticsearch-opensearch` |
+| DevOps / SRE / Cloud | `docker-operations`, `devops-cicd`, `grafana-observability`, `server-ops-safety`, `network-diagnosis` |
+| Security | `app-security`, `server-ops-safety` |
+| Issue fixers | `issue-fix-loop`, `systematic-debugging` |
+| Marketing | `product-gtm-strategy` |
+| Sales | `b2b-outbound-pipeline`, `product-gtm-strategy` |
+| Research & strategy | `research-strategy`, `product-gtm-strategy` |
+
+**On-need activation:** teams not named as owner or reviewer of the current task stay
+silent — the dev team doesn't wake marketing, marketing doesn't wake the dev team.
+One owner, one reviewer, nothing else runs.
+
 ## Escalation
 
 - Technical dispute → cto. Product dispute → cpo. Priority dispute → ceo-orchestrator.

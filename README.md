@@ -110,15 +110,20 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-| Skill | Purpose |
+**36 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six truly-native platform skills, and three new forges
+(`native-app-delivery`, `ui-ux-design`, `app-security`). The per-team mapping lives in
+`orchestration-runpack` → "Team skill libraries"; teams not routed to a task stay silent.
+
+| Layer | Skills |
 |---|---|
-| `company-onboarding` | Smart brain generation: name + vision in, full brain out |
-| `orchestration-runpack` | Routing table: request → owner → reviewer; standard pipelines |
-| `fullstack-65` | The 65-language matrix + 65 engineering competencies + guardrails |
-| `data-schema-design` | Schema derive → design → **CTO review gate** → apply (SQL + n8n) |
-| `design-core` | Brain-driven design method, WCAG AA, token handoff |
-| `issue-fix-loop` | Triage → fix at root cause → prove → prevent |
-| `research-strategy` | Evidence-first research and strategy with kill criteria |
+| Runpack core | `company-onboarding`, `orchestration-runpack`, `fullstack-65`, `data-schema-design`, `design-core`, `issue-fix-loop`, `research-strategy` |
+| Behavior core | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
+| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `app-security`, `ui-ux-design` |
+| Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev` |
+| Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
+| Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
+| Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline` |
 
 ## Review gates (hard, non-negotiable)
 

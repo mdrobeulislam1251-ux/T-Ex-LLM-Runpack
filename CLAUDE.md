@@ -7,6 +7,9 @@
   DB credentials, n8n credentials, other config). Never invent company details.
 - Route all work through the `orchestration-runpack` skill: one owner, one reviewer,
   hard gates (schemas → cto, design → design-director, fixes → regression-tester).
+- Before working, the owning agent loads its team's skill library (the "Team skill
+  libraries" table in `orchestration-runpack`) — skills carry the doctrine, agent files
+  carry the persona. Teams not routed as owner or reviewer of the task stay silent.
 
 ## 1. Zero-Laziness Enforcement
 - Partial code and templates are forbidden. Write fully realized, compilation-ready
