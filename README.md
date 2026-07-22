@@ -170,8 +170,9 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-**43 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
-run-verified playbooks), the six truly-native platform skills, and ten new forges
+**44 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six per-platform native skills + Avalonia cross-platform
+desktop, and ten new forges
 (`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`,
 `dashboard-design`, `strategy-workspace`, `server-fleet-management`,
 `server-identity-builder`, `fleet-app-hosting`, `agent-environment-setup`). The per-team
@@ -192,7 +193,7 @@ the real file is **gitignored**, only the placeholder ships (same for `ssh-confi
 | Runpack core | `company-onboarding`, `orchestration-runpack`, `fullstack-65`, `data-schema-design`, `design-core`, `issue-fix-loop`, `research-strategy` |
 | Behavior core | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
 | Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `app-security`, `ui-ux-design`, `dashboard-design` |
-| Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev` |
+| Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev`, `avalonia-dev` (cross-platform desktop) |
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
 | Fleet / SSH / environment | `server-fleet-management`, `server-identity-builder`, `fleet-app-hosting`, `agent-environment-setup` |

@@ -7,9 +7,16 @@ description: Use when building truly-native apps for Android, iOS, macOS, Window
 
 One doctrine above six platform skills. The platform skills (`android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev`) hold the exact toolchains, scaffolds, and build loops — this skill holds the rules that apply to all of them.
 
-## Truly native only (hard rule)
+## The tiers (pick deliberately)
 
-Forbidden as the app shell/UI: WebView / WKWebView / WebView2, Electron, Tauri, React Native, Flutter, .NET MAUI, Ionic / Cordova / Capacitor, Xamarin, Kotlin Multiplatform UI. Shipping a wrapper = failed task. If the user explicitly WANTS a wrapper stack, that's their call — but say plainly it isn't native and route accordingly.
+Two allowed tiers, one banned category:
+
+- **Tier 1 — Per-platform native** (`android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev`): each platform's own toolkit. Maximum platform fidelity + deep platform APIs. Pick when the product IS the UX or needs best-in-class per-OS feel.
+- **Tier 2 — Native-compiled cross-platform** (`avalonia-dev`): ONE C#/.NET codebase → Windows + macOS + Linux (optionally mobile/web), drawn by Skia into real native binaries — no web engine. Pick for LOB/tooling/desktop apps where one codebase across the desktop OSes beats per-OS fidelity, especially in a .NET shop.
+
+**Banned as the app shell/UI (the hard rule):** anything that ships a browser engine or JS bridge to render the app — WebView / WKWebView / WebView2, Electron, Tauri, Cordova / Capacitor / Ionic. Shipping a web-wrapper UI = failed task. (Other cross-platform UIs — Flutter, .NET MAUI, React Native, Kotlin Multiplatform UI — are Tier-2-class but not part of this pack; Avalonia is the one sanctioned cross-platform-native tool here, chosen for .NET alignment. If the user explicitly wants a different one, that's their call — say plainly what tier it is and route accordingly.)
+
+The distinction that matters: Avalonia and the per-platform toolkits all compile to native binaries and draw real UI. A WebView wrapper renders your app inside a shipped browser — that is what "not native" means here.
 
 ## Platform routing
 
@@ -21,8 +28,9 @@ Forbidden as the app shell/UI: WebView / WKWebView / WebView2, Electron, Tauri, 
 | Windows | `windows-dev` | C# .NET 8 + WinUI 3 |
 | macOS | `macos-dev` | Swift + SwiftUI (macOS) |
 | Linux | `linux-dev` | Rust + GTK4 |
+| Win + macOS + Linux (one codebase) | `avalonia-dev` | C# .NET + Avalonia UI (XAML/MVVM, Skia) |
 
-**One platform per task.** The Android task never edits the iOS folder. A cross-platform issue = one reported line to the orchestrator, zero edits outside your platform.
+**One platform per task** (Tier 1). Tier-2 Avalonia is itself the "one codebase for all three desktop OSes" choice — made once, up front, not mixed with per-platform desktop work on the same app. The Android task never edits the iOS folder. A cross-platform issue = one reported line to the orchestrator, zero edits outside your platform.
 
 ## Build-host honesty (probe, don't pretend)
 

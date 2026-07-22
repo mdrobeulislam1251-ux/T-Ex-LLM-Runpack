@@ -107,7 +107,7 @@ loads its team's skills:
 |---|---|
 | Everyone (behavior core) | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
 | Engineering — web/API | `api-design`, `fullstack-delivery`, `systematic-debugging`, `postgres-patterns`, `app-security` |
-| Engineering — native apps | `native-app-delivery`, then the platform skill: `android-dev` / `ios-dev` / `macos-dev` / `windows-dev` / `linux-dev` / `harmony-dev` |
+| Engineering — native apps | `native-app-delivery`, then the platform skill: `android-dev` / `ios-dev` / `macos-dev` / `windows-dev` / `linux-dev` / `harmony-dev`, or `avalonia-dev` for one-codebase cross-platform desktop |
 | Design | `ui-ux-design`, `design-core`, `dashboard-design` |
 | Data | `data-schema-design`, `data-pipelines`, `sql-analytics`, `supabase-platform`, `clickhouse-analytics`, `elasticsearch-opensearch` |
 | DevOps / SRE / Cloud | `docker-operations`, `devops-cicd`, `grafana-observability`, `server-ops-safety`, `network-diagnosis` |
