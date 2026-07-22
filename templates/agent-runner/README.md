@@ -9,7 +9,7 @@ only for the seconds it's working one issue.
 Linear issue + label "claude-fix"
    → Linear webhook (signed)
    → n8n tex-linear-events   (verify Linear-Signature + check label)
-   → POST http://172.17.0.1:8787/run   (x-tex-runner-token)
+   → POST http://172.18.0.1:8799/run   (x-tex-runner-token)
    → tex-agent-runner  (this service, user=texagent)
         clone/fetch repo · branch claude/<id> · `claude -p` (acceptEdits, scoped tools)
         commit · push branch (if GH_TOKEN) · comment back VIA the n8n gateway
@@ -47,14 +47,16 @@ The installer creates `texagent`, drops the service in `/opt/tex-agent-runner`, 
 In `tex-linear-events`, after the webhook: (1) a Code node verifies `Linear-Signature`
 (HMAC-SHA256 of the raw body with the webhook signing secret); (2) an IF node passes only
 events whose issue carries the `claude-fix` label; (3) an HTTP Request node POSTs to
-`http://172.17.0.1:8787/run` with header `x-tex-runner-token` and body
+`http://172.18.0.1:8799/run` with header `x-tex-runner-token` and body
 `{identifier, title, description, issueId}`. Register the webhook URL in Linear →
 Settings → API → Webhooks and copy its signing secret into n8n.
 
-## Firewall note
-`/run` binds `0.0.0.0:8787` for the n8n container to reach it via the docker bridge.
-Restrict it to the bridge + deny tailnet/public: `ufw allow from 172.16.0.0/12 to any port 8787`
-then ensure 8787 is not otherwise exposed. The `RUNNER_TOKEN` is the backstop.
+## Firewall note (done on aidata)
+`/run` binds `0.0.0.0:8799` (8787 was already taken by the ES→Supabase transfer-api).
+ufw is active with a default-DROP INPUT policy, so the n8n container is allowed through a
+single scoped rule — the same pattern the transfer-api uses:
+`ufw allow from 172.18.0.0/16 to any port 8799 proto tcp`. Tailnet/public cannot reach it;
+the `RUNNER_TOKEN` is the backstop. Verified: the n8n container reaches `172.18.0.1:8799`.
 
 ## v1 limits (honest)
 - **Branch push needs `GH_TOKEN`** (fine-grained, contents:write). Without it, the runner
