@@ -50,7 +50,7 @@ Other high-value MCPs — add per what the work needs (probe each isn't already 
 | Playwright | browser automation, visual verification of frontends | `claude mcp add --scope user playwright -- npx -y @playwright/mcp@latest` |
 | Filesystem | scoped file access outside cwd | `claude mcp add --scope user filesystem -- npx -y @modelcontextprotocol/server-filesystem <dir>` |
 | Postgres (read) | query a DB as a tool | project-scoped; connection string via env, never inline |
-| Linear | issues as tools | `claude mcp add --transport sse --scope user linear https://mcp.linear.app/sse` (see `linear-integration`) |
+| Linear | issues as tools | `claude mcp add --transport http --scope user linear https://mcp.linear.app/mcp` (see `linear-integration`) |
 
 Rules: **secrets for MCPs go in env vars**, never in the `claude mcp add` command line (it lands in shell history). Any MCP showing `failed` in `claude mcp list` is triaged now, not left — a dead MCP silently removes a capability you'll assume you have.
 
@@ -110,7 +110,7 @@ Capture the desired setup as data so any new machine reproduces it. Store it OUT
   "mcp": [
     { "name": "context7",  "scope": "user", "transport": "http", "url": "https://mcp.context7.com/mcp" },
     { "name": "playwright","scope": "user", "cmd": "npx -y @playwright/mcp@latest" },
-    { "name": "linear",    "scope": "user", "transport": "sse",  "url": "https://mcp.linear.app/sse" }
+    { "name": "linear",    "scope": "user", "transport": "http", "url": "https://mcp.linear.app/mcp" }
   ],
   "git": { "user.name": "<name>", "init.defaultBranch": "main", "pull.rebase": true },
   "claude_code": { "editorMode": "vim", "statusLine": "templates/statusline.sh", "model": "Opus 4.8 (1M context) — pick via /model", "permissions.defaultMode": "bypassPermissions" },
