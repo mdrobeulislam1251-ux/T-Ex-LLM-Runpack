@@ -82,8 +82,10 @@ curl -sS -X POST "$N8N_BASE/webhook/tex-claude-gateway" \
 
 - [x] Linear MCP registered in both Claude profiles (main + claude-web) — needs one-time `/mcp` OAuth each
 - [x] Workflows authored: `templates/n8n/claude-gateway.workflow.json`, `linear-events.workflow.json`
-- [x] Bootstrap script authored: `scripts/linear-bootstrap.sh` (needs `LINEAR_API_KEY`)
-- [ ] tl-n8n powered on → import workflows, set `TEX_GATEWAY_TOKEN`, store Linear key as credential — Claude does this over SSH
+- [x] Bootstrap script authored: `scripts/linear-bootstrap.sh` — routes every call through the
+  gateway (`N8N_BASE` + `TEX_GATEWAY_TOKEN`); it never touches the Linear key
+- [ ] tl-n8n powered on → import workflows, set `TEX_GATEWAY_TOKEN`, owner enters the Linear
+  key into n8n Credentials (the ONLY place it ever exists) — everything after that is Claude over SSH
 - [ ] Public webhook route for 3b via tl-internet (only if Linear→n8n events wanted)
 - [ ] Bootstrap run → project + seeded backlog exist in Linear
 - [ ] Roundtrip proven: gateway curl creates a comment on a real issue (the done-gate)
@@ -91,7 +93,7 @@ curl -sS -X POST "$N8N_BASE/webhook/tex-claude-gateway" \
 ## Done-gates
 
 - Gateway proven with a real roundtrip (curl → comment visible in Linear), not assumed.
-- Linear key exists ONLY as an n8n credential + (optionally) `.env` on the machine that
-  runs the bootstrap once. Never in git, never in a chat.
+- **Linear key exists ONLY as an n8n credential.** Never on a dev machine, never in git,
+  never in a chat. Dev machines hold webhook access only (base URL + gateway token).
 - Every seeded issue has acceptance checks.
 - The workflows' import is live-verified in the n8n UI (hand-authored JSON — verify on import).
