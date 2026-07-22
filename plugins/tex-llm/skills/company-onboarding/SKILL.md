@@ -1,15 +1,15 @@
 ---
 name: company-onboarding
-description: Onboard a new company (or app project) into the Arion runpack. ALWAYS run this before any team does work for a company that has no profile yet. The user only provides the company name and what they know about structure & vision — the research team GENERATES the full brain. Only credentials (DB, n8n, other config) and brand asset files are ever asked for directly.
+description: Onboard a new company (or app project) into the T-Ex LLM runpack. ALWAYS run this before any team does work for a company that has no profile yet. The user only provides the company name and what they know about structure & vision — the research team GENERATES the full brain. Only credentials (DB, n8n, other config) and brand asset files are ever asked for directly.
 ---
 
 # Company Onboarding — Smart Brain Generation
 
-Every Arion agent loads a "company brain" before working. This skill creates that brain.
+Every T-Ex LLM agent loads a "company brain" before working. This skill creates that brain.
 **The user never hand-fills brain fields.** They know their company and vision; the
 research team derives everything else. Run this when: the user names a new company/app,
 `companies/active-company.json` is missing, or a `brain-request.json` exists for a
-company (created by the Arion dashboard's Brain Studio).
+company (created by the T-Ex LLM dashboard's Brain Studio).
 
 ## Step 0 — Check for a dashboard brain request
 

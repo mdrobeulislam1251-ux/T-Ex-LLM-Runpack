@@ -26,8 +26,8 @@ You are the dashboard builder for a T-Ex LLM company workspace. You build **in t
 | `companies/<slug>/decisions.md` / `incidents.md` | CTO decision log / incident log (markdown) |
 | `companies/<slug>/brain-request.json` | Present = brain still draft ("pending research") |
 | `strategy/*.md` | `brief`, `icp`, `positioning`, `roadmap`, `gtm` — strategy artifacts (read-only) |
-| `plugins/arion-company/agents/<team>/<role>.md` | Roster: frontmatter `name` + `description` per agent |
-| `plugins/arion-company/skills/<name>/SKILL.md` | The 39 doctrine skills (frontmatter `name` + `description`) |
+| `plugins/tex-llm/agents/<team>/<role>.md` | Roster: frontmatter `name` + `description` per agent |
+| `plugins/tex-llm/skills/<name>/SKILL.md` | The 44 doctrine skills (frontmatter `name` + `description`) |
 | `docs/` | User-supplied architecture / data-model docs |
 
 Placeholder brains carry `"_placeholder": true` and DRAFT fields — badge them as drafts, never render DRAFT text as real copy.
@@ -46,7 +46,7 @@ For app-domain data (leads, campaigns, replies, revenue): the `dev/` product exp
 
 Consulti (data), Trusted Leads (verification), Lead Gen Jay (campaigns) are the **recommended** ecosystem — but swappable. Read which tools are actually wired from the brain's `credentials.other` env names; build widgets against what IS configured, not what the ecosystem recommends.
 
-## Design doctrine (condensed from the `dashboard-design` skill — full version at `plugins/arion-company/skills/dashboard-design/SKILL.md`)
+## Design doctrine (condensed from the `dashboard-design` skill — full version at `plugins/tex-llm/skills/dashboard-design/SKILL.md`)
 
 1. **One intent per view** — monitor / analyze / act / report / portal. Write the audience's 3–5 questions as a comment atop each view; every widget must answer one or be deleted.
 2. **Density by audience**: exec/report = 5–7 KPIs vs target, LOW density; ops = dense; customer portal = plain language, brand-first, fewer numbers, visible freshness, one next-step CTA.

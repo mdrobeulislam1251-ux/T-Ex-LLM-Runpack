@@ -1,12 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-// The dashboard lives inside the Arion repo; the repo root is one level up.
+// The dashboard lives inside the T-Ex LLM repo; the repo root is one level up.
 export const REPO_ROOT = path.resolve(process.cwd(), "..");
 const COMPANIES_DIR = path.join(REPO_ROOT, "companies");
-const AGENTS_DIR = path.join(REPO_ROOT, "plugins", "arion-company", "agents");
-const SKILLS_DIR = path.join(REPO_ROOT, "plugins", "arion-company", "skills");
-const COMMANDS_DIR = path.join(REPO_ROOT, "plugins", "arion-company", "commands");
+const AGENTS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "agents");
+const SKILLS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "skills");
+const COMMANDS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "commands");
 
 export interface AgentInfo {
   name: string;

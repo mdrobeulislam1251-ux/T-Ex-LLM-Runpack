@@ -1,6 +1,6 @@
 # T-Ex LLM — The Full Company Runpack
 
-*(repo: Arion-Multi-Agent — the single combined version of the agent product)*
+*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product)*
 
 A **company-in-a-box** for terminal AI sessions: **52 specialist agents in 9 teams backed
 by 37 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
@@ -20,7 +20,7 @@ like a full company — with hard review gates so the output is accurate, not im
 
 ## Why
 
-AI coding alone drifts: wrong assumptions, half-finished code, no reviews. Arion fixes
+AI coding alone drifts: wrong assumptions, half-finished code, no reviews. T-Ex LLM fixes
 that structurally:
 
 - **Specialists, not generalists** — each task goes to an agent whose whole prompt is
@@ -37,8 +37,8 @@ that structurally:
 This repo is a Claude Code **plugin marketplace**. In any project:
 
 ```
-/plugin marketplace add mdrobeulislam1251-ux/Arion-Multi-Agent
-/plugin install arion-company@arion
+/plugin marketplace add mdrobeulislam1251-ux/T-Ex-LLM-Runpack
+/plugin install tex-llm@tex-llm
 ```
 
 Then start with:
@@ -70,7 +70,7 @@ Grok's) responsibility — T-Ex LLM guarantees the endpoints and access.
 ## The Command Deck (dashboard)
 
 A SaaS-grade visual dashboard ships in [`dashboard/`](dashboard/): dark animated
-Aion-style UI showing the active brain, all 9 teams / 52 agents, review gates, and the
+modern UI showing the active brain, all 9 teams / 52 agents, review gates, and the
 CTO decision + incident logs — read live from the repo files.
 
 ```bash
@@ -216,12 +216,12 @@ the real file is **gitignored**, only the placeholder ships (same for `ssh-confi
 
 ```
 .claude-plugin/marketplace.json      # marketplace manifest
-plugins/arion-company/
+plugins/tex-llm/
   .claude-plugin/plugin.json
   agents/<team>/<role>.md            # the 52 agents
   skills/<skill>/SKILL.md            # the 7 doctrine skills
   commands/*.md                      # /onboard /company /build /design /schema /fix /team
-dashboard/                           # Arion Command Deck (Next.js) — npm run dev
+dashboard/                           # T-Ex Command Deck (Next.js) — npm run dev
 templates/company-profile.template.json
 companies/                           # company brains; ships consulti / trusted-leads / lead-gen-jay placeholders
 runpacks/                            # operating docs for external agents (Grok dashboard builder)
@@ -234,8 +234,8 @@ Clone → work → push. The dashboard and the runpack both read/write plain rep
 so everything versions like code:
 
 ```bash
-git clone https://github.com/mdrobeulislam1251-ux/Arion-Multi-Agent.git
-cd Arion-Multi-Agent/dashboard && npm install && npm run dev   # the deck
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/dashboard && npm install && npm run dev   # the deck
 # ...meanwhile use Claude Code in the repo root: /onboard, /build, /fix ...
 git add companies/ && git commit -m "brain updates" && git push
 ```

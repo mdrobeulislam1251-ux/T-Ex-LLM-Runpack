@@ -5,7 +5,7 @@ description: The design team's core method — research, strategy, flows, visual
 
 # Design Core — From Company Brain to Shipped Interface
 
-Design at Arion is not decoration: it is the company brain's emotion and vision made
+Design at T-Ex LLM is not decoration: it is the company brain's emotion and vision made
 visible. Every design decision must trace back to a brain field or a research finding.
 
 ## Step 0 — Load the brain, set direction (design-director)

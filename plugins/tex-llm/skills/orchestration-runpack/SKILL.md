@@ -1,6 +1,6 @@
 ---
 name: orchestration-runpack
-description: The company runpack routing table — how the 52 Arion agents in 9 teams receive work, who reviews what, and how multi-team projects flow. Use whenever deciding which agent should handle a task or how to sequence a multi-team effort.
+description: The company runpack routing table — how the 52 T-Ex LLM agents in 9 teams receive work, who reviews what, and how multi-team projects flow. Use whenever deciding which agent should handle a task or how to sequence a multi-team effort.
 ---
 
 # Orchestration Runpack — Routing & Review Gates

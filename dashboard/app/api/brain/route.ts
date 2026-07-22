@@ -12,7 +12,7 @@ import { REPO_ROOT, slugify } from "@/lib/data";
  *      values NEVER touched — secrets live in .env only), and
  *   2. writes brain-request.json capturing the briefing verbatim.
  *
- * The Arion research team (research-lead, market-analyst, product-strategist) picks up
+ * The T-Ex LLM research team (research-lead, market-analyst, product-strategist) picks up
  * brain-request.json on the next `/onboard <name>` run in Claude Code and generates the
  * full brain — scope, mission, emotion/tone, audience, voice — asking the user only for
  * credentials and brand asset files, which cannot be researched.
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   }
   if (briefing.length < 20) {
     return NextResponse.json(
-      { error: "Tell Arion a bit more about the company structure & vision (at least a sentence or two)" },
+      { error: "Tell T-Ex LLM a bit more about the company structure & vision (at least a sentence or two)" },
       { status: 400 }
     );
   }
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
 
   const brainRequest = {
     requested_at: now,
-    source: "arion-dashboard",
+    source: "tex-dashboard",
     company_name: name,
     user_briefing: briefing,
     instructions:

@@ -1,4 +1,4 @@
-# Arion Core Engine Rules
+# T-Ex LLM Core Engine Rules
 
 ## 0. Company Brain First
 - Before any team does work: read `companies/active-company.json`, then the active

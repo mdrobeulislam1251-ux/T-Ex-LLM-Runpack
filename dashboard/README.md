@@ -1,14 +1,14 @@
-# Arion Command Deck
+# T-Ex Command Deck
 
-SaaS-grade control dashboard for the Arion 52-agent company runpack. Dark, animated
-"Aion-style" UI: aurora backdrop, glass panels, neon team accents, live data read
+SaaS-grade control dashboard for the T-Ex LLM 52-agent company runpack. Dark, animated
+"modern" UI: aurora backdrop, glass panels, neon team accents, live data read
 straight from this repo's files — no separate backend, no database.
 
 ## Run it (git-native workflow)
 
 ```bash
-git clone https://github.com/mdrobeulislam1251-ux/Arion-Multi-Agent.git
-cd Arion-Multi-Agent/dashboard
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/dashboard
 npm install
 npm run dev        # → http://localhost:4100
 ```
@@ -46,7 +46,7 @@ ever asked for — those can't be researched.
 ## Architecture
 
 - Next.js 14 (app router) + Tailwind. No UI libraries; all effects are CSS.
-- `lib/data.ts` reads `../companies`, `../plugins/arion-company` via `fs` at request
+- `lib/data.ts` reads `../companies`, `../plugins/tex-llm` via `fs` at request
   time (`force-dynamic`), so the deck is always in sync with the repo.
 - `POST /api/brain` — creates the draft company + brain request (validates input,
   409 on existing slug).

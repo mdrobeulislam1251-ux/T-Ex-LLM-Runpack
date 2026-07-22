@@ -1,8 +1,8 @@
 {
-  "name": "arion-dashboard",
+  "name": "tex-dashboard",
   "version": "1.0.0",
   "private": true,
-  "description": "Arion Command Deck — SaaS-grade dashboard for the Arion 52-agent company runpack",
+  "description": "T-Ex Command Deck — SaaS-grade dashboard for the T-Ex LLM 52-agent company runpack",
   "scripts": {
     "dev": "next dev -p 4100",
     "build": "next build",

@@ -58,10 +58,10 @@ export function CommandDeck({ data }: { data: DashboardData }) {
       <aside className="glass sticky top-6 hidden h-[calc(100vh-3rem)] w-60 shrink-0 flex-col p-5 md:flex">
         <div className="mb-1 flex items-center gap-2.5">
           <div className="neon-ring flex h-9 w-9 items-center justify-center rounded-xl bg-neon-cyan/10 font-mono text-lg text-neon-cyan">
-            A
+            T
           </div>
           <div>
-            <div className="text-sm font-700 font-bold tracking-wide text-white">ARION</div>
+            <div className="text-sm font-700 font-bold tracking-wide text-white">T-EX LLM</div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">Command Deck</div>
           </div>
         </div>
@@ -321,7 +321,7 @@ function BrainStudio() {
         router.refresh();
       }
     } catch {
-      setResult({ ok: false, message: "Request failed — is the dashboard running inside the Arion repo?" });
+      setResult({ ok: false, message: "Request failed — is the dashboard running inside the T-Ex LLM repo?" });
     } finally {
       setBusy(false);
     }
@@ -330,7 +330,7 @@ function BrainStudio() {
   return (
     <div className="grid gap-6 lg:grid-cols-5">
       <div className="glass scan-card animate-fade-up p-6 lg:col-span-3">
-        <h2 className="mb-1 text-lg font-bold text-white">You bring the vision. Arion builds the brain.</h2>
+        <h2 className="mb-1 text-lg font-bold text-white">You bring the vision. T-Ex LLM builds the brain.</h2>
         <p className="mb-6 text-sm leading-relaxed text-slate-400">
           Don&apos;t fill in scope documents or tone guides — just say what you know about the company and where it
           should go. The research team (research-lead, market-analyst, product-strategist) generates the full brain.
