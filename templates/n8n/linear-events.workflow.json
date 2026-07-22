@@ -1,0 +1,44 @@
+{
+  "name": "TEX — Linear Events In (receiver skeleton)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tex-linear-events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b1000000-0000-0000-0000-000000000001",
+      "name": "Linear Webhook In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "tex-linear-events"
+    },
+    {
+      "parameters": {},
+      "id": "b1000000-0000-0000-0000-000000000002",
+      "name": "Inbox — attach routing here",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Receiver skeleton\nRegister this URL in Linear → Settings → API → Webhooks (Issue + Comment events).\n\nPayloads land here and are visible in Executions. Attach real routing (notify, queue, sync) to the Inbox node ONLY when a concrete need appears — no speculative automation.\n\nNeeds a PUBLIC route (cloudflared/Caddy on tl-internet) — Linear's cloud cannot reach a tailnet-only URL.",
+        "height": 240,
+        "width": 380
+      },
+      "id": "b1000000-0000-0000-0000-000000000003",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [80, -300]
+    }
+  ],
+  "connections": {
+    "Linear Webhook In": { "main": [[{ "node": "Inbox — attach routing here", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

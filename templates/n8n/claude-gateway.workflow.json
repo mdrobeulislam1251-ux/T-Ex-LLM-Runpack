@@ -1,0 +1,100 @@
+{
+  "name": "TEX — Claude Gateway (Linear proxy)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tex-claude-gateway",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-0000-0000-000000000001",
+      "name": "Webhook In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "tex-claude-gateway"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.headers['x-tex-token'] }}",
+              "rightValue": "={{ $env.TEX_GATEWAY_TOKEN }}",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-0000-0000-000000000002",
+      "name": "Token OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linear.app/graphql",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $json.body.query, variables: $json.body.variables || {} }) }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-0000-0000-000000000003",
+      "name": "Linear GraphQL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, -100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_ON_IMPORT",
+          "name": "Linear API key — header 'Authorization', value = the personal API key (no Bearer prefix)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-0000-0000-000000000004",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [700, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ error: 'unauthorized' }) }}",
+        "options": { "responseCode": 401 }
+      },
+      "id": "a1000000-0000-0000-0000-000000000005",
+      "name": "Respond 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [460, 140]
+    }
+  ],
+  "connections": {
+    "Webhook In": { "main": [[{ "node": "Token OK?", "type": "main", "index": 0 }]] },
+    "Token OK?": {
+      "main": [
+        [{ "node": "Linear GraphQL", "type": "main", "index": 0 }],
+        [{ "node": "Respond 401", "type": "main", "index": 0 }]
+      ]
+    },
+    "Linear GraphQL": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
