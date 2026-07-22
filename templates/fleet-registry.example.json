@@ -1,0 +1,68 @@
+{
+  "_note": "PLACEHOLDER fleet registry. Copy this to fleet-registry.json (gitignored) and fill in your real values. Secrets are referenced by env var NAME only — actual values live in .env and your SSH keys/Tailscale identity, NEVER in this file. This template ships with placeholders so nothing real is committed.",
+  "access": {
+    "method": "tailscale-ssh",
+    "_method_options": "tailscale-ssh | key-ssh | bastion",
+    "ssh_config": "~/.ssh/config",
+    "_ssh_config_note": "Aliases below must match Host entries in your ~/.ssh/config (see ssh-config.example)."
+  },
+  "servers": [
+    {
+      "alias": "app-host",
+      "host": "<TAILNET_IP_OR_HOSTNAME>",
+      "user": "<SSH_USER>",
+      "os": "ubuntu-24.04",
+      "role": "app",
+      "_role_options": "app | data | edge | ai | build | worker",
+      "status": "on-role",
+      "capacity_flag": "",
+      "_capacity_flag_note": "Set to high-ram | high-load | near-full to force observe-only for this box.",
+      "expose": {
+        "method": "reverse-proxy",
+        "_method_options": "reverse-proxy | tunnel | tailscale-only | none",
+        "proxy": "caddy",
+        "tunnel": "",
+        "public_inbound_443": true
+      },
+      "deploy": {
+        "method": "docker-compose",
+        "_method_options": "docker-compose | systemd | pm2 | static",
+        "path": "/opt/<app>"
+      },
+      "secrets_env": ["<APP>_DATABASE_URL", "<APP>_API_KEY"]
+    },
+    {
+      "alias": "data-host",
+      "host": "<TAILNET_IP_OR_HOSTNAME>",
+      "user": "<SSH_USER>",
+      "os": "ubuntu-24.04",
+      "role": "data",
+      "status": "on-role",
+      "capacity_flag": "high-ram",
+      "expose": {
+        "method": "none",
+        "_note": "Data stores get NO public front door — reach them via: ssh -L <localport>:127.0.0.1:<dbport> data-host",
+        "public_inbound_443": false
+      },
+      "deploy": { "method": "docker-compose", "path": "/data/apps" },
+      "secrets_env": ["<DB>_SUPERUSER_PASSWORD_ENV_NAME"]
+    },
+    {
+      "alias": "edge-host",
+      "host": "<TAILNET_IP_OR_HOSTNAME>",
+      "user": "<SSH_USER>",
+      "os": "ubuntu-24.04",
+      "role": "edge",
+      "status": "on-role",
+      "capacity_flag": "",
+      "expose": {
+        "method": "tunnel",
+        "proxy": "caddy",
+        "tunnel": "cloudflared",
+        "public_inbound_443": false
+      },
+      "deploy": { "method": "systemd", "path": "/etc/caddy" },
+      "secrets_env": ["CLOUDFLARE_TUNNEL_TOKEN_ENV_NAME"]
+    }
+  ]
+}

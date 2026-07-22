@@ -4,8 +4,8 @@
     "name": "mdrobeulislam1251-ux"
   },
   "metadata": {
-    "description": "T-Ex LLM — The Full Company Runpack (Arion Multi-Agent): 53 specialist agents in 9 teams backed by 42 deep doctrine skills (native app, UI/UX, dashboards, security, data, DevOps, multi-server SSH fleet + identity builder, agent environment setup, Linear PM sync), strategy-first onboarding, two modes (founder from-scratch / developer in any codebase), external dashboard runpack for Grok, driven by a switchable per-company brain.",
-    "version": "1.4.0"
+    "description": "T-Ex LLM — The Full Company Runpack (Arion Multi-Agent): 53 specialist agents in 9 teams backed by 43 deep doctrine skills (native app, UI/UX, dashboards, security, data, DevOps, multi-server SSH fleet + identity builder + app hosting/exposure over local SSH, agent environment setup, Linear PM sync), strategy-first onboarding, two modes (founder from-scratch / developer in any codebase), external dashboard runpack for Grok, driven by a switchable per-company brain.",
+    "version": "1.5.0"
   },
   "plugins": [
     {

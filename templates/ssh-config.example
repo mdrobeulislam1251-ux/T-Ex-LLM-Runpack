@@ -1,0 +1,28 @@
+# PLACEHOLDER SSH config for the fleet.
+# Copy the blocks you need into ~/.ssh/config and fill the <placeholders>.
+# Real hosts/IPs/keys stay in ~/.ssh/ (mode 600) — never committed to this repo.
+#
+# Tailscale SSH: identity-based, NO IdentityFile needed — just HostName + User.
+#   Gotcha: a bare `ssh <ip>` sends your local username, which may not exist on the box.
+#   Always set User to an account that exists there (often root on single-user VMs).
+# Key-based SSH: uncomment IdentityFile and point it at your private key.
+
+Host app-host
+    HostName <TAILNET_IP_OR_HOSTNAME>
+    User <SSH_USER>
+    # IdentityFile ~/.ssh/<your_key>      # key-based only; omit for Tailscale SSH
+    ConnectTimeout 8
+
+Host data-host
+    HostName <TAILNET_IP_OR_HOSTNAME>
+    User <SSH_USER>
+    ConnectTimeout 8
+
+Host edge-host
+    HostName <TAILNET_IP_OR_HOSTNAME>
+    User <SSH_USER>
+    ConnectTimeout 8
+
+# Reach a private database WITHOUT exposing it publicly (local port -> box's localhost):
+#   ssh -L 5432:127.0.0.1:5432 data-host
+# then connect your client to localhost:5432

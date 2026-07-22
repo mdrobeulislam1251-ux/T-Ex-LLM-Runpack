@@ -4,6 +4,13 @@
 !.env.example
 companies/*/secrets*
 
+# Fleet — real filled-in registry stays local; only the .example placeholder is committed
+fleet-registry.json
+**/fleet-registry.json
+templates/fleet-registry.json
+ssh-config
+!templates/ssh-config.example
+
 # Python
 __pycache__/
 *.pyc

@@ -170,12 +170,22 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-**42 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
-run-verified playbooks), the six truly-native platform skills, and nine new forges
+**43 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six truly-native platform skills, and ten new forges
 (`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`,
 `dashboard-design`, `strategy-workspace`, `server-fleet-management`,
-`server-identity-builder`, `agent-environment-setup`). The per-team mapping lives in
-`orchestration-runpack` → "Team skill libraries"; teams not routed to a task stay silent.
+`server-identity-builder`, `fleet-app-hosting`, `agent-environment-setup`). The per-team
+mapping lives in `orchestration-runpack` → "Team skill libraries"; teams not routed to a
+task stay silent.
+
+### Fleet hosting (local SSH)
+
+The fleet-manager works with your **local `~/.ssh/config`** — no cloud API. It routes an
+app to the right box by role + capacity, deploys over SSH (docker compose / systemd / pm2
+/ static), and exposes it the **right way**: app on `127.0.0.1`, one front door (reverse
+proxy or outbound tunnel) with TLS, the database never public. Your fleet is described in
+`fleet-registry.json` — copy `templates/fleet-registry.example.json` and fill it locally;
+the real file is **gitignored**, only the placeholder ships (same for `ssh-config.example`).
 
 | Layer | Skills |
 |---|---|
@@ -185,7 +195,7 @@ run-verified playbooks), the six truly-native platform skills, and nine new forg
 | Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev` |
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
-| Fleet / SSH / environment | `server-fleet-management`, `server-identity-builder`, `agent-environment-setup` |
+| Fleet / SSH / environment | `server-fleet-management`, `server-identity-builder`, `fleet-app-hosting`, `agent-environment-setup` |
 | Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline`, `strategy-workspace` |
 | Integrations | `linear-integration` |
 
