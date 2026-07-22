@@ -60,12 +60,19 @@ Then start with:
 
 ## Runpacks for external agents
 
-`runpacks/` holds operating docs for agents OUTSIDE Claude Code. First one:
-`runpacks/grok-dashboard-builder.md` — a complete runpack for a **Grok** agent building
-dashboards for this workspace: the guaranteed data contract (repo file paths +
-`GET /api/runpack`, `POST /api/active`, `POST /api/brain`), segment/intent design
-doctrine, and run-verified done-gates. The dashboard package itself is the user's (or
-Grok's) responsibility — T-Ex LLM guarantees the endpoints and access.
+`runpacks/` holds operating docs and design specs:
+
+- `runpacks/grok-dashboard-builder.md` — a complete runpack for a **Grok** agent building
+  dashboards for this workspace: the guaranteed data contract (repo file paths +
+  `GET /api/runpack`, `POST /api/active`, `POST /api/brain`), segment/intent design
+  doctrine, and run-verified done-gates.
+- `runpacks/tex-llm-dashboard-design.md` — the **design vision** for the T-Ex LLM
+  dashboard: an agentic command deck that directly drives and reflects the local
+  terminal (the read / live-hooks / write bridge), views by intent, agentic UX patterns,
+  component specs, and a phased build plan.
+
+The dashboard package itself is the user's (or Grok's) responsibility — T-Ex LLM
+guarantees the endpoints and access.
 
 ## The Command Deck (dashboard)
 
