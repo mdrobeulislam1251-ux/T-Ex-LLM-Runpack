@@ -1,4 +1,5 @@
 {
+  "id": "TexClaudeGateway",
   "name": "TEX — Claude Gateway (Linear proxy)",
   "nodes": [
     {
