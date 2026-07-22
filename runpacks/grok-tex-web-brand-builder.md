@@ -5,7 +5,7 @@ Operating document for a **Grok agent** building T-Ex LLM's **own** web presence
 ## 0. Identity & rules
 
 You are building T-Ex LLM's flagship web product. Premium SaaS craft — this is the storefront and the cockpit, so it must look expensive and *work*. Hard rules:
-1. **Standalone first.** Every data read goes through one typed data layer (`lib/data.ts`) returning mock data now; swapping to real APIs later is a one-file change. No backend secrets in this build — ever.
+1. **Standalone first.** Every data read goes through one typed data layer (`lib/data.ts`) returning mock data now; swapping to real APIs later is a one-file change. When the owner supplies a reference project, the mock mirrors that project's **real data shapes** (see "Reference project" below). No backend secrets in this build — ever.
 2. **Premium ≠ broken.** Every 3D scene and animation ships with a performance budget and a `prefers-reduced-motion` fallback (§8). A beautiful site that janks or fails a screen reader is a failed build.
 3. **Two surfaces, one system.** Public marketing (SSR, indexable) and the app dashboard (auth-gated, `noindex`) share a design system and brand tokens but are separate route groups.
 4. **Own the code.** shadcn/ui and Tremor are copy-in components — you own and brand them. No external UI lock-in.
@@ -47,6 +47,24 @@ npm i @stripe/stripe-js        # checkout redirect only; secret billing lives se
 ```
 
 Structure: `app/(marketing)/…` and `app/(app)/…` route groups; `components/ui/*` (shadcn), `components/brand/*`, `components/motion/*`, `lib/data.ts` (the typed mock layer), `lib/tokens.css` (brand tokens), `public/brand/*` (assets).
+
+## Reference project → realistic mock data (read-only — do this FIRST)
+
+The owner will give you a path to an existing, running web app. Use it to make the mock **real-shaped**, so "reveal real data" later is a drop-in. Do this before building any view.
+
+**Hard rules:**
+- **Read-only. Never modify, run, deploy, or write into the reference project.** If it's a separate git repo, clone a fresh copy into `_reference/<name>/` inside your workspace and read from there; if it's a local path, read in place without editing.
+- **Never copy secrets or real user data.** Skip `.env*`, keys, tokens, DB dumps, and PII. Extract data *shapes* and generate your own synthetic sample values — not the live data.
+
+**Extract (write findings to `lib/data.model.md`):**
+1. **Entities / data models** — from schema files, TypeScript types/interfaces, ORM models, or sample API responses. Capture exact field names + types + nesting.
+2. **Routes / screens** — the app's real pages and what each needs.
+3. **Key flows** — auth, the main object lifecycle (e.g. a task/order going open → done), list + detail.
+4. **API surface** — endpoint shapes (method, path, request/response) where present.
+
+**Then build `lib/data.ts` to mirror those exact shapes** (same field names, same structure), seeded with realistic-but-synthetic values, and **map the real entities onto T-Ex's views** — e.g. the project's "tasks/tickets" → the kanban board, its "users" → the team directory, its "orders/usage" → billing tiles. If the reference app has no natural analog for a view, mock it plausibly and note it.
+
+**The reveal-real-data seam:** `lib/data.ts` is the ONLY file that returns data. It returns the mirrored mock today; to go live, point each function at the reference project's real API/DB — zero component changes, because every component already consumes the real-shaped types.
 
 ## 4. Marketing site — page spec (SSR, indexable)
 
@@ -120,6 +138,7 @@ Keep the seam clean: UI never talks to a provider directly — it talks to your 
 - Motion: everything honors `prefers-reduced-motion` (verify by toggling the OS setting).
 - Brand: logo exports (SVG + PNG), favicon, one OG image, and one social template render correctly; tokens drive the whole UI (zero hardcoded hex in components).
 - Zero secrets anywhere in the repo; `lib/data.ts` is the single swap-point for real data.
+- If a reference project was supplied: `lib/data.model.md` documents its real entities, mock shapes match those exact types, and **no secrets or real PII** were copied from it.
 
 ---
 
