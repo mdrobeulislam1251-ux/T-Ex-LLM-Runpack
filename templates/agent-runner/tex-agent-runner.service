@@ -1,0 +1,24 @@
+[Unit]
+Description=TEX Agent Runner — event-driven Claude fixer (triggered by n8n on Linear issues)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=texagent
+EnvironmentFile=/etc/tex-agent-runner.env
+ExecStart=/usr/bin/node /opt/tex-agent-runner/runner.mjs
+Restart=on-failure
+RestartSec=5
+# Hardening — the auto-triggered agent is deliberately boxed in.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/home/texagent
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target
