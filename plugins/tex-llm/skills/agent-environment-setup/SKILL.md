@@ -79,6 +79,27 @@ Host <alias>
 
 For Tailscale fleets: the machine must first join the tailnet (`tailscale up`) and identity-based SSH needs no key here. Confirm with `ssh -o ConnectTimeout=8 <alias> hostnamectl` (the fleet skill's connect gotchas apply). Never copy private keys into a doc or the repo — they stay in `~/.ssh/` with mode 600.
 
+## Step 3.5 — Status line, editor mode, model (the visible setup)
+
+Replicate the terminal look and per-session prefs the user runs elsewhere.
+
+**Status line** (`◆ <model> · <workspace> · ⎇ <branch>* · <N> changed · $<cost>`): copy `templates/statusline.sh` to `~/.claude/statusline.sh`, then add to `~/.claude/settings.json` (merge, don't replace):
+
+```json
+{
+  "statusLine": { "type": "command", "command": "bash \"$HOME/.claude/statusline.sh\"" },
+  "editorMode": "vim"
+}
+```
+
+Windows + Git Bash: set `env.CLAUDE_CODE_GIT_BASH_PATH` to the bash exe and use an absolute POSIX path in the command (`bash "/c/Users/<you>/.claude/statusline.sh"`). Test before trusting it — pipe a sample payload:
+
+```sh
+echo '{"model":{"display_name":"Opus 4.8 (1M context)"},"workspace":{"current_dir":"'"$PWD"'"},"cost":{"total_cost_usd":3.57}}' | bash ~/.claude/statusline.sh
+```
+
+**Editor mode**: `"editorMode": "vim"` gives the built-in `-- INSERT --` / `-- NORMAL --` indicator. **Model + 1M context**: run `/model` and pick the model (e.g. `Opus 4.8 (1M context)`) — this selects the model AND its context window in one step and persists as the default; don't hand-set a model ID when a 1M variant is wanted. **Bypass permissions** (`⏵⏵`): `"permissions": { "defaultMode": "bypassPermissions" }` — auto-approves tool calls; only for a machine the user trusts, and only after they've accepted the bypass dialog once. Flag this one explicitly — it's the single security-relevant preference.
+
 ## Step 4 — Write the portable manifest (this is what makes "same as my other computer" one command)
 
 Capture the desired setup as data so any new machine reproduces it. Store it OUTSIDE any repo that could be public (a private dotfiles repo or synced vault), values referenced by env-var name:
@@ -92,6 +113,7 @@ Capture the desired setup as data so any new machine reproduces it. Store it OUT
     { "name": "linear",    "scope": "user", "transport": "sse",  "url": "https://mcp.linear.app/sse" }
   ],
   "git": { "user.name": "<name>", "init.defaultBranch": "main", "pull.rebase": true },
+  "claude_code": { "editorMode": "vim", "statusLine": "templates/statusline.sh", "model": "Opus 4.8 (1M context) — pick via /model", "permissions.defaultMode": "bypassPermissions" },
   "ssh_aliases_source": "<private path to ssh config, e.g. a synced vault>",
   "env_vars_required": ["CONTEXT7_API_KEY", "LINEAR_API_KEY", "ANTHROPIC_API_KEY"]
 }
