@@ -50,7 +50,7 @@ Structure: `app/(marketing)/…` and `app/(app)/…` route groups; `components/u
 
 ## Reference project → realistic mock data (read-only — do this FIRST)
 
-The owner will give you a path to an existing, running web app. Use it to make the mock **real-shaped**, so "reveal real data" later is a drop-in. Do this before building any view.
+**Reference project (on the machine where you run):** `E:\Dev Stacks\TRUSTED LEADS DEV\workspace` — the owner's existing **Trusted Leads** web app. Use it to make the mock **real-shaped**, so "reveal real data" later is a drop-in. Do this before building any view. (If that path isn't present on your machine, ask the owner for the correct one — don't guess.)
 
 **Hard rules:**
 - **Read-only. Never modify, run, deploy, or write into the reference project.** If it's a separate git repo, clone a fresh copy into `_reference/<name>/` inside your workspace and read from there; if it's a local path, read in place without editing.
