@@ -54,6 +54,11 @@
   `runpacks/grok-dashboard-builder.md` (repo files + `GET /api/runpack`,
   `POST /api/active`, `POST /api/brain`). External agents write only inside `dashboard/`
   and never read `.env`. Dashboard craft rules live in the `dashboard-design` skill.
+- **Server fleet**: multi-server SSH work routes to the fleet-manager
+  (`server-fleet-management` + `server-identity-builder`), read/observe by default,
+  state-changing work through `server-ops-safety`. Secrets on servers stay as PATHS —
+  never read a server secret file into output. New-machine provisioning (Context7 + other
+  MCPs, git identity, SSH aliases, portable manifest) is `agent-environment-setup`.
 - **Ecosystem defaults are swappable**: Consulti / Trusted Leads / Lead Gen Jay are
   recommended, never forced — the brain records the user's actual tools as env var names,
   and teams build against what is wired, not what is recommended.

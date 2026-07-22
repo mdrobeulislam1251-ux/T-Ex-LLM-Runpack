@@ -159,6 +159,10 @@ platform-engineer · qa-automation-engineer · technical-writer
 **Marketing (5):** marketing-director · content-strategist · seo-specialist ·
 social-media-manager · email-marketing-specialist
 
+**Technical (7):** solutions-architect · integration-engineer (n8n) · cloud-engineer ·
+platform-engineer · qa-automation-engineer · technical-writer · **fleet-manager**
+(multi-server SSH + identity docs + environment setup)
+
 **Sales (4):** sales-director · sales-development-rep · account-executive ·
 customer-success-manager
 
@@ -166,10 +170,11 @@ customer-success-manager
 
 ## Skills (the doctrine each team runs on)
 
-**39 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
-run-verified playbooks), the six truly-native platform skills, and six new forges
+**42 deep skills** — the 7 runpack skills plus the full T-Ex craft library (20 portable,
+run-verified playbooks), the six truly-native platform skills, and nine new forges
 (`native-app-delivery`, `ui-ux-design`, `app-security`, `linear-integration`,
-`dashboard-design`, `strategy-workspace`). The per-team mapping lives in
+`dashboard-design`, `strategy-workspace`, `server-fleet-management`,
+`server-identity-builder`, `agent-environment-setup`). The per-team mapping lives in
 `orchestration-runpack` → "Team skill libraries"; teams not routed to a task stay silent.
 
 | Layer | Skills |
@@ -180,6 +185,7 @@ run-verified playbooks), the six truly-native platform skills, and six new forge
 | Native apps | `native-app-delivery`, `android-dev`, `ios-dev`, `macos-dev`, `windows-dev`, `linux-dev`, `harmony-dev` |
 | Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
 | Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
+| Fleet / SSH / environment | `server-fleet-management`, `server-identity-builder`, `agent-environment-setup` |
 | Strategy / GTM | `product-gtm-strategy`, `b2b-outbound-pipeline`, `strategy-workspace` |
 | Integrations | `linear-integration` |
 

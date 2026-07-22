@@ -31,6 +31,8 @@ description: The company runpack routing table — how the 52 Arion agents in 9 
 | **Data table schema, ETL, n8n data tables** | **data-engineer** | **cto (MANDATORY)** |
 | Query tuning, migrations execution, backups | database-engineer | cto (prod migrations) |
 | CI/CD, Docker, IaC, environments | devops-engineer | — |
+| Multi-server SSH fleet, connect/route/identity docs | fleet-manager | cto (state-changing fleet ops) |
+| Agent environment setup (MCPs, Context7, git identity, SSH aliases) | fleet-manager | — |
 | Monitoring, alerts, incidents (ops) | sre-engineer | — |
 | Security review, auth hardening | security-engineer | cto |
 | Performance issues, load testing | performance-engineer | — |
@@ -108,6 +110,8 @@ loads its team's skills:
 | Design | `ui-ux-design`, `design-core`, `dashboard-design` |
 | Data | `data-schema-design`, `data-pipelines`, `sql-analytics`, `supabase-platform`, `clickhouse-analytics`, `elasticsearch-opensearch` |
 | DevOps / SRE / Cloud | `docker-operations`, `devops-cicd`, `grafana-observability`, `server-ops-safety`, `network-diagnosis` |
+| Fleet / multi-server SSH (fleet-manager) | `server-fleet-management`, `server-identity-builder`, `server-ops-safety`, `network-diagnosis` |
+| Environment provisioning (MCPs, Context7, git identity, SSH aliases) | `agent-environment-setup` |
 | Security | `app-security`, `server-ops-safety` |
 | Issue fixers | `issue-fix-loop`, `systematic-debugging` |
 | Marketing | `product-gtm-strategy` |
