@@ -70,6 +70,12 @@ Then start with:
   dashboard: an agentic command deck that directly drives and reflects the local
   terminal (the read / live-hooks / write bridge), views by intent, agentic UX patterns,
   component specs, and a phased build plan.
+- `runpacks/grok-tex-web-brand-builder.md` — a full build spec for a **Grok** agent to
+  build T-Ex LLM's **own** premium web presence standalone: marketing site (3D hero, live
+  animated workflow, MCP/API/integrations, pricing, API docs, press/social kit), the SaaS
+  app dashboard (agentic kanban board, checklists, team directory, billing), and the brand
+  kit — with shadcn/Tremor/Framer-Motion/R3F stack, performance + accessibility guardrails,
+  and a clean data seam that wires into T-Ex once confirmed.
 
 The dashboard package itself is the user's (or Grok's) responsibility — T-Ex LLM
 guarantees the endpoints and access.
