@@ -1,6 +1,19 @@
 # T-Ex LLM — The Full Company Runpack
 
-*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product)*
+*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product.
+The former `T-Ex-LLM-Agent` and `T-ex-LLM` repos are merged in here with full
+history — see `launcher/` and `runtime/` — and are archived.)*
+
+**One repo, three distribution modes:**
+
+1. **Plugin mode** (this runpack) — the 53-agent company inside Claude Code:
+   `/plugin install tex-llm@tex-llm`, driven by the per-project company brain.
+2. **Standalone launcher** (`launcher/`) — one portable T-Ex agent (dev + ops +
+   strategy persona) launched via `launcher/launch-tex.ps1` from any project;
+   skills mirror `plugins/tex-llm/skills/` at every launch.
+3. **Runtime host** (`runtime/`) — the self-hosted Python product: FastAPI host +
+   React operator console on port 3006, Company Runbook spine (Intent → Deploy),
+   multi-provider auth, agent-CLI detect/spawn, `tex` workspace CLI.
 
 A **company-in-a-box** for terminal AI sessions: **53 specialist agents in 9 teams backed
 by 44 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
@@ -254,6 +267,8 @@ dashboard/                           # T-Ex Command Deck (Next.js) — npm run d
 templates/company-profile.template.json
 companies/                           # placeholder SEED brains (reference only — live brains: <project-root>/.tex-llm/companies/)
 runpacks/                            # operating docs for external agents (Grok dashboard builder)
+launcher/                            # standalone portable T-Ex agent (merged from T-Ex-LLM-Agent)
+runtime/                             # self-hosted FastAPI host + React console (merged from T-ex-LLM)
 CLAUDE.md                            # core engine rules for this repo
 ```
 
