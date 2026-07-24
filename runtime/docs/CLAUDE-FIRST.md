@@ -5,7 +5,7 @@ End-to-end: **connect Claude → Chat + Jobs use that Claude auth**.
 ## 1. Start host
 
 ```bash
-cd T-ex-LLM
+cd T-Ex-LLM-Runpack/runtime
 bash scripts/setup.sh --port 3006 --non-interactive   # once
 set -a && source .env && set +a
 python3 -m texllm.cli serve
