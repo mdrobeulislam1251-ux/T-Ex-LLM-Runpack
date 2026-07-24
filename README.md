@@ -1,9 +1,6 @@
 # T-Ex LLM — The Full Company Runpack
 
-*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product.
-Commercial identity: **Outboundrix**, the platform company behind Trusted Leads,
-Lead Gen Jay, and Consulti — naming research, About copy, and value-discipline rules
-in [`strategy/brand-identity.md`](strategy/brand-identity.md).)*
+*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product)*
 
 A **company-in-a-box** for terminal AI sessions: **53 specialist agents in 9 teams backed
 by 44 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
