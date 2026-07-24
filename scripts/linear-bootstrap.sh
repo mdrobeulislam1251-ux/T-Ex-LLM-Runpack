@@ -92,7 +92,7 @@ seed "First real /onboard dogfood — create a live company brain" \
 "Run company-onboarding end-to-end with real answers; no invented details.
 
 ## Acceptance checks
-- [ ] companies/<slug>/profile.json passes the template's required fields
+- [ ] .tex-llm/companies/<slug>/profile.json passes the template's required fields
 - [ ] active-company.json points at it; /company reflects it"
 
 seed "Command Deck: wire live events (hooks -> tex-events.jsonl -> SSE feed)" \

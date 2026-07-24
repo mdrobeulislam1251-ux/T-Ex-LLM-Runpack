@@ -107,7 +107,7 @@ export function CommandDeck({ data }: { data: DashboardData }) {
               {tab === "overview" && "Live state of your agent company"}
               {tab === "teams" && `${data.agentCount} specialists across ${data.teams.length} teams`}
               {tab === "brain" && "Generate a company brain from nothing but your vision"}
-              {tab === "companies" && "Every brain in this repo — one is live at a time"}
+              {tab === "companies" && "Company brains — project-scoped via TEX_PROJECT_ROOT (repo seeds, read-only, when unset)"}
               {tab === "logs" && "CTO decisions and incident history for the active company"}
             </p>
           </div>

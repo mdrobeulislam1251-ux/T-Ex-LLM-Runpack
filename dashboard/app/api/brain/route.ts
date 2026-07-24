@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { REPO_ROOT, slugify } from "@/lib/data";
+import { COMPANIES_DIR, BRAINS_WRITABLE, slugify } from "@/lib/data";
 
 /**
  * Smart Brain Generation entry point.
  *
  * The user supplies only what they actually know: the company name and a free-text
  * briefing about structure & vision. This endpoint:
- *   1. creates companies/<slug>/ with a draft profile.json (env var names pre-derived,
- *      values NEVER touched — secrets live in .env only), and
+ *   1. creates <TEX_PROJECT_ROOT>/.tex-llm/companies/<slug>/ with a draft profile.json
+ *      (env var names pre-derived, values NEVER touched — secrets live in .env only), and
  *   2. writes brain-request.json capturing the briefing verbatim.
  *
  * The T-Ex LLM research team (research-lead, market-analyst, product-strategist) picks up
@@ -18,6 +18,16 @@ import { REPO_ROOT, slugify } from "@/lib/data";
  * credentials and brand asset files, which cannot be researched.
  */
 export async function POST(request: Request) {
+  if (!BRAINS_WRITABLE) {
+    return NextResponse.json(
+      {
+        error:
+          "Brains are project-scoped (rule 0): the repo's companies/ holds read-only seeds. " +
+          "Set TEX_PROJECT_ROOT to your project folder — the deck then creates the brain in <project>/.tex-llm/companies/.",
+      },
+      { status: 400 }
+    );
+  }
   let body: { name?: unknown; briefing?: unknown };
   try {
     body = await request.json();
@@ -42,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Company name produced an empty slug" }, { status: 400 });
   }
 
-  const companyDir = path.join(REPO_ROOT, "companies", slug);
+  const companyDir = path.join(COMPANIES_DIR, slug);
   if (fs.existsSync(path.join(companyDir, "profile.json"))) {
     return NextResponse.json({ error: `Company "${slug}" already exists` }, { status: 409 });
   }
@@ -118,7 +128,7 @@ export async function POST(request: Request) {
     if (!fs.existsSync(p)) fs.writeFileSync(p, `# ${log.replace(".md", "")} — ${name}\n`);
   }
 
-  const activeFile = path.join(REPO_ROOT, "companies", "active-company.json");
+  const activeFile = path.join(COMPANIES_DIR, "active-company.json");
   fs.writeFileSync(activeFile, JSON.stringify({ active: slug, switched_at: now }, null, 2) + "\n");
 
   return NextResponse.json({

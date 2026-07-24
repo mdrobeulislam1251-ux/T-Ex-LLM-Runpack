@@ -25,7 +25,7 @@ exactly one discipline — and every outside capability T-Ex leans on fills exac
 slot (lead lists, mailboxes, tracking, …). Specialists and specialist tools don't
 overlap; the orchestrator combines them into one engine.
 
-**Two modes, one runpack:**
+**Two operating modes (within plugin mode):**
 
 - **Founder mode** — build a sellable product from scratch, strategy-first: T-Ex wakes
   as the **strategist** (`strategy-workspace`), locks direction with you, scaffolds the
@@ -107,11 +107,14 @@ CTO decision + incident logs — read live from the repo files.
 
 ```bash
 cd dashboard && npm install && npm run dev   # → http://localhost:4100
+# Point the deck at YOUR project (rule 0) or it is a read-only seed viewer:
+# TEX_PROJECT_ROOT=/path/to/your/project npm run dev
 ```
 
 Runs on any computer with Node.js ≥ 18 (`winget install OpenJS.NodeJS.LTS` on Windows /
 `brew install node` on macOS). Clone the repo on that machine, run the two commands,
-open the browser — the deck reads the live repo files next to it.
+open the browser — agents/skills/gates read live from the repo files next to it; company
+brains read from `TEX_PROJECT_ROOT` (your project's `.tex-llm/companies/`).
 
 Its **Brain Studio** creates companies from nothing but a name and a vision briefing —
 see the next section.
@@ -295,3 +298,7 @@ git add .tex-llm/ && git commit -m "brain updates" && git push
 - Database and n8n access always flows through those references.
 - The security-engineer reviews auth and secrets handling; the CTO gates anything
   credential-adjacent.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE). The `runtime/` subproject ships the same license.

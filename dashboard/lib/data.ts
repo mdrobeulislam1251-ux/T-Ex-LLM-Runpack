@@ -3,7 +3,17 @@ import path from "path";
 
 // The dashboard lives inside the T-Ex LLM repo; the repo root is one level up.
 export const REPO_ROOT = path.resolve(process.cwd(), "..");
-const COMPANIES_DIR = path.join(REPO_ROOT, "companies");
+// Rule 0: live brains belong to the PROJECT being built, never to this repo.
+// Point TEX_PROJECT_ROOT at that project and the deck reads/writes its
+// <project>/.tex-llm/companies/. Without it, the deck falls back to the repo's
+// own companies/ — the shipped _placeholder seeds — in READ-ONLY mode.
+export const PROJECT_ROOT = process.env.TEX_PROJECT_ROOT
+  ? path.resolve(process.env.TEX_PROJECT_ROOT)
+  : null;
+export const BRAINS_WRITABLE = PROJECT_ROOT !== null;
+export const COMPANIES_DIR = PROJECT_ROOT
+  ? path.join(PROJECT_ROOT, ".tex-llm", "companies")
+  : path.join(REPO_ROOT, "companies");
 const AGENTS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "agents");
 const SKILLS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "skills");
 const COMMANDS_DIR = path.join(REPO_ROOT, "plugins", "tex-llm", "commands");
