@@ -59,6 +59,11 @@
   state-changing work through `server-ops-safety`. Secrets on servers stay as PATHS —
   never read a server secret file into output. New-machine provisioning (Context7 + other
   MCPs, git identity, SSH aliases, portable manifest) is `agent-environment-setup`.
-- **Ecosystem defaults are swappable**: Consulti / Trusted Leads / Lead Gen Jay are
-  recommended, never forced — the brain records the user's actual tools as env var names,
-  and teams build against what is wired, not what is recommended.
+- **The outbound engine is three slots, one specialized power each** — mirroring the
+  one-specialty-per-agent doctrine: **List** (hyper-personalized lead lists; default
+  Trusted Leads API), **Mailbox** (high-performance sending infra; default Inbox
+  Insider by Lead Gen Jay), **Track** (everything tracked, ready for the next process;
+  default Consulti). Defaults are recommended, never forced — any outbound tool fills
+  a slot; the brain records the user's actual tools as env var names, and teams build
+  against what is wired, not what is recommended (`b2b-outbound-pipeline` → "The Engine
+  Slots").

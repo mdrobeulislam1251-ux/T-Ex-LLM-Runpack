@@ -2,10 +2,15 @@
 
 *(repo: T-Ex-LLM-Runpack — the single combined version of the agent product)*
 
-A **company-in-a-box** for terminal AI sessions: **52 specialist agents in 9 teams backed
-by 37 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
+A **company-in-a-box** for terminal AI sessions: **53 specialist agents in 9 teams backed
+by 44 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
 emotion/tone, brand, stack, credentials). Install it into any project and the AI works
 like a full company — with hard review gates so the output is accurate, not improvised.
+
+One rule shapes everything here: **one specialty, deeply mastered**. Every agent owns
+exactly one discipline — and every outside capability T-Ex leans on fills exactly one
+slot (lead lists, mailboxes, tracking, …). Specialists and specialist tools don't
+overlap; the orchestrator combines them into one engine.
 
 **Two modes, one runpack:**
 
@@ -24,9 +29,10 @@ AI coding alone drifts: wrong assumptions, half-finished code, no reviews. T-Ex 
 that structurally:
 
 - **Specialists, not generalists** — each task goes to an agent whose whole prompt is
-  that discipline.
+  that discipline. Outside tools are held to the same bar: one slot, one specialized
+  power, combined by the orchestrator instead of overlapping.
 - **A changeable brain** — one profile per company defines what everything should sound
-  like, look like, and run on. Switch companies, and all 52 agents switch with it.
+  like, look like, and run on. Switch companies, and all 53 agents switch with it.
 - **Hard gates** — the data engineer designs schemas autonomously, but **nothing is
   applied until the CTO approves**. UI doesn't ship past the design director. Fixes
   don't close without regression tests.
@@ -83,7 +89,7 @@ guarantees the endpoints and access.
 ## The Command Deck (dashboard)
 
 A SaaS-grade visual dashboard ships in [`dashboard/`](dashboard/): dark animated
-modern UI showing the active brain, all 9 teams / 52 agents, review gates, and the
+modern UI showing the active brain, all 9 teams / 53 agents, review gates, and the
 CTO decision + incident logs — read live from the repo files.
 
 ```bash
@@ -127,28 +133,36 @@ hand-design tables.
 | `/design <thing>` | Design pipeline: research → flows → visuals → motion → tokens → handoff |
 | `/schema [change]` | Data engineer designs/evolves schema; CTO gate; apply to DB / n8n data tables |
 | `/fix <bug>` | Issue loop: triage → root-cause fix → regression test → prevention |
-| `/team [task]` | Show the 52-agent roster, or route a task to the right owner |
+| `/team [task]` | Show the 53-agent roster, or route a task to the right owner |
 
-## The ecosystem (preloaded company placeholders)
+## The outbound engine (three slots, one power each)
 
-`companies/` ships three placeholder brains for the operating brands of the outbound
-business — complete each with `/onboard <slug>`:
+When work is outbound — filling pipeline for the active company — T-Ex runs an
+**outbound engine** built on the same doctrine as the roster: **one specialized power
+per slot**, nothing overlapping. Three slots make the engine:
 
-| Brand | Role in the ecosystem |
-|---|---|
-| **Consulti** (`consulti`) | Data engine — 500M+ B2B contacts, local businesses, creators, verification API |
-| **Trusted Leads** (`trusted-leads`) | Trust layer — list cleaning, ICP qualification, verification before any send |
-| **Lead Gen Jay** (`lead-gen-jay`) | Flagship leadgen brand — strategy, copy, mailbox infra, campaign deploy, A/B testing |
+| Slot | The one thing it does | Preloaded default (placeholder brain) |
+|---|---|---|
+| **List** | Hyper-personalized lead lists — ICP-sourced, enriched, verified, send-ready via API | **Trusted Leads API** (`trusted-leads`) |
+| **Mailbox** | High-performance sending infrastructure — domains, auth, warmup, reputation; mail that lands | **Inbox Insider** by Lead Gen Jay (`lead-gen-jay`) |
+| **Track** | Everything tracked and ready for the next process — every contact's stage, status, next action | **Consulti** (`consulti`) |
 
-Their live operational skills currently run in the separate `Outbound agent` workspace
-(cold-email suite, consulti-scrape, lead-tracking-db, …). The placeholders reference them
-by name; porting + scrubbing them into this repo is a planned cycle.
+Alone, each is one power. Combined, they are a pipeline: the **List** slot feeds the
+**Mailbox** slot, outcomes land in the **Track** slot, and the Track slot stages the
+next process — while the roster (SDR, email specialist, data engineer, CTO gate)
+operates the machine under the `b2b-outbound-pipeline` doctrine.
 
-**Recommended, not required:** the three brands are the default stack, and every slot is
-swappable — bring your own data source, verifier, or sending tool. The brain's
-`credentials` env-var names record what's actually wired, and teams build against that.
+**A capability spine, not a bundle.** The slot is the contract; the tool is swappable.
+Wire Apollo or Clay into List, your own warmed Google-Workspace + sequencer stack into
+Mailbox, any CRM into Track — the brain's `credentials` env-var names record what's
+actually wired, agents build against what IS wired (never what's recommended), and
+every gate and threshold in `b2b-outbound-pipeline` applies identically whatever fills
+the slots. The three defaults are simply pre-wired placeholders: complete each with
+`/onboard <slug>`. Their live operational skills currently run in the separate
+`Outbound agent` workspace (cold-email suite, consulti-scrape, lead-tracking-db, …);
+porting + scrubbing them into this repo is a planned cycle.
 
-## The 52-agent roster
+## The 53-agent roster
 
 **Executive (4):** ceo-orchestrator · cto · cpo · coo
 
@@ -166,15 +180,12 @@ ai-eval-engineer
 **Issue Fixers (5):** triage-lead · bug-hunter · hotfix-engineer · regression-tester ·
 root-cause-analyst
 
-**Technical (6):** solutions-architect · integration-engineer (n8n) · cloud-engineer ·
-platform-engineer · qa-automation-engineer · technical-writer
-
-**Marketing (5):** marketing-director · content-strategist · seo-specialist ·
-social-media-manager · email-marketing-specialist
-
 **Technical (7):** solutions-architect · integration-engineer (n8n) · cloud-engineer ·
 platform-engineer · qa-automation-engineer · technical-writer · **fleet-manager**
 (multi-server SSH + identity docs + environment setup)
+
+**Marketing (5):** marketing-director · content-strategist · seo-specialist ·
+social-media-manager · email-marketing-specialist
 
 **Sales (4):** sales-director · sales-development-rep · account-executive ·
 customer-success-manager
@@ -231,8 +242,8 @@ the real file is **gitignored**, only the placeholder ships (same for `ssh-confi
 .claude-plugin/marketplace.json      # marketplace manifest
 plugins/tex-llm/
   .claude-plugin/plugin.json
-  agents/<team>/<role>.md            # the 52 agents
-  skills/<skill>/SKILL.md            # the 7 doctrine skills
+  agents/<team>/<role>.md            # the 53 agents
+  skills/<skill>/SKILL.md            # the 44 doctrine skills
   commands/*.md                      # /onboard /company /build /design /schema /fix /team
 dashboard/                           # T-Ex Command Deck (Next.js) — npm run dev
 templates/company-profile.template.json

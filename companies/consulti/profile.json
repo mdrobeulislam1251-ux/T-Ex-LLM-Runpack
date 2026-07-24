@@ -5,18 +5,18 @@
     "name": "Consulti",
     "slug": "consulti",
     "app_name": "Consulti",
-    "description": "B2B data engine: 500M+ contact database, Google Maps local businesses, and podcast/YouTube creator data, served via REST API with credit-based access; also provides server-side email verification (/verify).",
+    "description": "The Track slot of the outbound engine — the pipeline's system of record: every contact's stage, verification date, sends, replies, suppression state, and next action tracked, so each handoff starts ready for the next process. Under the hood it is also a B2B data platform (500M+ contacts, Google Maps local businesses, podcast/YouTube creators) served via REST API with credit-based access and server-side email verification (/verify).",
     "created_at": "2026-07-22"
   },
   "brain": {
     "scope": {
-      "does": "DRAFT — lead data sourcing at scale (B2B contacts, local businesses, creators), targeted list pulls via API, email verification as a service",
-      "does_not": "DRAFT — no outreach sending of its own; delivery/sequencing belongs to the campaign layer (Lead Gen Jay stack)"
+      "does": "DRAFT — the Track slot: pipeline system-of-record (stage, status, dates, replies, next action per contact), suppression ledger, handoff readiness between processes; plus underlying data services via REST API (targeted pulls, /verify)",
+      "does_not": "DRAFT — no list personalization or delivery of send-ready lists (List slot: Trusted Leads API default); no mailboxes or sending (Mailbox slot: Inbox Insider default)"
     },
-    "vision": "DRAFT — the data backbone of the outbound ecosystem",
+    "vision": "DRAFT — nothing falls between stages: every record tracked, every next step ready",
     "mission": "DRAFT",
     "emotion_tone": "DRAFT — precise, data-first, no hype",
-    "target_audience": "DRAFT — B2B founders, agencies, and outbound teams that need targeted, verified lead data",
+    "target_audience": "DRAFT — B2B founders, agencies, and outbound teams that lose deals to untracked handoffs and stale pipeline state",
     "voice_examples": []
   },
   "brand": {

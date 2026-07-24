@@ -68,6 +68,7 @@ description: The company runpack routing table — how the 52 T-Ex LLM agents in
 | Email marketing | email-marketing-specialist | marketing-director |
 | Sales strategy, pricing, playbooks | sales-director | ceo-orchestrator |
 | Outbound, lead gen | sales-development-rep | sales-director |
+| Outbound engine slot wiring (List / Mailbox / Track tool choice) | sales-director | cto (credential-adjacent) |
 | Demos, proposals, deals | account-executive | sales-director |
 | Onboarding journeys, retention | customer-success-manager | sales-director |
 | Research questions, verification sweeps | research-lead | — |
@@ -115,8 +116,8 @@ loads its team's skills:
 | Environment provisioning (MCPs, Context7, git identity, SSH aliases) | `agent-environment-setup` |
 | Security | `app-security`, `server-ops-safety` |
 | Issue fixers | `issue-fix-loop`, `systematic-debugging` |
-| Marketing | `product-gtm-strategy` |
-| Sales | `b2b-outbound-pipeline`, `product-gtm-strategy` |
+| Marketing | `product-gtm-strategy`; email-marketing-specialist also loads `b2b-outbound-pipeline` (Mailbox-slot deliverability doctrine) |
+| Sales | `b2b-outbound-pipeline` (engine slots: List / Mailbox / Track), `product-gtm-strategy` |
 | Research & strategy | `research-strategy`, `product-gtm-strategy`, `strategy-workspace` |
 | Delivery & PM sync (coo, engineering-manager) | `linear-integration` |
 

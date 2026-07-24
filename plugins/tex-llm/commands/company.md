@@ -11,5 +11,5 @@ Company brain control. $ARGUMENTS is the company name (or empty).
   `companies/active-company.json` to that slug and confirm the switch, summarizing the
   newly active brain. If it does not exist, run the `company-onboarding` skill for it.
 
-All 52 agents follow whichever brain is active — a switch changes scope, vision, tone,
+All 53 agents follow whichever brain is active — a switch changes scope, vision, tone,
 brand, stack defaults, and credential references everywhere at once.
