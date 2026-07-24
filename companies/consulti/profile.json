@@ -2,9 +2,9 @@
   "_placeholder": true,
   "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (consulti-scrape, email-verification). Run /onboard consulti to have the research team complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
   "company": {
-    "name": "Consulti",
+    "name": "Consulti AI",
     "slug": "consulti",
-    "app_name": "Consulti",
+    "app_name": "Consulti AI",
     "description": "The Track slot of the outbound engine — the pipeline's system of record: every contact's stage, verification date, sends, replies, suppression state, and next action tracked, so each handoff starts ready for the next process. Under the hood it is also a B2B data platform (500M+ contacts, Google Maps local businesses, podcast/YouTube creators) served via REST API with credit-based access and server-side email verification (/verify).",
     "created_at": "2026-07-22"
   },
@@ -28,7 +28,7 @@
   "tech": {
     "stack": {
       "frontend": "",
-      "backend": "Consulti REST API (external product surface)",
+      "backend": "Consulti AI REST API (external product surface)",
       "database": "",
       "mobile": "",
       "cloud": "",

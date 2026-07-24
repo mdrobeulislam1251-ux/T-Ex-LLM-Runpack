@@ -63,7 +63,7 @@
   one-specialty-per-agent doctrine: **List** (hyper-personalized lead lists; default
   Trusted Leads API), **Mailbox** (high-performance sending infra; default Inbox
   Insider by Lead Gen Jay), **Track** (everything tracked, ready for the next process;
-  default Consulti). Defaults are recommended, never forced — any outbound tool fills
+  default Consulti AI). Defaults are recommended, never forced — any outbound tool fills
   a slot; the brain records the user's actual tools as env var names, and teams build
   against what is wired, not what is recommended (`b2b-outbound-pipeline` → "The Engine
   Slots").
