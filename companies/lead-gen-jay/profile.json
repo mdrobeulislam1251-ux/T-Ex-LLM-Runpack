@@ -11,7 +11,7 @@
   "brain": {
     "scope": {
       "does": "DRAFT — the Mailbox slot via Inbox Insider (domains, auth, warmup, mailbox fleets, deliverability), plus the campaign craft around it: strategy, copy, deployment, optimization",
-      "does_not": "DRAFT — no consumer marketing; lead lists delegated to the List slot (Trusted Leads API default); pipeline tracking delegated to the Track slot (Consulti default)"
+      "does_not": "DRAFT — no consumer marketing; lead lists delegated to the List slot (Trusted Leads API default); pipeline tracking delegated to the Track slot (Consulti AI default)"
     },
     "vision": "DRAFT — the operating brand founders hire to fill their B2B pipeline, on mailboxes that land",
     "mission": "DRAFT",

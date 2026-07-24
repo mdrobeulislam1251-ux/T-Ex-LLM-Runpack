@@ -139,13 +139,16 @@ hand-design tables.
 
 When work is outbound — filling pipeline for the active company — T-Ex runs an
 **outbound engine** built on the same doctrine as the roster: **one specialized power
-per slot**, nothing overlapping. Three slots make the engine:
+per slot**, nothing overlapping. Three slots make the engine, and **three planned
+companies hold them** — the operating companies this runpack is being built to run:
+**Trusted Leads**, **Consulti AI**, and **Lead Gen Jay**, each specializing in
+exactly one slot:
 
-| Slot | The one thing it does | Preloaded default (placeholder brain) |
+| Slot | The one thing it does | Planned company (placeholder brain) |
 |---|---|---|
-| **List** | Hyper-personalized lead lists — ICP-sourced, enriched, verified, send-ready via API | **Trusted Leads API** (`trusted-leads`) |
+| **List** | Hyper-personalized lead lists — ICP-sourced, enriched, verified, send-ready via API | **Trusted Leads** (`trusted-leads`) |
 | **Mailbox** | High-performance sending infrastructure — domains, auth, warmup, reputation; mail that lands | **Inbox Insider** by Lead Gen Jay (`lead-gen-jay`) |
-| **Track** | Everything tracked and ready for the next process — every contact's stage, status, next action | **Consulti** (`consulti`) |
+| **Track** | Everything tracked and ready for the next process — every contact's stage, status, next action | **Consulti AI** (`consulti`) |
 
 Alone, each is one power. Combined, they are a pipeline: the **List** slot feeds the
 **Mailbox** slot, outcomes land in the **Track** slot, and the Track slot stages the
@@ -157,10 +160,10 @@ Wire Apollo or Clay into List, your own warmed Google-Workspace + sequencer stac
 Mailbox, any CRM into Track — the brain's `credentials` env-var names record what's
 actually wired, agents build against what IS wired (never what's recommended), and
 every gate and threshold in `b2b-outbound-pipeline` applies identically whatever fills
-the slots. The three defaults are simply pre-wired placeholders: complete each with
-`/onboard <slug>`. Their live operational skills currently run in the separate
-`Outbound agent` workspace (cold-email suite, consulti-scrape, lead-tracking-db, …);
-porting + scrubbing them into this repo is a planned cycle.
+the slots. The three planned companies ship as pre-wired placeholder brains — complete
+each with `/onboard <slug>` when its turn comes. Their live operational skills currently
+run in the separate `Outbound agent` workspace (cold-email suite, consulti-scrape,
+lead-tracking-db, …); porting + scrubbing them into this repo is a planned cycle.
 
 ## The 53-agent roster
 

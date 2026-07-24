@@ -28,7 +28,7 @@ swappable**:
    env var name (section 0 probes). Never guess.
 3. **Ecosystem defaults — offer only when a slot is empty and the user asks for a
    recommendation:** Trusted Leads API (List), Inbox Insider by Lead Gen Jay (Mailbox),
-   Consulti (Track). Recommended, never forced, never presented as the only option —
+   Consulti AI (Track). Recommended, never forced, never presented as the only option —
    Apollo/Clay/Sales Navigator fill the List slot equally; a warmed Google-Workspace +
    sequencer stack fills Mailbox; any CRM or ledger DB fills Track. Every gate and
    threshold below applies identically whatever fills the slots.

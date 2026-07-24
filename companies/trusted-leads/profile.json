@@ -11,7 +11,7 @@
   "brain": {
     "scope": {
       "does": "DRAFT — the List slot, end-to-end: ICP-targeted sourcing, qualification, enrichment/personalization, normalization, email verification, list QA — hyper-personalized, send-ready lead lists delivered via API",
-      "does_not": "DRAFT — no mailboxes or sending (Mailbox slot: Inbox Insider default), no pipeline ledger (Track slot: Consulti default)"
+      "does_not": "DRAFT — no mailboxes or sending (Mailbox slot: Inbox Insider default), no pipeline ledger (Track slot: Consulti AI default)"
     },
     "vision": "DRAFT — every campaign starts from a list that lands: one power, done completely",
     "mission": "DRAFT",

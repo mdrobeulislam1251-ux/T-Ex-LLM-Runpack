@@ -22,17 +22,18 @@ Rules:
 - Only one company is active at a time; switch with `/company <name>`.
 - Agents never invent brain fields — a missing profile routes to `/onboard`.
 
-## Preloaded ecosystem placeholders (the outbound engine's three slots)
+## The three planned companies (the outbound engine's three slots)
 
-Three brains ship as `"_placeholder": true` drafts — one per slot of the outbound
-engine, one specialized power each:
+The three operating companies this runpack is being built to run ship as
+`"_placeholder": true` drafts — one per slot of the outbound engine, one specialized
+power each:
 
-- `trusted-leads` — **List slot**: hyper-personalized lead lists via API (ICP-sourced,
-  enriched, verified, send-ready)
-- `lead-gen-jay` — **Mailbox slot**: Inbox Insider, high-performance sending
-  infrastructure (domains, auth, warmup, reputation)
-- `consulti` — **Track slot**: everything tracked and ready for the next process
-  (stage, status, suppression, next action per contact)
+- **Trusted Leads** (`trusted-leads`) — **List slot**: hyper-personalized lead lists
+  via API (ICP-sourced, enriched, verified, send-ready)
+- **Lead Gen Jay** (`lead-gen-jay`) — **Mailbox slot**: Inbox Insider,
+  high-performance sending infrastructure (domains, auth, warmup, reputation)
+- **Consulti AI** (`consulti`) — **Track slot**: everything tracked and ready for the
+  next process (stage, status, suppression, next action per contact)
 
 Their DRAFT fields are completed and confirmed by running `/onboard <slug>`; their live
 operational skills currently run in the separate `Outbound agent` workspace and are
