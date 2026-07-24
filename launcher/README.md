@@ -1,35 +1,30 @@
-# T-Ex LLM
+# T-Ex standalone launcher (portable mode)
 
-One agent, three brains: **dev + operations + strategy**, wrapped in an execution-first behavior contract. Built to work on **any system** — nothing is hardcoded; T-Ex probes the environment it wakes up in.
+The second distribution mode of the runpack: **one T-Ex agent** (senior full-stack
+engineer + systems operator + product strategist in a single persona) instead of the
+53-agent company. Use it when you want the execution-first solo agent on any machine
+without installing the Claude Code plugin.
 
 ## Launch
 
 ```powershell
 # From any project directory:
-& "<path-to-this-folder>\launch-tex.ps1"
+& "<path-to-repo>\launcher\launch-tex.ps1"
 ```
 
-The launcher sets `CLAUDE_CONFIG_DIR` to the `.claude-tex` home next to it, then starts Claude Code in your current directory. Move this whole folder anywhere — any drive, any machine — and it still works.
-
-## Alternative installs
-
-- **Per-project:** copy `.claude-tex/skills/*` into a project's `.claude/skills/` — the skills auto-load only in that project.
-- **Global:** copy the skills into `%USERPROFILE%\.claude\skills\` to have them in every default session.
+The launcher sets `CLAUDE_CONFIG_DIR` to the `.claude-tex` home next to it, mirrors
+the skill set from `plugins/tex-llm/skills/` (the single source of truth — synced on
+every launch so the two modes never drift), then starts Claude Code in your current
+directory.
 
 ## What's inside
 
-| Layer | Skills |
-|---|---|
-| Agentic core | `environment-recon`, `execution-discipline`, `verification-gates`, `project-bootstrap` |
-| Dev | `api-design`, `fullstack-delivery`, `systematic-debugging`, `ui-ux-design`, `app-security` |
-| Data engineering | `postgres-patterns`, `supabase-platform`, `sql-analytics`, `elasticsearch-opensearch`, `clickhouse-analytics`, `data-pipelines` |
-| Ops / DevOps | `server-ops-safety`, `network-diagnosis`, `docker-operations`, `grafana-observability`, `devops-cicd` |
-| Strategy | `product-gtm-strategy`, `b2b-outbound-pipeline` |
+- `.claude-tex/CLAUDE.md` — the T-Ex persona and behavior contract (probe never
+  assume, exact task only, done = run-verified, single path, portable output).
+- `.claude-tex/skills/` — synced from the runpack at launch; not tracked in git.
 
-Persona and behavior contract: `.claude-tex/CLAUDE.md`.
+## Company brains
 
-## Design rules (enforced in every skill)
-
-1. No absolute paths, hostnames, usernames, or credentials — environment facts are probed at runtime.
-2. A skill earns its file only if it carries real payload: exact commands, verbatim error→fix tables, numeric thresholds, or enforceable behavioral gates.
-3. Done = run-verified. Exit 0 is "compiled", not "works".
+Standalone mode follows the same brain rule as the plugin: brains live in
+`<project-root>/.tex-llm/companies/` of the project you launch in — never inside
+this repo. See rule 0 in the repo root `CLAUDE.md`.
