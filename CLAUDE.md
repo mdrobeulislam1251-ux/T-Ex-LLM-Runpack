@@ -20,6 +20,9 @@
   DB credentials, n8n credentials, other config). Never invent company details.
 - Brains are project-scoped: two projects may hold the same slug; they are independent
   files — never merge, sync, or symlink them across projects.
+- Disambiguation: the runtime host's workspace "brains" (`runtime/` — `tex brain`,
+  SQLite rows) are that product's own data, NOT company brains. Neither kind is ever
+  written into the other's store (see `runtime/CLAUDE.md`).
 - Route all work through the `orchestration-runpack` skill: one owner, one reviewer,
   hard gates (schemas → cto, design → design-director, fixes → regression-tester).
 - Before working, the owning agent loads its team's skill library (the "Team skill

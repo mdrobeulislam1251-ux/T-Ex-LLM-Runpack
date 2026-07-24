@@ -51,3 +51,16 @@ When the user hands docs/specs for a build: (1) `project-bootstrap` — map the 
 ## Reporting
 
 Lead with the outcome ("Deployed and health-checked", "Found the bug: …"), then only the detail that changes what the user does next. Failures reported plainly with the actual output — never softened, never hidden.
+
+## Company Brain (same contract as the runpack — rule 0)
+
+Before company-scoped work (features, schema, brand, outbound), read the active brain:
+`<project-root>/.tex-llm/companies/active-company.json`, then the active
+`.tex-llm/companies/<slug>/profile.json` — where `<project-root>` is the directory you
+were launched in. If `.tex-llm/` does not exist, bootstrap `.tex-llm/companies/` before
+anything else. A profile with `"_placeholder": true` is a seed, never an active brain —
+complete it via the `company-onboarding` skill instead of working from DRAFT fields.
+Never read or write brains inside this launcher folder, the runpack repo/plugin clone,
+or any parent/home directory — brains are project-scoped and never cross projects.
+Secrets: values live only in the project's gitignored `.env`; profiles store env var
+NAMES. Plain dev/ops tasks that need no company context proceed without a brain.

@@ -40,8 +40,8 @@ No vendor lock-in. No assumed personal machine paths. Works on **macOS**, **Linu
 From the repository root:
 
 ```bash
-git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
-cd T-ex-LLM
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/runtime
 bash scripts/setup.sh
 ```
 
@@ -88,8 +88,8 @@ http://127.0.0.1:3006/
    ```
 3. Clone and setup:
    ```bash
-   git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
-   cd T-ex-LLM
+   git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+   cd T-Ex-LLM-Runpack/runtime
    bash scripts/setup.sh --port 3006
    source .env
    python3 -m texllm.cli serve
@@ -113,8 +113,8 @@ sudo apt install -y python3 python3-pip python3-venv git curl
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 
-git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
-cd T-ex-LLM
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/runtime
 bash scripts/setup.sh --port 3006
 set -a && source .env && set +a
 python3 -m texllm.cli serve
@@ -143,8 +143,8 @@ sudo ufw allow 3006/tcp
 2. Open PowerShell:
 
 ```powershell
-git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
-cd T-ex-LLM
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/runtime
 # Git Bash or:
 bash scripts/setup.sh --port 3006
 # If bash unavailable:
@@ -192,7 +192,7 @@ python3 -m texllm.cli run "List three benefits of multi-agent workers" --provide
 ### 4) Interactive TUI (your terminal)
 
 ```bash
-cd /path/to/T-ex-LLM
+cd /path/to/T-Ex-LLM-Runpack/runtime
 claude    # or codex, gemini, …
 # Point the agent at playbooks/ and skills/ in this repo
 ```

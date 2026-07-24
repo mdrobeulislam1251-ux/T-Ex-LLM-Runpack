@@ -24,8 +24,8 @@ Local CLIs use **their own auth** (e.g. `claude auth login`). That is separate f
 ## Quick start
 
 ```bash
-git clone https://github.com/mdrobeulislam1251-ux/T-ex-LLM.git
-cd T-ex-LLM
+git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
+cd T-Ex-LLM-Runpack/runtime
 bash scripts/setup.sh          # prompts for port (default 3006)
 set -a && source .env && set +a
 python3 -m texllm.cli serve
