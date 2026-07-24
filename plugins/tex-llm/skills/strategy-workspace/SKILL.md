@@ -9,7 +9,7 @@ The flow this enables: the user creates a folder, starts a terminal session, cal
 
 ## Trigger
 
-Fire when ANY of: the working folder is empty (or has no `companies/` and no code), the user says "start strategy" / "new venture" / names a company that has no brain, or a build request arrives with zero strategy artifacts. If code already exists → this is Developer mode, run `project-bootstrap` instead.
+Fire when ANY of: the working folder is empty (or has no `.tex-llm/companies/` and no code), the user says "start strategy" / "new venture" / names a company that has no brain, or a build request arrives with zero strategy artifacts. If code already exists → this is Developer mode, run `project-bootstrap` instead.
 
 ## The flow
 
@@ -39,7 +39,7 @@ Fire when ANY of: the working folder is empty (or has no `companies/` and no cod
   sales/          # outbound ops — lists, sequences (created when first needed)
   docs/           # user-supplied architecture & data-model docs
   dashboard/      # dashboard package (user/Grok-built; reads the data contract)
-  companies/      # brains — created by /onboard, not by hand
+  .tex-llm/companies/      # brains — created by /onboard, not by hand
 ```
 
 ```powershell

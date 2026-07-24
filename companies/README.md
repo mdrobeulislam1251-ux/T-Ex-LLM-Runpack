@@ -1,9 +1,16 @@
-# companies/
+# companies/ — reference seeds (NEVER live brains)
 
-Each subdirectory is one company brain, created by `/onboard`:
+**This directory ships with the runpack git clone. It is read-only reference
+material.** The clone is refreshed from GitHub — anything written here is silently
+lost — and it is shared by every project, so a brain stored here collides across
+projects. Never read a profile from this directory as the active brain; every
+profile here is a `"_placeholder": true` DRAFT seed. To use one, COPY it to
+`<project-root>/.tex-llm/companies/<slug>/` and complete it with `/onboard <slug>`.
+
+Live brains live in each project's own config root, created by `/onboard`:
 
 ```
-companies/
+<project-root>/.tex-llm/companies/
   active-company.json        # which brain is live: {"active": "<slug>"}
   <slug>/
     profile.json             # the brain: scope, vision, emotion, brand, stack, credential refs
@@ -19,7 +26,8 @@ Rules:
 
 - `profile.json` holds credential **env var names only**. Raw secret values live in the
   project's `.env`, which must be gitignored.
-- Only one company is active at a time; switch with `/company <name>`.
+- Only one company is active at a time per project; switch with `/company <name>`
+  (updates the PROJECT's `.tex-llm/companies/active-company.json`, never this clone).
 - Agents never invent brain fields — a missing profile routes to `/onboard`.
 
 ## The three planned companies (the outbound engine's three slots)

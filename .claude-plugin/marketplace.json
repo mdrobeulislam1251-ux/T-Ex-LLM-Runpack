@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "T-Ex LLM — The Full Company Runpack (T-Ex LLM): 53 specialist agents in 9 teams backed by 44 deep doctrine skills (native app — 6 per-platform + Avalonia cross-platform desktop, UI/UX, dashboards, security, data, DevOps, multi-server SSH fleet + identity builder + app hosting/exposure over local SSH, agent environment setup, Linear PM sync), strategy-first onboarding, two modes (founder from-scratch / developer in any codebase), a three-slot outbound engine (List / Mailbox / Track — one specialized power per slot, swappable ecosystem defaults), external dashboard runpack for Grok, driven by a switchable per-company brain.",
-    "version": "1.8.0"
+    "version": "1.8.1"
   },
   "plugins": [
     {

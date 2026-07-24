@@ -1,5 +1,6 @@
 {
   "_placeholder": true,
+  "_do_not_load": "Reference seed shipped inside the runpack clone. NEVER load or edit in place — copy to <project-root>/.tex-llm/companies/trusted-leads/ and run /onboard.",
   "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (email-verification, list-optimize, lead-tracking-db). Run /onboard trusted-leads to complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
   "company": {
     "name": "Trusted Leads",

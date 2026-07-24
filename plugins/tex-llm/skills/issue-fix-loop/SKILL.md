@@ -51,7 +51,7 @@ Triggered by: any S1, any bug seen twice, or bug-hunter flagging a systemic smel
 - Classify the failure CLASS and propose a defense that kills the class (validation
   layer, type constraint, lint rule, CI check, contract test).
 - Route: architectural fixes → cto, process fixes → coo. Log the pattern in
-  `companies/<slug>/incidents.md`.
+  `.tex-llm/companies/<slug>/incidents.md`.
 
 ## Loop invariants
 

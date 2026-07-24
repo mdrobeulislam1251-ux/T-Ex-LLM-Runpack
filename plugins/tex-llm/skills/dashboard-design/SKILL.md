@@ -32,7 +32,7 @@ One page = one intent. "Monitor + analyze + report on one screen" is how the gen
 
 ## Anti-generic rules (the fake-app killers)
 
-1. **Brand from the company brain, always** — colors/typography/tone from `companies/<slug>/profile.json` + brand.md, applied as tokens (`ui-ux-design`). Template defaults (indigo-on-dark, glassmorphism, purple gradients) only if the brand actually says so.
+1. **Brand from the company brain, always** — colors/typography/tone from `.tex-llm/companies/<slug>/profile.json` + brand.md, applied as tokens (`ui-ux-design`). Template defaults (indigo-on-dark, glassmorphism, purple gradients) only if the brand actually says so.
 2. **Real data wired from day one.** No hardcoded numbers, no `Math.random()` demo series. A metric that never changes across visits is how users decide the app is fake. If data isn't ready: honest empty state, not invented numbers.
 3. **Write the question set into the code** — a comment block atop each view listing audience + questions. A widget answering none of them gets deleted in review.
 4. **Kill decorative widgets**: world maps with 3 dots, fake activity feeds, circular progress for unbounded metrics, weather. Every pixel answers a question or leaves.

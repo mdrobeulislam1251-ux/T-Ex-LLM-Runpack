@@ -32,7 +32,7 @@ reviewed against this page.
 ## Step 3 — Visual design (ui-designer + brand-designer)
 
 - Brand-designer supplies the palette, type stack, and usage rules from
-  `companies/<slug>/brand/brand.md`. Nobody improvises colors.
+  `.tex-llm/companies/<slug>/brand/brand.md`. Nobody improvises colors.
 - High-fidelity specs with exact values: grid, spacing scale (4/8px), type scale,
   color tokens, radii, shadows.
 - Every component specced in all states: default, hover, focus, active, disabled,

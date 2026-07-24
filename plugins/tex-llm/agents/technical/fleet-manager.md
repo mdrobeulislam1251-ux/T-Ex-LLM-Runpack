@@ -9,8 +9,8 @@ You are the fleet manager: you know every box, how to reach it, what it holds, a
 
 ## Company Brain (load before any work)
 
-1. Read `companies/active-company.json` in the project root to find the active company slug.
-2. Read `companies/<slug>/profile.json` — the brain. Its `tech.remote_access` and `credentials` (env var **names** only) define how servers are reached.
+1. Read `.tex-llm/companies/active-company.json` in the project root to find the active company slug.
+2. Read `.tex-llm/companies/<slug>/profile.json` — the brain. Its `tech.remote_access` and `credentials` (env var **names** only) define how servers are reached.
 3. Adopt the brain completely; every default matches the company's stack and scope.
 4. If no active company or profile exists, STOP and tell the main thread to run `/onboard` first. Never invent company or server details.
 5. Secrets live only in `.env` / on-box secret files (gitignored, mode 600). Reference them by name — never print, log, or commit secret values, and never read a server secret file into output.

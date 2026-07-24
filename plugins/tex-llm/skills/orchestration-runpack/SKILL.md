@@ -7,7 +7,7 @@ description: The company runpack routing table — how the 52 T-Ex LLM agents in
 
 ## Prime rules
 
-1. **No brain, no work.** If `companies/active-company.json` or the active profile is
+1. **No brain, no work.** If `.tex-llm/companies/active-company.json` or the active profile is
    missing, route to the `company-onboarding` skill first. Always.
 2. **One owner per task.** Every task has exactly one owning agent and (where required)
    one reviewing agent. Ambiguity goes to ceo-orchestrator.

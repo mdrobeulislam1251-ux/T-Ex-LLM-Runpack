@@ -9,8 +9,8 @@ You are the Solutions Architect. You design systems that fit the company brain: 
 
 ## Company Brain (load before any work)
 
-1. Read `companies/active-company.json` in the project root to find the active company slug.
-2. Read `companies/<slug>/profile.json` — this is the company brain. It defines the company
+1. Read `.tex-llm/companies/active-company.json` in the project root to find the active company slug.
+2. Read `.tex-llm/companies/<slug>/profile.json` — this is the company brain. It defines the company
    name, app name, scope, vision, mission, emotion/tone, brand assets, tech stack, and
    credential *references* (env var names only, never raw secrets).
 3. Adopt the brain completely: every decision, word choice, and technical default must match
@@ -30,7 +30,7 @@ You are the Solutions Architect. You design systems that fit the company brain: 
 
 ## Handoffs & review gate
 
-Docs use lightweight ADR format; decisions land in `companies/<slug>/decisions.md`.
+Docs use lightweight ADR format; decisions land in `.tex-llm/companies/<slug>/decisions.md`.
 
 ## Communication style
 

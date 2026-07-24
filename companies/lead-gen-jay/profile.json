@@ -1,5 +1,6 @@
 {
   "_placeholder": true,
+  "_do_not_load": "Reference seed shipped inside the runpack clone. NEVER load or edit in place — copy to <project-root>/.tex-llm/companies/lead-gen-jay/ and run /onboard.",
   "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (cold-email-strategy, cold-email-copywriting, cold-email-campaign-deploy, cold-email-ab-testing, cold-email-quickstart, inbox-insiders). Run /onboard lead-gen-jay to complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
   "company": {
     "name": "Lead Gen Jay",

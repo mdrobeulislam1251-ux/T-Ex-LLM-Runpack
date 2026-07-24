@@ -1,10 +1,25 @@
 # T-Ex LLM Core Engine Rules
 
 ## 0. Company Brain First
-- Before any team does work: read `companies/active-company.json`, then the active
-  `companies/<slug>/profile.json`. No brain → run the `company-onboarding` skill
+- **Brain resolution (hard rule):** every brain lives in the PROJECT's config root —
+  `<project-root>/.tex-llm/companies/` — where `<project-root>` is the directory the
+  session was started in. Before any team does work: read
+  `.tex-llm/companies/active-company.json`, then the active
+  `.tex-llm/companies/<slug>/profile.json`. If `.tex-llm/` does not exist, bootstrap it
+  (create `.tex-llm/companies/`) before anything else. Never resolve `companies/`
+  against a parent directory, the home directory, or the runpack/plugin clone.
+- **The runpack clone is read-only reference.** The `companies/` directory shipped in
+  this repo (and its plugin-marketplace clone under `~/.claude/plugins/`) holds
+  `_placeholder` seeds only. Never read one as a live brain and never write there —
+  the clone is refreshed from GitHub (writes are silently lost) and is shared by every
+  project (brains would collide). To start from a seed, COPY it into the project's
+  `.tex-llm/companies/<slug>/` and complete it with `/onboard`.
+- A profile with `"_placeholder": true` is not a brain — route to `/onboard` instead of
+  working from its DRAFT fields. No brain → run the `company-onboarding` skill
   (`/onboard`) and always ask the user the onboarding questions (app name, brand assets,
   DB credentials, n8n credentials, other config). Never invent company details.
+- Brains are project-scoped: two projects may hold the same slug; they are independent
+  files — never merge, sync, or symlink them across projects.
 - Route all work through the `orchestration-runpack` skill: one owner, one reviewer,
   hard gates (schemas → cto, design → design-director, fixes → regression-tester).
 - Before working, the owning agent loads its team's skill library (the "Team skill
@@ -44,7 +59,7 @@
   probe the stack, live-verify every credential, at most one batched ask — then deliver
   doc-by-doc against the user's specs.
 - **User-supplied architecture / data-model docs are first-class input**: store them under
-  `companies/<slug>/research/` (or the project's docs folder), route schema work through
+  `.tex-llm/companies/<slug>/research/` (or the project's docs folder), route schema work through
   `/schema` (data-engineer → cto gate), and never redesign what a doc already decides
   without flagging the conflict in one line.
 - **Clients**: Claude Code in a terminal session (Anthropic API key or Claude Max/Pro

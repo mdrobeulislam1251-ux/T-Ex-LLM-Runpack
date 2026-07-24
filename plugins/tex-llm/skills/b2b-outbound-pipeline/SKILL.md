@@ -22,7 +22,7 @@ List feeds Mailbox, Mailbox outcomes land in Track, Track stages the next proces
 Resolve what fills each slot in this order — **the slot is the contract, the tool is
 swappable**:
 
-1. **What the brain wires.** The active `companies/<slug>/profile.json` `credentials`
+1. **What the brain wires.** The active `.tex-llm/companies/<slug>/profile.json` `credentials`
    env-var names are the truth. Build against what IS configured.
 2. **What the project shows.** Sequencer/CRM/config files and API keys referenced by
    env var name (section 0 probes). Never guess.

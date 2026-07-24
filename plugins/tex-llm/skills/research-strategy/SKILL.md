@@ -32,7 +32,7 @@ not averaged.
 ## 3 — Analyze (market-analyst)
 
 - Competitor matrix: features, pricing, positioning, weaknesses-from-reviews —
-  maintained in `companies/<slug>/research/competitors.md`.
+  maintained in `.tex-llm/companies/<slug>/research/competitors.md`.
 - Market sizing with shown math: TAM/SAM/SOM and every assumption listed.
 - Pricing landscape: where the company's packaging fits, where the gaps are.
 

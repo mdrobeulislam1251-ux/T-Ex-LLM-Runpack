@@ -8,12 +8,18 @@ description: Onboard a new company (or app project) into the T-Ex LLM runpack. A
 Every T-Ex LLM agent loads a "company brain" before working. This skill creates that brain.
 **The user never hand-fills brain fields.** They know their company and vision; the
 research team derives everything else. Run this when: the user names a new company/app,
-`companies/active-company.json` is missing, or a `brain-request.json` exists for a
+`.tex-llm/companies/active-company.json` is missing, or a `brain-request.json` exists for a
 company (created by the T-Ex LLM dashboard's Brain Studio).
+
+**Path anchor (hard rule):** every `.tex-llm/companies/...` path below resolves
+against the PROJECT root — the directory this session started in. If
+`<project-root>/.tex-llm/companies/` does not exist, create it before anything else.
+Never read or write the runpack/plugin clone's own `companies/` directory: its
+profiles are `_placeholder` seeds — copy them into the project, never load in place.
 
 ## Step 0 — Check for a dashboard brain request
 
-If `companies/<slug>/brain-request.json` exists, the user already provided their
+If `.tex-llm/companies/<slug>/brain-request.json` exists, the user already provided their
 briefing through the dashboard. Read `company_name` and `user_briefing` from it and
 skip straight to Step 2 (do NOT re-ask what they already wrote). Delete the file after
 Step 3 completes.
@@ -77,13 +83,13 @@ These are the only other things ever asked, because no research can produce them
 
 Create from `templates/company-profile.template.json`:
 
-- `companies/<slug>/profile.json` — fully filled (brain generated, credentials as env
+- `.tex-llm/companies/<slug>/profile.json` — fully filled (brain generated, credentials as env
   var names). If the dashboard already created a draft profile, fill its empty fields
   in place and remove the `brain.generation.status: "pending-research"` marker.
-- `companies/<slug>/brand/brand.md` + `brand/assets/`
-- `companies/<slug>/decisions.md`, `incidents.md`, `research/` (keep the research
+- `.tex-llm/companies/<slug>/brand/brand.md` + `brand/assets/`
+- `.tex-llm/companies/<slug>/decisions.md`, `incidents.md`, `research/` (keep the research
   team's onboarding findings in `research/onboarding-brief.md`)
-- `companies/active-company.json` → `{ "active": "<slug>", "switched_at": "<ISO>" }`
+- `.tex-llm/companies/active-company.json` → `{ "active": "<slug>", "switched_at": "<ISO>" }`
 - Delete `brain-request.json` if it existed.
 
 ## Step 6 — Data foundation (automatic, with review)
@@ -96,12 +102,12 @@ Create from `templates/company-profile.template.json`:
 
 ## Step 7 — Confirm
 
-Report: brain generated at `companies/<slug>/` (research-derived, user-confirmed),
+Report: brain generated at `.tex-llm/companies/<slug>/` (research-derived, user-confirmed),
 env vars registered (names only), schema status, and that all 53 agents now operate
 under this brain. `/company <name>` switches brains any time.
 
 ## Switching companies
 
-`/company <name>`: if `companies/<slug>/profile.json` exists, update
+`/company <name>`: if `.tex-llm/companies/<slug>/profile.json` exists, update
 `active-company.json`. If not, run this onboarding from Step 0. Multiple companies
 coexist; one is active at a time.

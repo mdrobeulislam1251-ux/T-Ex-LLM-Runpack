@@ -11,4 +11,4 @@ tables, credentials referenced from `.env` by name).
 
 If $ARGUMENTS is empty, design the initial schema for the active company's product.
 If credentials are missing from `.env`, route to `/onboard` to collect them properly.
-Log the CTO verdict in `companies/<slug>/decisions.md`.
+Log the CTO verdict in `.tex-llm/companies/<slug>/decisions.md`.

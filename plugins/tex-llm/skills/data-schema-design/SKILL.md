@@ -54,7 +54,7 @@ The cto reviews against this checklist and returns a verdict:
 
 Verdict: **APPROVED** / **CHANGES REQUIRED** (numbered items → back to Phase 2) /
 **REJECTED** (wrong approach; reason and direction stated). Log the ruling in
-`companies/<slug>/decisions.md` with the date.
+`.tex-llm/companies/<slug>/decisions.md` with the date.
 
 ## Phase 4 — Apply (data-engineer + database-engineer)
 

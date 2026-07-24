@@ -117,7 +117,7 @@ Only two things are ever asked for directly, because they can't be researched:
 1. **Brand asset files** — logos, colors, fonts (or brand-designer generates a starter
    identity from the tone)
 2. **Credentials** — database, n8n, other config → stored **only** in gitignored
-   `.env`; `companies/<slug>/profile.json` stores env var **names**, never values
+   `.env`; `.tex-llm/companies/<slug>/profile.json` stores env var **names**, never values
 
 Right after the brain is confirmed, the **data-engineer** derives the initial table
 schema by itself and submits it to the **CTO** for mandatory review — you don't
@@ -160,8 +160,10 @@ Wire Apollo or Clay into List, your own warmed Google-Workspace + sequencer stac
 Mailbox, any CRM into Track — the brain's `credentials` env-var names record what's
 actually wired, agents build against what IS wired (never what's recommended), and
 every gate and threshold in `b2b-outbound-pipeline` applies identically whatever fills
-the slots. The three planned companies ship as pre-wired placeholder brains — complete
-each with `/onboard <slug>` when its turn comes. Their live operational skills currently
+the slots. The three planned companies ship as pre-wired placeholder SEED brains in the runpack's
+own `companies/` directory (reference material only — never loaded in place);
+`/onboard <slug>` copies a seed into your project's `.tex-llm/companies/<slug>/` and
+completes it there when its turn comes. Their live operational skills currently
 run in the separate `Outbound agent` workspace (cold-email suite, consulti-scrape,
 lead-tracking-db, …); porting + scrubbing them into this repo is a planned cycle.
 
@@ -250,21 +252,24 @@ plugins/tex-llm/
   commands/*.md                      # /onboard /company /build /design /schema /fix /team
 dashboard/                           # T-Ex Command Deck (Next.js) — npm run dev
 templates/company-profile.template.json
-companies/                           # company brains; ships consulti / trusted-leads / lead-gen-jay placeholders
+companies/                           # placeholder SEED brains (reference only — live brains: <project-root>/.tex-llm/companies/)
 runpacks/                            # operating docs for external agents (Grok dashboard builder)
 CLAUDE.md                            # core engine rules for this repo
 ```
 
 ## Git-native workflow
 
-Clone → work → push. The dashboard and the runpack both read/write plain repo files,
-so everything versions like code:
+Clone the runpack for the dashboard and reference material. Real work happens in YOUR
+project directory: `/onboard` there creates `<project-root>/.tex-llm/companies/`, and
+the brain versions with the project's own repo — never commit brains into the runpack
+clone (it is refreshed from GitHub and shared by every project):
 
 ```bash
 git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
 cd T-Ex-LLM-Runpack/dashboard && npm install && npm run dev   # the deck
-# ...meanwhile use Claude Code in the repo root: /onboard, /build, /fix ...
-git add companies/ && git commit -m "brain updates" && git push
+# ...meanwhile use Claude Code in YOUR project directory: /onboard, /build, /fix ...
+# in your project repo:
+git add .tex-llm/ && git commit -m "brain updates" && git push
 ```
 
 ## Security model
