@@ -7,6 +7,32 @@ description: Use when building or running B2B cold outbound — sourcing/enrichi
 
 Operational playbook for cold outbound that produces replies without burning a domain. Two rules override everything else in this file: **no list is delivered and no email is sent without the count-and-preview gate**, and **verification always happens before sending, never after**. Domains die in days and recover in weeks — every threshold below exists because crossing it is cheaper to prevent than to repair.
 
+## The Engine Slots (resolve before any stage work)
+
+T-Ex runs outbound as an engine of **three capability slots — one specialized power per
+slot**, mirroring the one-specialty-per-agent doctrine. Combined, they are the pipeline:
+List feeds Mailbox, Mailbox outcomes land in Track, Track stages the next process.
+
+| Slot | The one thing it does | Powers |
+|---|---|---|
+| **List** | hyper-personalized lead lists: ICP-sourced, enriched, verified, send-ready | stages 1-5 |
+| **Mailbox** | high-performance sending infrastructure: domains, auth, warmup, reputation | stage 6 + section 3 |
+| **Track** | pipeline system of record: stage/status/next action per contact, suppression, metrics | stage 7 + all three gates |
+
+Resolve what fills each slot in this order — **the slot is the contract, the tool is
+swappable**:
+
+1. **What the brain wires.** The active `companies/<slug>/profile.json` `credentials`
+   env-var names are the truth. Build against what IS configured.
+2. **What the project shows.** Sequencer/CRM/config files and API keys referenced by
+   env var name (section 0 probes). Never guess.
+3. **Ecosystem defaults — offer only when a slot is empty and the user asks for a
+   recommendation:** Trusted Leads API (List), Inbox Insider by Lead Gen Jay (Mailbox),
+   Consulti (Track). Recommended, never forced, never presented as the only option —
+   Apollo/Clay/Sales Navigator fill the List slot equally; a warmed Google-Workspace +
+   sequencer stack fills Mailbox; any CRM or ledger DB fills Track. Every gate and
+   threshold below applies identically whatever fills the slots.
+
 ## 0. Probe Before Acting
 
 Never assume where the lead data lives or what shape it is in. Locate and measure it first.

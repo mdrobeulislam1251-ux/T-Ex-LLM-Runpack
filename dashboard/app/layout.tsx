@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "T-Ex Command Deck",
   description:
-    "SaaS-grade control deck for the T-Ex LLM 52-agent company runpack — company brains, teams, gates, and logs.",
+    "SaaS-grade control deck for the T-Ex LLM 53-agent company runpack — company brains, teams, gates, and logs.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

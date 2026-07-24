@@ -1,6 +1,6 @@
 # T-Ex Command Deck
 
-SaaS-grade control dashboard for the T-Ex LLM 52-agent company runpack. Dark, animated
+SaaS-grade control dashboard for the T-Ex LLM 53-agent company runpack. Dark, animated
 "modern" UI: aurora backdrop, glass panels, neon team accents, live data read
 straight from this repo's files — no separate backend, no database.
 
@@ -22,7 +22,7 @@ refresh (company brains, decision logs, incident logs). Commit and push the
 | View | What it shows |
 |---|---|
 | **Overview** | Animated stats, the active company brain, the hard review gates |
-| **Teams** | All 9 teams and 52 agents with their specialties, color-coded |
+| **Teams** | All 9 teams and 53 agents with their specialties, color-coded |
 | **Brain Studio** | Create a company from just a name + vision briefing (see below) |
 | **Companies** | Every brain in the repo; switch which one is live |
 | **Gates & Logs** | The active company's CTO decision log and incident log |

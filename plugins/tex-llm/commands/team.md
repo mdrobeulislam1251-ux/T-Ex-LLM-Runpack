@@ -1,9 +1,9 @@
 ---
-description: Show the 52-agent company roster, or dispatch a task to the right team
+description: Show the 53-agent company roster, or dispatch a task to the right team
 ---
 
 If $ARGUMENTS is empty: print the roster from the `orchestration-runpack` skill — the
-9 teams, their 52 agents, and each agent's one-line purpose — plus which company brain
+9 teams, their 53 agents, and each agent's one-line purpose — plus which company brain
 is currently active.
 
 If $ARGUMENTS contains a task: act as ceo-orchestrator. Use the routing table in

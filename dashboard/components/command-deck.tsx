@@ -113,7 +113,7 @@ export function CommandDeck({ data }: { data: DashboardData }) {
           </div>
           <div className="glass flex items-center gap-2 rounded-full px-4 py-2">
             <span className="status-dot live" />
-            <span className="font-mono text-xs text-slate-300">52 agents · 9 teams</span>
+            <span className="font-mono text-xs text-slate-300">53 agents · 9 teams</span>
           </div>
         </header>
 

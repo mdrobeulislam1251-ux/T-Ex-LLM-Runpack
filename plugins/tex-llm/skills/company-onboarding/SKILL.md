@@ -97,7 +97,7 @@ Create from `templates/company-profile.template.json`:
 ## Step 7 — Confirm
 
 Report: brain generated at `companies/<slug>/` (research-derived, user-confirmed),
-env vars registered (names only), schema status, and that all 52 agents now operate
+env vars registered (names only), schema status, and that all 53 agents now operate
 under this brain. `/company <name>` switches brains any time.
 
 ## Switching companies

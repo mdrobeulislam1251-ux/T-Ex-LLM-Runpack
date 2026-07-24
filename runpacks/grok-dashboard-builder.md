@@ -44,7 +44,7 @@ For app-domain data (leads, campaigns, replies, revenue): the `dev/` product exp
 
 ### C. Ecosystem note
 
-Consulti (data), Trusted Leads (verification), Lead Gen Jay (campaigns) are the **recommended** ecosystem — but swappable. Read which tools are actually wired from the brain's `credentials.other` env names; build widgets against what IS configured, not what the ecosystem recommends.
+The outbound engine has three slots, one specialized power each: **List** (hyper-personalized lead lists — Trusted Leads API default), **Mailbox** (high-performance sending infra — Inbox Insider by Lead Gen Jay default), **Track** (everything tracked, ready for the next process — Consulti default). Defaults are **recommended** — but swappable. Read which tools are actually wired from the brain's `credentials.other` env names; build widgets against what IS configured, not what the ecosystem recommends.
 
 ## Design doctrine (condensed from the `dashboard-design` skill — full version at `plugins/tex-llm/skills/dashboard-design/SKILL.md`)
 
