@@ -1,8 +1,9 @@
 # Commercial Brand Identity — Naming Decision & About Copy
 
-*Status: **PROPOSED** — per company policy this is research-derived and takes effect on
-the owner's confirm/adjust pass (merging the PR that carries it is the confirm). Nothing
-here is invented: every claim below is either verified in-repo or sourced.*
+*Status: **CONFIRMED** — research-derived per company policy; the owner's confirm pass
+was the merge of PR #10 (2026-07-24). Applied so far: README title and plugin manifests
+carry the umbrella. Nothing here is invented: every claim below is either verified
+in-repo or sourced.*
 
 ## The decision (recommended)
 
