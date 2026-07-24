@@ -22,3 +22,6 @@ node_modules/
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# standalone launcher: skills are mirrored from plugins/tex-llm/skills at launch
+launcher/.claude-tex/skills/
