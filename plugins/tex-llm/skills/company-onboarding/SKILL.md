@@ -17,6 +17,13 @@ against the PROJECT root — the directory this session started in. If
 Never read or write the runpack/plugin clone's own `companies/` directory: its
 profiles are `_placeholder` seeds — copy them into the project, never load in place.
 
+**Shipped seeds:** if the requested company matches a shipped seed (`consulti`,
+`trusted-leads`, `lead-gen-jay`), COPY the seed into
+`<project-root>/.tex-llm/companies/<slug>/` first and complete it there. Plugin
+installs find the seeds in the marketplace clone at
+`${CLAUDE_PLUGIN_ROOT}/../../companies/<slug>/`; repo clones at
+`<repo>/companies/<slug>/`.
+
 ## Step 0 — Check for a dashboard brain request
 
 If `.tex-llm/companies/<slug>/brain-request.json` exists, the user already provided their
@@ -81,7 +88,9 @@ These are the only other things ever asked, because no research can produce them
 
 ## Step 5 — Write the company brain
 
-Create from `templates/company-profile.template.json`:
+Create from `company-profile.template.json` (shipped in this skill's directory — the
+canonical profile shape the dashboard reads; a repo copy lives at
+`templates/company-profile.template.json`):
 
 - `.tex-llm/companies/<slug>/profile.json` — fully filled (brain generated, credentials as env
   var names). If the dashboard already created a draft profile, fill its empty fields

@@ -8,14 +8,24 @@ without installing the Claude Code plugin.
 ## Launch
 
 ```powershell
-# From any project directory:
+# Windows, from any project directory:
 & "<path-to-repo>\launcher\launch-tex.ps1"
+```
+
+```bash
+# macOS / Linux, from any project directory:
+"<path-to-repo>/launcher/launch-tex.sh"
 ```
 
 The launcher sets `CLAUDE_CONFIG_DIR` to the `.claude-tex` home next to it, mirrors
 the skill set from `plugins/tex-llm/skills/` (the single source of truth — synced on
 every launch so the two modes never drift), then starts Claude Code in your current
 directory.
+
+> **First launch:** Claude Code runs its onboarding (theme + login) once, because
+> `.claude-tex` is a separate config home — your normal `~/.claude` setup is untouched.
+> Everything Claude Code writes there (including credentials) is gitignored; only
+> `CLAUDE.md` and `settings.json` are tracked.
 
 ## What's inside
 

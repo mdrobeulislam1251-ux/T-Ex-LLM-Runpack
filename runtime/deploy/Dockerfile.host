@@ -4,6 +4,6 @@ COPY pyproject.toml setup.py requirements.txt README.md LICENSE ./
 COPY texllm ./texllm
 COPY firmware ./firmware
 RUN pip install --no-cache-dir -e .
-ENV HOST_PORT=8080 LLM_PROVIDER=mock
-EXPOSE 8080
+ENV HOST_PORT=3006 LLM_PROVIDER=mock SERVE_WEB=false
+EXPOSE 3006
 CMD ["python", "-m", "texllm.host.app"]

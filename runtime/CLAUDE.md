@@ -1,4 +1,4 @@
-# T-ex LLM — Claude Code entry
+# T-Ex LLM — Claude Code entry
 
 When the user mentions **@T-ex**, **@tex**, **T-ex**, or team agents (ops/sales/dev/tech/ceo/fulfillment/personal-bd), load and follow:
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "texllm"
 version = "0.1.0"
-description = "T-ex LLM — portable multi-agent host, team workers, and agentic firmware"
+description = "T-Ex LLM — portable multi-agent host, team workers, and agentic firmware"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }

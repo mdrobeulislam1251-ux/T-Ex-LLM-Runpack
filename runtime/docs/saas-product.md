@@ -20,7 +20,7 @@ Hyper-agentic control plane inspired by [Open Design](https://github.com/nexu-io
 Browser (apps/web)
     │  /api proxy or VITE_HOST_URL
     ▼
-texllm Host API  (:8080)     ← team runners + firmware
+texllm Host API  (:3006)     ← team runners + firmware
     │
     ├─ mock | OpenAI-compat LLM
     │

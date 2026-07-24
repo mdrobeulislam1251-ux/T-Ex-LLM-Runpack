@@ -1,4 +1,7 @@
-# T-ex LLM
+# T-Ex LLM — Runtime Host
+
+*The third distribution mode of [T-Ex-LLM-Runpack](../README.md) — the plugin
+(53-agent company) and standalone launcher modes live in the root README.*
 
 **Product:** Company Runbook Agent — pre-loaded **Intent → Deploy** spine for a full company, multi-team agents, multi-provider AI (Claude / ChatGPT / Gemini / Grok via API key or subscription/CLI).
 
@@ -26,9 +29,10 @@ Local CLIs use **their own auth** (e.g. `claude auth login`). That is separate f
 ```bash
 git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
 cd T-Ex-LLM-Runpack/runtime
-bash scripts/setup.sh          # prompts for port (default 3006)
+bash scripts/setup.sh          # prompts for port (default 3006); installs into .venv
+source .venv/bin/activate      # Git Bash on Windows: source .venv/Scripts/activate
 set -a && source .env && set +a
-python3 -m texllm.cli serve
+python -m texllm.cli serve
 ```
 
 Open **http://127.0.0.1:3006/**

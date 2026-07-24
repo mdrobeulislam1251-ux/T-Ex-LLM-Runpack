@@ -48,7 +48,11 @@ need() {
   fi
 }
 
-need python3
+PY="$(command -v python3 || command -v python || true)"
+if [[ -z "$PY" ]]; then
+  echo "ERROR: required command not found: python3 (or python)" >&2
+  exit 1
+fi
 if ! command -v npm >/dev/null 2>&1; then
   echo "WARN: npm not found — web UI build will be skipped. Install Node.js 20+."
   SKIP_WEB_BUILD=1
@@ -75,11 +79,20 @@ if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [[ "$PORT" -lt 1 || "$PORT" -gt 65535 ]]; then
 fi
 
 echo "==> Port: $PORT"
-echo "==> Python: $(python3 --version)"
+echo "==> Python: $("$PY" --version)"
+
+# --- virtualenv (PEP 668-safe: never install into the system interpreter) ---
+if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+  echo "==> Creating virtualenv .venv…"
+  "$PY" -m venv "$ROOT/.venv"
+  # shellcheck disable=SC1091
+  source "$ROOT/.venv/bin/activate" 2>/dev/null || source "$ROOT/.venv/Scripts/activate"
+  PY="$(command -v python)"
+fi
 
 # --- python package ---
 echo "==> Installing Python package…"
-python3 -m pip install -q -e ".[dev]" 2>/dev/null || python3 -m pip install -q -e .
+"$PY" -m pip install -q -e ".[dev]" 2>/dev/null || "$PY" -m pip install -q -e .
 
 # --- web ---
 if [[ "$SKIP_WEB_BUILD" -eq 0 ]]; then
@@ -124,7 +137,7 @@ fi
 
 # --- agent detect ---
 echo "==> Scanning for terminal AI CLIs…"
-python3 -m texllm.cli agents || true
+"$PY" -m texllm.cli agents || true
 
 cat <<EOF
 
@@ -135,8 +148,9 @@ cat <<EOF
 Start (API + Web UI on one port):
 
   cd $ROOT
+  source .venv/bin/activate      # Git Bash on Windows: source .venv/Scripts/activate
   set -a; source .env; set +a    # bash/zsh
-  python3 -m texllm.cli serve
+  python -m texllm.cli serve
 
   # or:
   texllm serve --port $PORT

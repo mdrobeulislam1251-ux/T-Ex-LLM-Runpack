@@ -1,4 +1,4 @@
-# T-ex LLM — Quickstart (open source)
+# T-Ex LLM — Quickstart (open source)
 
 One project: **host API + web console + team runners + optional local terminal AI CLIs**.
 
@@ -66,7 +66,8 @@ bash scripts/setup.sh --port 8088
 
 ```bash
 set -a && source .env && set +a   # bash/zsh
-python3 -m texllm.cli serve
+source .venv/bin/activate   # created by setup.sh (Git Bash: .venv/Scripts/activate)
+python -m texllm.cli serve
 ```
 
 Open:
@@ -92,7 +93,8 @@ http://127.0.0.1:3006/
    cd T-Ex-LLM-Runpack/runtime
    bash scripts/setup.sh --port 3006
    source .env
-   python3 -m texllm.cli serve
+   source .venv/bin/activate   # created by setup.sh (Git Bash: .venv/Scripts/activate)
+   python -m texllm.cli serve
    ```
 4. Optional local agents (examples — install only what you use):
    ```bash
@@ -117,7 +119,8 @@ git clone https://github.com/mdrobeulislam1251-ux/T-Ex-LLM-Runpack.git
 cd T-Ex-LLM-Runpack/runtime
 bash scripts/setup.sh --port 3006
 set -a && source .env && set +a
-python3 -m texllm.cli serve
+source .venv/bin/activate   # created by setup.sh (Git Bash: .venv/Scripts/activate)
+python -m texllm.cli serve
 ```
 
 Open firewall only if you intend LAN access (see [REMOTE-ACCESS.md](./REMOTE-ACCESS.md)):
