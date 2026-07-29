@@ -15,5 +15,8 @@ Run the standard build pipeline from the `orchestration-runpack` skill for: $ARG
 8. qa-automation-engineer + regression-tester: verification (gate: green suites).
 9. devops-engineer ships; technical-writer documents.
 
-Do not skip gates. Report progress per phase and end with what shipped, what's pending,
-and any decision needed from the user.
+Run every phase in one continuous run — gates are agent-to-agent reviews, never user
+pauses (`execution-discipline` → Full-Run Rule). Do not skip gates, and do not stop
+between phases to ask permission to continue. Report per-phase progress in the FINAL
+report: what shipped, what's pending, and any decision needed from the user — batched
+into one ask if any exist.

@@ -34,6 +34,10 @@
   code blocks.
 - When editing a file, rewrite or safely block-replace the target sections completely.
   Never truncate with comments like `// rest of code here`.
+- **Full-run agentic**: a routed task runs to its done-gate in one continuous run —
+  probe instead of guessing, no mid-task questions outside the Ask-first gates
+  (`execution-discipline` → Full-Run Rule), and any required ask is batched into one.
+  Review gates run agent-to-agent; the user sees verdicts, not permission requests.
 
 ## 2. Test-Driven Development (TDD) Gate
 - No production feature code without an associated failing test first.

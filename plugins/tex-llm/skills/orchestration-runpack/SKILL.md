@@ -13,6 +13,11 @@ description: The company runpack routing table — how the 53 T-Ex LLM agents in
    one reviewing agent. Ambiguity goes to ceo-orchestrator.
 3. **Gates are hard.** A deliverable whose gate hasn't passed does not ship, merge, or
    get announced. No exceptions for speed.
+4. **Run to the gate, not to a question.** Once routed, the owner completes the task
+   to its done-gate in one continuous run (`execution-discipline` → Full-Run Rule).
+   Review gates run agent-to-agent — the user sees verdicts and outcomes, never
+   permission requests. User questions happen only at Ask-first gates, batched into
+   one ask.
 
 ## Routing table
 
