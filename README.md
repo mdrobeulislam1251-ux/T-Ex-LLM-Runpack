@@ -1,6 +1,19 @@
 # T-Ex LLM — The Full Company Runpack
 
-*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product)*
+*(repo: T-Ex-LLM-Runpack — the single combined version of the agent product.
+The former `T-Ex-LLM-Agent` and `T-ex-LLM` repos are merged in here with full
+history — see `launcher/` and `runtime/` — and are archived.)*
+
+**One repo, three distribution modes:**
+
+1. **Plugin mode** (this runpack) — the 53-agent company inside Claude Code:
+   `/plugin install tex-llm@tex-llm`, driven by the per-project company brain.
+2. **Standalone launcher** (`launcher/`) — one portable T-Ex agent (dev + ops +
+   strategy persona) launched via `launcher/launch-tex.ps1` from any project;
+   skills mirror `plugins/tex-llm/skills/` at every launch.
+3. **Runtime host** (`runtime/`) — the self-hosted Python product: FastAPI host +
+   React operator console on port 3006, Company Runbook spine (Intent → Deploy),
+   multi-provider auth, agent-CLI detect/spawn, `tex` workspace CLI.
 
 A **company-in-a-box** for terminal AI sessions: **53 specialist agents in 9 teams backed
 by 44 deep doctrine skills**, driven by a switchable **company brain** (scope, vision,
@@ -12,7 +25,7 @@ exactly one discipline — and every outside capability T-Ex leans on fills exac
 slot (lead lists, mailboxes, tracking, …). Specialists and specialist tools don't
 overlap; the orchestrator combines them into one engine.
 
-**Two modes, one runpack:**
+**Two operating modes (within plugin mode):**
 
 - **Founder mode** — build a sellable product from scratch, strategy-first: T-Ex wakes
   as the **strategist** (`strategy-workspace`), locks direction with you, scaffolds the
@@ -94,11 +107,14 @@ CTO decision + incident logs — read live from the repo files.
 
 ```bash
 cd dashboard && npm install && npm run dev   # → http://localhost:4100
+# Point the deck at YOUR project (rule 0) or it is a read-only seed viewer:
+# TEX_PROJECT_ROOT=/path/to/your/project npm run dev
 ```
 
 Runs on any computer with Node.js ≥ 18 (`winget install OpenJS.NodeJS.LTS` on Windows /
 `brew install node` on macOS). Clone the repo on that machine, run the two commands,
-open the browser — the deck reads the live repo files next to it.
+open the browser — agents/skills/gates read live from the repo files next to it; company
+brains read from `TEX_PROJECT_ROOT` (your project's `.tex-llm/companies/`).
 
 Its **Brain Studio** creates companies from nothing but a name and a vision briefing —
 see the next section.
@@ -254,6 +270,8 @@ dashboard/                           # T-Ex Command Deck (Next.js) — npm run d
 templates/company-profile.template.json
 companies/                           # placeholder SEED brains (reference only — live brains: <project-root>/.tex-llm/companies/)
 runpacks/                            # operating docs for external agents (Grok dashboard builder)
+launcher/                            # standalone portable T-Ex agent (merged from T-Ex-LLM-Agent)
+runtime/                             # self-hosted FastAPI host + React console (merged from T-ex-LLM)
 CLAUDE.md                            # core engine rules for this repo
 ```
 
@@ -280,3 +298,7 @@ git add .tex-llm/ && git commit -m "brain updates" && git push
 - Database and n8n access always flows through those references.
 - The security-engineer reviews auth and secrets handling; the CTO gates anything
   credential-adjacent.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE). The `runtime/` subproject ships the same license.

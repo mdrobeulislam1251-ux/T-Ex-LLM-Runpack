@@ -1,7 +1,7 @@
 {
   "name": "tex-llm",
   "description": "T-Ex LLM company runpack — 53 specialist agents in 9 teams backed by 44 deep doctrine skills (native app dev — 6 per-platform native toolkits + Avalonia cross-platform desktop, UI/UX, segment/intent dashboard design, app security, APIs, data engineering, DevOps, multi-server SSH fleet management + identity builder + app hosting/exposure over local SSH, agent environment setup with Context7/MCPs, strategy-first workspace onboarding, Linear PM sync), two operating modes (founder from-scratch / developer in any existing codebase), a three-slot outbound engine (List / Mailbox / Track — one specialized power per slot, ecosystem defaults swappable for any outbound tool), driven by a switchable per-company brain with onboarding, credential-safe config, on-need team activation, and hard review gates.",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "author": {
     "name": "mdrobeulislam1251-ux",
     "email": "mdrobeulislam1251@gmail.com"

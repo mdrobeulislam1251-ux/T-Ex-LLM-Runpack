@@ -10,6 +10,7 @@ This file makes the runpack usable from ANY agentic client — Cursor, Claude Co
 4. Company context lives in the PROJECT's config root: `<project-root>/.tex-llm/companies/<slug>/profile.json` (active one named by `.tex-llm/companies/active-company.json`). The runpack clone's own `companies/` directory holds `_placeholder` seeds — reference only, never load or edit them as a live brain. No brain → run onboarding before feature work. Never invent company details.
 5. Secrets: values in `.env` only (gitignored); everything else references env var NAMES. Never print or commit secret values.
 6. Done = run-verified (build runs, test passes, endpoint answers). Exit code 0 alone is "compiled", not "works".
+7. Full-run agentic: a routed task runs to its done-gate in one continuous run — probe instead of guessing; questions to the user only at the Ask-first gates in `execution-discipline` (spend, deletion, secrets, external sends, scope change), batched into a single ask. Review gates run agent-to-agent — report verdicts, not permission requests.
 
 ## Client notes
 

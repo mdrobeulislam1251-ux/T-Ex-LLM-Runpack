@@ -22,3 +22,10 @@ node_modules/
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# standalone launcher home: Claude Code writes its runtime state here (including
+# .credentials.json OAuth tokens) — track ONLY the two authored files. skills/ is
+# mirrored from plugins/tex-llm/skills at launch.
+launcher/.claude-tex/*
+!launcher/.claude-tex/CLAUDE.md
+!launcher/.claude-tex/settings.json

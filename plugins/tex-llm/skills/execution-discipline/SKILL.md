@@ -61,6 +61,30 @@ The single-path rule does NOT mean never asking. Some decisions belong to the us
 | Permission to read files/logs/configs needed for the named task | NO | Theater — reading local state is part of doing X |
 | "Should I verify this first?" | NO | Theater — verification is never optional |
 
+## Full-Run Rule — routed means run to the end
+
+A routed task runs to its named endpoint in ONE continuous run. Stopping mid-task for
+anything outside the Ask-first rows above is a failed run, not caution.
+
+- **Probe before asking, always.** A question the terminal can answer is never asked:
+  file contents, configured tools, wired credentials (env var NAMES only), row counts,
+  current state — probe them (`environment-recon`). Guessing is eliminated by probing
+  more, never by asking more.
+- **Internal gates are not user stops.** cto, design-director, regression-tester and
+  every other review gate runs agent-to-agent inside the run. The user sees gate
+  VERDICTS in the final report — never "may I submit this to the CTO?".
+- **Required asks are batched into ONE.** When Ask-first rows genuinely apply (spend,
+  deletion, secrets, external sends, scope change) or a doctrine gate is user-facing
+  (onboarding inputs, count-and-preview before list delivery/send), collect everything
+  into a single ask at the earliest point it is knowable — then continue all separable
+  work while waiting. Dribbling questions one at a time is the same failure as
+  stopping.
+- **Banned stop phrases** — each is theater once the task was named: "Shall I
+  proceed?", "Want me to continue?", "Should I do the next phase?", "Let me know if
+  you'd like me to…". The named ask already authorized the run.
+- **Blocked ≠ stopped.** A real blocker uses the blocked format below and proceeds
+  with the best next move unless overridden — it never silently parks the task.
+
 ## Check State, Never Memory
 
 Before proposing or changing anything, read the real current state. State drifts between messages: files get edited outside the session, branches move, services restart.
@@ -147,6 +171,7 @@ Violations: pushing to the registry (build ≠ deploy), running the container in
 - [ ] Every side-issue: exactly one line, zero action taken.
 - [ ] Zero option menus for internal decisions; questions only from the Ask-first rows.
 - [ ] Every done-claim states its verification level; Level 1 claims have observed output behind them.
+- [ ] The named task ran to its endpoint this turn — or the reply carries exactly ONE batched ask (Ask-first rows only) or one blocked line, with all separable work already done.
 - [ ] No absolute machine paths, hostnames, usernames, or secrets in anything produced for the user's repo.
 
 Any unchecked box = the reply is not ready. Fix it, then send.

@@ -20,6 +20,9 @@
   DB credentials, n8n credentials, other config). Never invent company details.
 - Brains are project-scoped: two projects may hold the same slug; they are independent
   files — never merge, sync, or symlink them across projects.
+- Disambiguation: the runtime host's workspace "brains" (`runtime/` — `tex brain`,
+  SQLite rows) are that product's own data, NOT company brains. Neither kind is ever
+  written into the other's store (see `runtime/CLAUDE.md`).
 - Route all work through the `orchestration-runpack` skill: one owner, one reviewer,
   hard gates (schemas → cto, design → design-director, fixes → regression-tester).
 - Before working, the owning agent loads its team's skill library (the "Team skill
@@ -31,6 +34,10 @@
   code blocks.
 - When editing a file, rewrite or safely block-replace the target sections completely.
   Never truncate with comments like `// rest of code here`.
+- **Full-run agentic**: a routed task runs to its done-gate in one continuous run —
+  probe instead of guessing, no mid-task questions outside the Ask-first gates
+  (`execution-discipline` → Full-Run Rule), and any required ask is batched into one.
+  Review gates run agent-to-agent; the user sees verdicts, not permission requests.
 
 ## 2. Test-Driven Development (TDD) Gate
 - No production feature code without an associated failing test first.

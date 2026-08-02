@@ -17,4 +17,7 @@ Path anchor (hard rule): `.tex-llm/` resolves at the PROJECT root — the direct
 this session started in. If `<project-root>/.tex-llm/companies/` is missing,
 create it first. Never read or write the runpack/plugin clone's own `companies/`
 directory — its profiles are `_placeholder` seeds (copy in, never load in place),
-and a profile with `"_placeholder": true` is never an active brain.
+and a profile with `"_placeholder": true` is never an active brain. If the name
+matches a shipped seed (consulti / trusted-leads / lead-gen-jay), copy the seed from
+`${CLAUDE_PLUGIN_ROOT}/../../companies/<slug>/` (marketplace clone) or
+`<repo>/companies/<slug>/` into the project first, then complete it.

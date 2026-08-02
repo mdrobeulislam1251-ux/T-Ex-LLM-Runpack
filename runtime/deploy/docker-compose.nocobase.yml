@@ -1,0 +1,17 @@
+# Optional lightweight admin backend (NocoBase) for T-ex LLM operators.
+# Usage: docker compose -f deploy/docker-compose.nocobase.yml up -d
+services:
+  nocobase:
+    image: nocobase/nocobase:latest
+    restart: unless-stopped
+    ports:
+      - "13000:80"
+    environment:
+      # Standalone app DB inside container for MVP
+      DB_DIALECT: sqlite
+      APP_KEY: texllm-nocobase-dev-change-me
+    volumes:
+      - nocobase_storage:/app/nocobase/storage
+
+volumes:
+  nocobase_storage:

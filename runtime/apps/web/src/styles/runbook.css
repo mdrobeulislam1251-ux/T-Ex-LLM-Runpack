@@ -1,0 +1,392 @@
+/* Company Runbook — clean product UI (not a dark gimmick console) */
+
+.runbook {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+  font-family: Inter, system-ui, sans-serif;
+  color: #18181b;
+  background: #fafafa;
+  min-height: 100vh;
+}
+
+.runbook * {
+  box-sizing: border-box;
+}
+
+.rb-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.rb-kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.runbook h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.rb-tagline {
+  margin: 0;
+  color: #52525b;
+  font-size: 15px;
+  max-width: 42ch;
+}
+
+.rb-progress-block {
+  min-width: 240px;
+}
+
+.rb-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #52525b;
+  margin-bottom: 6px;
+}
+
+.rb-progress-track {
+  height: 6px;
+  background: #e4e4e7;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rb-progress-fill {
+  height: 100%;
+  background: #18181b;
+  border-radius: 99px;
+  transition: width 0.25s ease;
+}
+
+.rb-company {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rb-company label,
+.rb-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #52525b;
+}
+
+.rb-company input,
+.rb-field input,
+.rb-field textarea {
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: #fff;
+}
+
+.rb-card {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.rb-card h2 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.rb-muted {
+  color: #71717a;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.rb-muted.mono,
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.rb-providers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.rb-prov {
+  text-align: left;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rb-prov strong {
+  font-size: 13px;
+}
+
+.rb-prov span {
+  font-size: 11px;
+  color: #71717a;
+  line-height: 1.35;
+}
+
+.rb-prov.on {
+  border-color: #18181b;
+  background: #fff;
+  box-shadow: 0 0 0 1px #18181b;
+}
+
+.rb-connect {
+  display: grid;
+  gap: 12px;
+}
+
+.rb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rb-btn {
+  align-self: flex-start;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #e4e4e7;
+  background: #f4f4f5;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.rb-btn.primary {
+  background: #18181b;
+  color: #fff;
+  border-color: #18181b;
+}
+
+.rb-btn.ghost {
+  background: #fff;
+}
+
+.rb-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .rb-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rb-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 12px;
+}
+
+.rb-phase {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.rb-phase .num {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #f4f4f5;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rb-phase .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rb-phase strong {
+  font-size: 13px;
+}
+
+.rb-phase em {
+  font-style: normal;
+  font-size: 11px;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rb-phase.active {
+  border-color: #18181b;
+}
+
+.rb-phase.done .num {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.rb-phase.running {
+  border-color: #ca8a04;
+}
+
+.rb-phase.running .num {
+  background: #fef3c7;
+  color: #92400e;
+  animation: rbPulse 1s ease-in-out infinite;
+}
+
+@keyframes rbPulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.rb-detail {
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.rb-detail h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.rb-detail h3 {
+  margin: 20px 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rb-agent {
+  font-size: 13px;
+  color: #52525b;
+}
+
+.rb-agent code {
+  font-size: 12px;
+  background: #f4f4f5;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.rb-placeholders {
+  display: grid;
+  gap: 10px;
+}
+
+.rb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rb-outputs {
+  margin: 0;
+  padding-left: 18px;
+  color: #52525b;
+  font-size: 14px;
+}
+
+.rb-result {
+  margin: 0;
+  padding: 12px;
+  background: #fafafa;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  font-size: 12px;
+  overflow: auto;
+  max-height: 320px;
+  white-space: pre-wrap;
+}
+
+.rb-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.rb-ok {
+  background: #f0fdf4;
+  color: #166534;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.rb-footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e4e7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #52525b;
+}
+
+.rb-footer code {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  background: #f4f4f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.rb-links {
+  display: flex;
+  gap: 12px;
+}
+
+.rb-links a {
+  color: #18181b;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
