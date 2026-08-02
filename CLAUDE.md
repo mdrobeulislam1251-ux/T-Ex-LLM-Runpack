@@ -1,4 +1,8 @@
-# T-Ex LLM Core Engine Rules
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+Sections 0–5 are the T-Ex LLM core engine rules (behavioral doctrine — they govern how work is routed and gated). Sections 6–7 are the developer reference for this repo itself. The `runtime/` subproject carries its own `CLAUDE.md` — read it before touching anything under `runtime/`. Cross-client rules for Cursor and other agents live in `AGENTS.md`.
 
 ## 0. Company Brain First
 - **Brain resolution (hard rule):** every brain lives in the PROJECT's config root —
@@ -89,3 +93,48 @@
   a slot; the brain records the user's actual tools as env var names, and teams build
   against what is wired, not what is recommended (`b2b-outbound-pipeline` → "The Engine
   Slots").
+
+## 6. Commands (per surface — nothing builds at repo root)
+
+```bash
+# Dashboard — T-Ex Command Deck (Next.js 14 + Tailwind, port 4100)
+cd dashboard && npm install && npm run dev      # dev server on :4100
+npm run build && npm run start                  # production
+npm run lint
+
+# Runtime host — FastAPI + team runners (Python ≥3.9)
+cd runtime && bash scripts/setup.sh --port 3006 --non-interactive   # one-time: .venv, editable install, web build
+set -a && source .env && set +a && source .venv/bin/activate
+python -m texllm.cli serve                      # host API + web console on :3006
+pytest                                          # all tests (needs the .venv; config in pyproject.toml)
+pytest tests/test_runner.py -k <expr>           # single file / single test
+python -m texllm.cli agents                     # detect terminal AI CLIs on PATH
+
+# Runtime web console (React 19 + Vite, served from runtime host)
+cd runtime/apps/web && npm install && npm run dev
+npm run build                                   # tsc --noEmit typecheck + vite build → dist/ served by host
+
+# Plugin (no build step — Markdown/JSON + one Node hook)
+#   install into a Claude Code session: /plugin install tex-llm@tex-llm
+cd plugins/tex-llm && node hooks/chat-capture.mjs --dry-run --transcript <sample.jsonl>   # chat-brain harness
+
+# Launcher — portable standalone mode (macOS/Linux; PowerShell twin exists)
+bash launcher/launch-tex.sh
+```
+
+## 7. Repo map & architecture
+
+| Surface | What it is |
+|---|---|
+| `plugins/tex-llm/` | THE product: marketplace plugin — 53 agents in 9 teams, 44 skills, 7 slash commands, chat-brain hook |
+| `dashboard/` | Command Deck UI + the external-agent API contract (`/api/runpack`, `/api/active`, `/api/brain`) |
+| `runtime/` | Self-hosted multi-agent host: FastAPI + SQLite workspace + React console + firmware packages (own docs, tests, CLAUDE.md) |
+| `launcher/` | Portable standalone Claude Code home (`.claude-tex/`) |
+
+- **Plugin anatomy**: `agents/<team>/<role>.md` = persona only; `skills/<name>/SKILL.md` = the doctrine (routing map: `skills/orchestration-runpack/SKILL.md`); `commands/*.md` = `/onboard /company /build /design /schema /fix /team`; `hooks/` + `migrations/` = the chat-brain. The plugin version lives in BOTH `plugins/tex-llm/.claude-plugin/plugin.json` and root `.claude-plugin/marketplace.json` (`metadata.version`) — always bump them in sync.
+- **Chat-brain hook** (`plugins/tex-llm/hooks/chat-capture.mjs`, registered for the `Stop` event in `hooks/hooks.json`): on every completed turn it extracts the turn from the transcript, redacts secret shapes, appends to the running project's `.claude/chat-log.jsonl` (always; 1000-turn bound, cursor-deduped) and best-effort POSTs to a DB when `CHATBRAIN_DB_URL`/`CHATBRAIN_DB_KEY` (or Supabase env fallbacks) are set — table from `migrations/arion_chatlog.sql`. Hard contract: it never throws and always exits 0; never "improve" it in a way that can throw or block a turn.
+- **Launcher mirrors skills**: `launcher/launch-tex.sh` rsyncs `plugins/tex-llm/skills/` into `launcher/.claude-tex/skills/` on every launch. Edit skills ONLY in the plugin — the launcher copy is generated, and `.claude-tex/` is gitignored except its `CLAUDE.md` and `settings.json`.
+- **`runtime/` is a subproject on purpose**: own `pyproject.toml` (console scripts `tex`, `t-ex`, `texllm`, `texllm-host`, `texllm-run`, `texllm-serve`), own docs (`runtime/docs/QUICKSTART.md`, `AUTH.md`, `WORKSPACE.md`, `architecture.md`), playbooks for external agents, and unit tests in `runtime/tests/`. Provider resolution is Claude-CLI-first, then API keys, then mock. Its SQLite "workspace brains" are not company brains (§0).
+- **Firmware lifecycle** (runtime): workspace teams/brains/skills live in SQLite (7 seeded teams) → `tex export <team>` (or `POST /v1/workspace/teams/{slug}/export-firmware`) generates `firmware/<team>-agents/` — manifest.yaml with the four runner roles (planner/executor/reviewer/integrator) plus a prompt file per brain → team runs (`tex run <team> "goal"`) prefer that package and fall back to `firmware/sample-assistant` → `TeamRunner` executes plan → draft/review retry loop → integrate, under the manifest's iteration/retry limits. Everything the runtime touches (`.env`, `firmware/`, `.texllm/workspace.db`, `.texllm/credentials.json`) resolves against the CWD the host/CLI starts in — one directory = one workspace.
+- **Reference-only directories**: `companies/` = `_placeholder` seed brains; `templates/` = copyable configs (company profile, fleet registry, n8n, agent-runner, statusline); `runpacks/` = operating contracts for external agents (Grok dashboard/brand builders, web-dev pipeline); `scripts/linear-bootstrap.sh` = Linear PM seeding.
+- **CI**: the only workflows are Claude Code review/mention actions (`.github/workflows/claude-code-review.yml`, `claude.yml`) — there is no test/build CI; run-verification happens locally per the TDD gate.

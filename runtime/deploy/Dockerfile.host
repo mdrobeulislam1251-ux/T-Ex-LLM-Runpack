@@ -3,7 +3,13 @@ WORKDIR /app
 COPY pyproject.toml setup.py requirements.txt README.md LICENSE ./
 COPY texllm ./texllm
 COPY firmware ./firmware
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -e . \
+ && useradd --create-home --uid 10001 texllm \
+ && chown -R texllm:texllm /app
 ENV HOST_PORT=3006 LLM_PROVIDER=mock SERVE_WEB=false
 EXPOSE 3006
+# Non-root: the workspace (.texllm/, firmware/) lives under /app, and the Claude
+# CLI refuses --dangerously-skip-permissions as root, so a root image silently
+# breaks Claude-CLI-first provider resolution.
+USER texllm
 CMD ["python", "-m", "texllm.host.app"]
