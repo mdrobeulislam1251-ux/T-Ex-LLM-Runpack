@@ -44,6 +44,18 @@ def run_team_flow(
     fw_id = "sample-assistant"
     fw_ver = "0.1.0"
     pkg = Path(settings.firmware_dir) / f"{team['slug']}-agents"
+    if not (pkg / "manifest.yaml").is_file():
+        # Fresh workspace (a user project dir): sample-assistant only ships inside
+        # the runtime checkout, so generate this team's firmware from its seeded
+        # brains/skills instead of failing the very first run.
+        try:
+            from texllm.workspace.export_firmware import export_team_firmware
+
+            export_team_firmware(
+                team["slug"], firmware_root=Path(settings.firmware_dir), db=db
+            )
+        except Exception:  # noqa: BLE001 — fall through to sample-assistant
+            pass
     if (pkg / "manifest.yaml").is_file():
         fw_id = f"{team['slug']}-agents"
         try:
