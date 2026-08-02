@@ -8,10 +8,11 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
 
 from texllm import __version__
 from texllm.agents.detect import detect_report
@@ -394,8 +395,7 @@ def workspace_team_run_async(
     This is the dispatch surface for UIs (Command Deck) that need a job id
     right away instead of holding a request open for the whole run.
     """
-    from texllm.workspace import get_workspace
-    from texllm.workspace.team_run import prepare_team_job
+    from texllm.host.dispatch import dispatch_team_job
 
     goal = str(body.get("goal") or "").strip()
     if not goal:
@@ -403,29 +403,11 @@ def workspace_team_run_async(
     mode = str(body.get("mode") or "chat").strip() or "chat"
     workdir = str(body.get("workdir") or "").strip() or None
     try:
-        team, job = prepare_team_job(slug, goal, mode=mode, workdir=workdir)
+        team, job = dispatch_team_job(
+            slug, goal, store=store, mode=mode, workdir=workdir
+        )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Team not found") from exc
-    store.put(job)
-    team_id = team["id"]
-
-    def _run_and_log() -> None:
-        queued = store.get(job.id)
-        if not queued:
-            return
-        updated = TeamRunner().run_job(queued)
-        store.put(updated)
-        try:
-            get_workspace().log_activity(
-                team_id,
-                "flow_run",
-                f"Flow: {goal[:80]}",
-                f"status={updated.status.value} mode={updated.mode}",
-            )
-        except Exception:  # noqa: BLE001 — activity log must never kill a run
-            logger.debug("activity log failed for job %s", job.id)
-
-    threading.Thread(target=_run_and_log, daemon=True).start()
     return {
         "job_id": job.id,
         "team": team["slug"],
@@ -899,6 +881,61 @@ def patch_aliases(
     return alias_store.patch(updates)
 
 
+# ----- Messaging channels (docs/CHANNELS.md) -----
+# Webhook routes are deliberately OUTSIDE require_api_key: chat platforms
+# cannot send custom headers, so each adapter authenticates with its
+# platform's own mechanism (signature / secret token / JWT) over the raw body.
+
+
+def _channel_response(resp: "object") -> Response:
+    from texllm.channels.base import WebhookResponse
+
+    assert isinstance(resp, WebhookResponse)
+    if resp.text is not None:
+        return PlainTextResponse(resp.text, status_code=resp.status_code)
+    return JSONResponse(resp.json_body or {"ok": True}, status_code=resp.status_code)
+
+
+def _channel_request(raw: bytes, request: Request, method: str) -> "object":
+    from texllm.channels.base import WebhookRequest
+
+    return WebhookRequest(
+        body=raw,
+        headers={k.lower(): v for k, v in request.headers.items()},
+        query=dict(request.query_params),
+        method=method,
+    )
+
+
+@app.get("/v1/channels")
+def channels_status(_: None = Depends(require_api_key)) -> dict:
+    """Adapter status: configured channels, allowlist counts, flags.
+    Counts and names only — never secret values."""
+    from texllm.channels.service import get_channel_service
+
+    return get_channel_service().status_report()
+
+
+@app.get("/v1/channels/{channel}/webhook")
+async def channel_webhook_get(channel: str, request: Request) -> Response:
+    from texllm.channels.service import get_channel_service
+
+    wreq = _channel_request(b"", request, "GET")
+    resp = await run_in_threadpool(get_channel_service().handle_get, channel, wreq)
+    return _channel_response(resp)
+
+
+@app.post("/v1/channels/{channel}/webhook")
+async def channel_webhook_post(channel: str, request: Request) -> Response:
+    from texllm.channels.service import get_channel_service
+
+    raw = await request.body()  # exact wire bytes — HMAC verification needs them
+    wreq = _channel_request(raw, request, "POST")
+    # threadpool: adapter sends are blocking httpx calls (bounded ~10s timeouts)
+    resp = await run_in_threadpool(get_channel_service().handle_post, channel, wreq)
+    return _channel_response(resp)
+
+
 @app.get("/health")
 def health(settings: Settings = Depends(_settings)) -> dict:
     from texllm.providers import describe_active_provider
@@ -1093,6 +1130,19 @@ def main() -> None:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level.upper())
     _mount_web(settings)
+    # Opt-in convenience: run the Telegram long-poll worker inside `serve`.
+    # Only when no webhook secret is set — Telegram forbids webhook + getUpdates
+    # together. Lives here (not a FastAPI startup hook) so TestClient never
+    # spawns it.
+    if (
+        settings.telegram_poll_on_serve
+        and settings.telegram_bot_token.strip()
+        and not settings.telegram_webhook_secret.strip()
+    ):
+        from texllm.channels.service import get_channel_service
+        from texllm.channels.telegram_poll import start_poller_thread
+
+        start_poller_thread(get_channel_service())
     logger.info(
         "T-ex LLM listening on %s:%s (web=%s, local_cli=%s)",
         settings.host_bind,
