@@ -19,6 +19,10 @@ __pycache__/
 # Node
 node_modules/
 
+# Chat-brain local logs (hooks/chat-capture.mjs) — turn memory stays local
+**/.claude/chat-log.jsonl
+**/.claude/chat-log.cursor
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

@@ -257,6 +257,31 @@ the real file is **gitignored**, only the placeholder ships (same for `ssh-confi
 | Bug fixes | **regression-tester** (test added + suites green) |
 | Releases | **engineering-manager** + **qa-automation-engineer** |
 
+## The chat-brain (realtime turn memory)
+
+The plugin ships a `Stop` hook (`hooks/chat-capture.mjs`) — the team's nervous system.
+On every completed turn it extracts that turn from the session transcript (user ask,
+assistant reply, tools used, files touched, verification harnesses run, gate blocks),
+**redacts secrets before anything is written** (Stripe / Supabase / GitHub / AWS key
+shapes and JWTs are masked), and appends one JSON row to a durable log:
+
+- **Always**: local JSONL at `.claude/chat-log.jsonl` in the project, bounded to the
+  last 1000 turns, with a cursor file so a turn is never double-logged.
+- **Optional**: a best-effort POST of the same row to a Postgres/Supabase table when
+  the DB env vars below are set. No DB configured → JSONL-only. The post (and the hook
+  as a whole) can never block or fail a turn: it never throws and always exits 0.
+
+Apply `migrations/arion_chatlog.sql` to a project's own database to enable the durable
+store (idempotent; RLS enabled with no policies — service-role only). Env knobs — values
+live in `.env`/`.env.local` per the security model, never in profiles or code:
+
+| Env var | Meaning | Default |
+|---|---|---|
+| `CHATBRAIN_DB_URL` | PostgREST/Supabase base URL (falls back to `SUPABASE_URL`, then `NEXT_PUBLIC_SUPABASE_URL`) | unset → JSONL-only |
+| `CHATBRAIN_DB_KEY` | service-role key (falls back to `SUPABASE_SERVICE_ROLE_KEY`) | unset → JSONL-only |
+| `CHATBRAIN_DB_SCHEMA` | Postgres schema for the table (falls back to `NEXT_PUBLIC_SUPABASE_SCHEMA`) | DB default (`public`) |
+| `CHATBRAIN_TABLE` | table name | `arion_chatlog` |
+
 ## Repository layout
 
 ```
@@ -266,6 +291,9 @@ plugins/tex-llm/
   agents/<team>/<role>.md            # the 53 agents
   skills/<skill>/SKILL.md            # the 44 doctrine skills
   commands/*.md                      # /onboard /company /build /design /schema /fix /team
+  hooks/hooks.json                   # Stop-hook registration (chat-brain)
+  hooks/chat-capture.mjs             # realtime chat-brain — logs each turn, redacted
+  migrations/arion_chatlog.sql       # optional DB store for the chat-brain
 dashboard/                           # T-Ex Command Deck (Next.js) — npm run dev
 templates/company-profile.template.json
 companies/                           # placeholder SEED brains (reference only — live brains: <project-root>/.tex-llm/companies/)
