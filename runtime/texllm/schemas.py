@@ -54,6 +54,8 @@ class JobCreate(BaseModel):
     firmware_version: str = "0.1.0"
     input: Dict[str, Any] = Field(default_factory=dict)
     goal: str = ""
+    # "chat" = text draft loop; "code" = executor drives a real coding agent
+    mode: str = "chat"
 
 
 class JobResult(BaseModel):
@@ -71,6 +73,7 @@ class Job(BaseModel):
     firmware_version: str
     goal: str
     input: Dict[str, Any] = Field(default_factory=dict)
+    mode: str = "chat"
     status: JobStatus = JobStatus.queued
     result: Optional[JobResult] = None
     error: Optional[str] = None

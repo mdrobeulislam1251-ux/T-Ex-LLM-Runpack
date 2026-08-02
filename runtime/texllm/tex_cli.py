@@ -49,6 +49,18 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("team", help="Team slug")
     p_run.add_argument("goal", nargs="+", help="Goal text")
     p_run.add_argument("--json", action="store_true")
+    p_run.add_argument(
+        "--code",
+        action="store_true",
+        help="Code mode: the executor drives a real coding agent (claude CLI) "
+        "that edits files in a per-run workdir and returns diff artifacts",
+    )
+    p_run.add_argument(
+        "--workdir",
+        default=None,
+        help="Code mode only: run in this existing directory instead of an "
+        "isolated .texllm/runs/<job-id>/ scratch dir",
+    )
 
     p_rev = sub.add_parser("review", help="Domain/website review → ideas, brains, skills")
     p_rev.add_argument("domain", help="example.com or URL")
@@ -119,7 +131,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "run":
-        return _cmd_run(args.team, " ".join(args.goal), as_json=args.json)
+        return _cmd_run(
+            args.team,
+            " ".join(args.goal),
+            as_json=args.json,
+            mode="code" if args.code else "chat",
+            workdir=args.workdir,
+        )
 
     if args.cmd == "review":
         from texllm.workspace.domain_review import review_domain
@@ -219,11 +237,18 @@ def main(argv: list[str] | None = None) -> int:
     return 2
 
 
-def _cmd_run(team: str, goal: str, *, as_json: bool) -> int:
+def _cmd_run(
+    team: str,
+    goal: str,
+    *,
+    as_json: bool,
+    mode: str = "chat",
+    workdir: str | None = None,
+) -> int:
     from texllm.workspace.team_run import run_team_flow
 
     try:
-        out = run_team_flow(team, goal)
+        out = run_team_flow(team, goal, mode=mode, workdir=workdir)
     except KeyError:
         print(f"Unknown team: {team}", file=sys.stderr)
         return 1
@@ -240,9 +265,20 @@ def _cmd_run(team: str, goal: str, *, as_json: bool) -> int:
         res = out.get("result") or {}
         if res.get("summary"):
             print(f"summary: {res['summary']}")
-        if res.get("output"):
+        output = res.get("output") or {}
+        if output.get("mode") == "code":
+            print(f"workdir: {output.get('workdir')}")
+            files = output.get("files_changed") or []
+            print(f"files changed ({len(files)}):")
+            for f in files[:50]:
+                print(f"  - {f}")
+            if output.get("diff"):
+                print("diff: (stored in job result; first 40 lines)")
+                for line in str(output["diff"]).splitlines()[:40]:
+                    print(f"  {line}")
+        elif output:
             print("output:")
-            print(json.dumps(res["output"], indent=2))
+            print(json.dumps(output, indent=2))
     return 0 if out.get("status") == "succeeded" else 1
 
 

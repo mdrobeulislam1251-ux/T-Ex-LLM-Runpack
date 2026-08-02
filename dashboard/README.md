@@ -22,10 +22,30 @@ refresh (company brains, decision logs, incident logs). Commit and push the
 | View | What it shows |
 |---|---|
 | **Overview** | Animated stats, the active company brain, the hard review gates |
+| **Run Ops** | Dispatch a team run to the runtime host and watch the real result land (see below) |
 | **Teams** | All 9 teams and 53 agents with their specialties, color-coded |
 | **Brain Studio** | Create a company from just a name + vision briefing (see below) |
 | **Companies** | Every brain in the repo; switch which one is live |
 | **Gates & Logs** | The active company's CTO decision log and incident log |
+
+## Run Ops — the deck actually commands now
+
+Pick a runtime team, state a goal, dispatch. The deck queues the run on the T-Ex
+runtime host (`POST /v1/workspace/teams/{slug}/run-async` via the server-side proxy
+`/api/run`) and polls the job live. **Code mode** drives a headless coding agent on
+the host that edits files for real — the result panel shows the workdir, the files
+changed, and the diff. **Draft mode** returns a reviewed text answer only.
+
+Wire it up in `dashboard/.env.local` (env var *names* only — never commit values):
+
+```bash
+TEX_RUNTIME_URL=http://127.0.0.1:3006   # where `python -m texllm.cli serve` runs
+TEX_RUNTIME_API_KEY=                     # only if the host sets HOST_API_KEY
+```
+
+If the host is down, Run Ops shows an offline state with the exact start command —
+it never fakes a run. Code mode additionally needs the `claude` CLI on the *host*
+machine; missing CLI fails the job with a clear error instead of returning prose.
 
 ## Brain Studio — smart brain generation
 
@@ -51,5 +71,8 @@ ever asked for — those can't be researched.
 - `POST /api/brain` — creates the draft company + brain request (validates input,
   409 on existing slug).
 - `POST /api/active` — switches `companies/active-company.json`.
+- `POST /api/run` + `GET /api/run?id=…|?teams=1` — server-side proxy to the runtime
+  host for run dispatch / job polling / team list (`TEX_RUNTIME_URL`,
+  `TEX_RUNTIME_API_KEY`); the browser never holds the host key.
 - Secrets: the dashboard never reads, writes, or displays secret values — only env
   var names.

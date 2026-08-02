@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DashboardData, TeamInfo, CompanyInfo } from "@/lib/data";
+import { RunConsole } from "@/components/run-console";
 
 /* ── Team accent colors ─────────────────────────────────────────── */
 
@@ -20,6 +21,7 @@ const TEAM_ACCENTS: Record<string, { text: string; border: string; bg: string }>
 
 const NAV = [
   { id: "overview", label: "Overview", icon: "◈" },
+  { id: "runs", label: "Run Ops", icon: "▶" },
   { id: "teams", label: "Teams", icon: "⬡" },
   { id: "brain", label: "Brain Studio", icon: "✦" },
   { id: "companies", label: "Companies", icon: "▣" },
@@ -105,6 +107,7 @@ export function CommandDeck({ data }: { data: DashboardData }) {
             </h1>
             <p className="mt-0.5 text-sm text-slate-400">
               {tab === "overview" && "Live state of your agent company"}
+              {tab === "runs" && "Dispatch a team run to the runtime host and watch the real result land"}
               {tab === "teams" && `${data.agentCount} specialists across ${data.teams.length} teams`}
               {tab === "brain" && "Generate a company brain from nothing but your vision"}
               {tab === "companies" && "Company brains — project-scoped via TEX_PROJECT_ROOT (repo seeds, read-only, when unset)"}
@@ -118,6 +121,7 @@ export function CommandDeck({ data }: { data: DashboardData }) {
         </header>
 
         {tab === "overview" && <Overview data={data} active={active} onNavigate={setTab} />}
+        {tab === "runs" && <RunConsole />}
         {tab === "teams" && <Teams teams={data.teams} />}
         {tab === "brain" && <BrainStudio />}
         {tab === "companies" && <Companies companies={data.companies} activeSlug={data.activeSlug} />}

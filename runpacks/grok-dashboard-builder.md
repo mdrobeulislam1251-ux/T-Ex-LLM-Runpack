@@ -39,6 +39,8 @@ Placeholder brains carry `"_placeholder": true` and DRAFT fields — badge them 
 | `/api/runpack` | GET | Full read-only summary: `{ activeSlug, companies[] (slug,name,appName,description,vision,emotionTone,scopeDoes,scopeDoesNot,targetAudience,status,hasCredentials), teams[] (id,label,agents[]), agentCount, skillCount, commandCount, decisions, incidents }` |
 | `/api/active` | POST `{slug}` | Switch the active company (validates slug, 404 if no brain) |
 | `/api/brain` | POST `{name, briefing}` | Create a draft brain + `brain-request.json` (Brain Studio flow); 409 if slug exists |
+| `/api/run` | POST `{team, goal, mode?, workdir?}` | Dispatch a run on the T-Ex **runtime host** (proxied server-side; 502 `runtime_offline` when the host isn't up). `mode:"code"` = real file edits + diff artifacts. Returns `{job_id}` |
+| `/api/run?id=<jobId>` / `?teams=1` | GET | Poll a dispatched job (status → `result.output.{files_changed,diff,workdir}` in code mode) / list runtime teams. Visualize honestly: offline is a state, never fake a run |
 
 For app-domain data (leads, campaigns, replies, revenue): the `dev/` product exposes its own API — ask the user for that spec; never scrape the product's database directly.
 

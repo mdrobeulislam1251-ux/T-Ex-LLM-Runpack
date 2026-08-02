@@ -373,12 +373,65 @@ def workspace_team_run(
     goal = str(body.get("goal") or "").strip()
     if not goal:
         raise HTTPException(status_code=400, detail="goal required")
+    mode = str(body.get("mode") or "chat").strip() or "chat"
+    workdir = str(body.get("workdir") or "").strip() or None
     try:
-        return run_team_flow(slug, goal)
+        return run_team_flow(slug, goal, mode=mode, workdir=workdir)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Team not found") from exc
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.post("/v1/workspace/teams/{slug}/run-async")
+def workspace_team_run_async(
+    slug: str,
+    body: Dict[str, Any],
+    _: None = Depends(require_api_key),
+) -> dict:
+    """Queue a team run and return immediately — poll /v1/jobs/{job_id}.
+
+    This is the dispatch surface for UIs (Command Deck) that need a job id
+    right away instead of holding a request open for the whole run.
+    """
+    from texllm.workspace import get_workspace
+    from texllm.workspace.team_run import prepare_team_job
+
+    goal = str(body.get("goal") or "").strip()
+    if not goal:
+        raise HTTPException(status_code=400, detail="goal required")
+    mode = str(body.get("mode") or "chat").strip() or "chat"
+    workdir = str(body.get("workdir") or "").strip() or None
+    try:
+        team, job = prepare_team_job(slug, goal, mode=mode, workdir=workdir)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Team not found") from exc
+    store.put(job)
+    team_id = team["id"]
+
+    def _run_and_log() -> None:
+        queued = store.get(job.id)
+        if not queued:
+            return
+        updated = TeamRunner().run_job(queued)
+        store.put(updated)
+        try:
+            get_workspace().log_activity(
+                team_id,
+                "flow_run",
+                f"Flow: {goal[:80]}",
+                f"status={updated.status.value} mode={updated.mode}",
+            )
+        except Exception:  # noqa: BLE001 — activity log must never kill a run
+            logger.debug("activity log failed for job %s", job.id)
+
+    threading.Thread(target=_run_and_log, daemon=True).start()
+    return {
+        "job_id": job.id,
+        "team": team["slug"],
+        "status": job.status.value,
+        "mode": job.mode,
+    }
 
 
 @app.post("/v1/workspace/domain-review")
@@ -949,6 +1002,7 @@ def create_job(
         firmware_version=body.firmware_version,
         goal=goal,
         input=body.input,
+        mode=(body.mode or "chat"),
         status=JobStatus.queued,
     )
     store.put(job)

@@ -11,12 +11,19 @@ from texllm.workers.runner import TeamRunner
 from texllm.workspace.db import WorkspaceDB, get_workspace
 
 
-def run_team_flow(
+def prepare_team_job(
     team_slug: str,
     goal: str,
     *,
     db: Optional[WorkspaceDB] = None,
-) -> Dict[str, Any]:
+    mode: str = "chat",
+    workdir: Optional[str] = None,
+) -> tuple[Dict[str, Any], Job]:
+    """Resolve team context + firmware and build the Job (without running it).
+
+    Shared by the synchronous flow (CLI, /run) and the async dispatch endpoint
+    (/run-async) so both queue identical jobs.
+    """
     db = db or get_workspace()
     team = db.get_team(team_slug)
     if not team:
@@ -66,19 +73,38 @@ def run_team_flow(
         except Exception:  # noqa: BLE001
             fw_ver = "0.1.0"
 
+    job_input: Dict[str, Any] = {"goal": goal, "team": team["slug"]}
+    if workdir:
+        job_input["workdir"] = workdir
     job = Job(
         firmware_id=fw_id,
         firmware_version=fw_ver,
         goal=full_goal,
-        input={"goal": goal, "team": team["slug"]},
+        input=job_input,
+        mode=(mode or "chat"),
     )
-    job = TeamRunner(settings=settings).run_job(job)
+    return team, job
+
+
+def run_team_flow(
+    team_slug: str,
+    goal: str,
+    *,
+    db: Optional[WorkspaceDB] = None,
+    mode: str = "chat",
+    workdir: Optional[str] = None,
+) -> Dict[str, Any]:
+    db = db or get_workspace()
+    team, job = prepare_team_job(
+        team_slug, goal, db=db, mode=mode, workdir=workdir
+    )
+    job = TeamRunner(settings=get_settings()).run_job(job)
 
     db.log_activity(
         team["id"],
         "flow_run",
         f"Flow: {goal[:80]}",
-        f"status={job.status.value}",
+        f"status={job.status.value} mode={job.mode}",
     )
 
     return {
