@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     job_max_iterations: int = 12
     job_max_cost_usd: float = 1.0
 
+    # Code-mode executor (headless coding agent doing real file work)
+    code_agent_bin: str = "claude"
+    code_agent_timeout_sec: int = 900
+    code_agent_allowed_tools: str = "Read,Edit,Write,Grep,Glob,Bash"
+    code_runs_dir: Path = Path(".texllm/runs")
+    code_diff_max_bytes: int = 200_000
+
     # Paths
     firmware_dir: Path = Path("firmware")
     repo_root: Path = Path(".")

@@ -47,6 +47,7 @@ tex @T-ex "Coordinate ops and sales handoff"
 | POST | `/v1/workspace/teams` |
 | GET | `/v1/workspace/teams/{slug}` |
 | POST | `/v1/workspace/teams/{slug}/run` |
+| POST | `/v1/workspace/teams/{slug}/run-async` |
 | POST | `/v1/workspace/domain-review` |
 | GET | `/v1/workspace/ideas` |
 | POST | `/v1/workspace/brains` |
@@ -78,3 +79,29 @@ tex export sales
 # → firmware/sales-agents/manifest.yaml + prompts from brains
 tex run sales "Weekly pipeline review"   # uses sales-agents if present
 ```
+
+## Code mode — runs that do real work
+
+By default a run is a text loop (planner → executor drafts prose → reviewer →
+integrator). With `--code`, the executor instead drives a **headless Claude Code
+session** that edits files for real; the reviewer reviews the actual diff and the
+job result carries `workdir`, `files_changed`, and `diff`.
+
+```bash
+tex run dev --code "Create healthz.py with a /healthz FastAPI route"
+# isolated workdir: .texllm/runs/<job-id>/  (git-inited → full diff artifact)
+
+tex run dev --code --workdir ~/myapp "Fix the failing date parser"
+# runs in-place in an existing directory (your responsibility to review/commit)
+```
+
+Same over HTTP: `POST /v1/workspace/teams/{slug}/run` or `/run-async` with
+`{"goal": "...", "mode": "code", "workdir": "(optional)"}` — `/run-async` returns a
+`job_id` immediately; poll `GET /v1/jobs/{job_id}` (this is what the Command Deck's
+Run Ops tab uses).
+
+Honest-failure contract: code mode requires the `claude` CLI on the host's PATH
+(`ANTHROPIC` login or `CLAUDE_CODE_OAUTH_TOKEN` setup-token profile). If it's
+missing, the job **fails with a clear error** — it never silently falls back to
+prose. Env knobs: `CODE_AGENT_BIN`, `CODE_AGENT_TIMEOUT_SEC`,
+`CODE_AGENT_ALLOWED_TOOLS`, `CODE_RUNS_DIR`, `CODE_DIFF_MAX_BYTES`.
