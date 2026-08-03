@@ -49,6 +49,37 @@ class Settings(BaseSettings):
     code_runs_dir: Path = Path(".texllm/runs")
     code_diff_max_bytes: int = 200_000
 
+    # Messaging channels (docs/CHANNELS.md) — secret VALUES live only in .env
+    channels_default_team: str = ""  # freeform chat text → draft run here ("" = reply help)
+    channels_reply_max_chars: int = 3500  # Telegram hard cap is 4096
+    channel_plugins: str = ""  # comma-separated import paths of third-party adapter modules
+
+    telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
+    telegram_allowed_senders: str = ""  # comma-separated numeric user ids
+    telegram_api_base: str = "https://api.telegram.org"
+    telegram_poll_on_serve: bool = False
+
+    whatsapp_access_token: str = ""
+    whatsapp_app_secret: str = ""
+    whatsapp_verify_token: str = ""
+    whatsapp_phone_number_id: str = ""
+    whatsapp_allowed_senders: str = ""  # wa_id digits, e.g. 15551234567
+    whatsapp_api_base: str = "https://graph.facebook.com"
+    whatsapp_api_version: str = "v21.0"
+
+    google_chat_project_number: str = ""
+    google_chat_allowed_senders: str = ""  # users/<id> and/or emails
+    google_chat_space_webhook_url: str = ""  # optional incoming-webhook URL for pushes
+    google_chat_tokeninfo_url: str = "https://oauth2.googleapis.com/tokeninfo"
+
+    bluebubbles_url: str = ""  # e.g. http://mac-mini.tailnet:1234
+    bluebubbles_password: str = ""
+    bluebubbles_allowed_senders: str = ""  # +1555… / iMessage emails
+
+    custom_channel_secret: str = ""
+    custom_channel_allowed_senders: str = ""
+
     # Paths
     firmware_dir: Path = Path("firmware")
     repo_root: Path = Path(".")

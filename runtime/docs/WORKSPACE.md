@@ -48,7 +48,13 @@ tex @T-ex "Coordinate ops and sales handoff"
 | GET | `/v1/workspace/teams/{slug}` |
 | POST | `/v1/workspace/teams/{slug}/run` |
 | POST | `/v1/workspace/teams/{slug}/run-async` |
+| GET | `/v1/channels` |
+| GET/POST | `/v1/channels/{channel}/webhook` |
 | POST | `/v1/workspace/domain-review` |
+
+Messaging channels (Telegram / WhatsApp / Google Chat / BlueBubbles-iMessage /
+custom HMAC) dispatch team runs from chat — setup, security model, and the
+adapter plugin contract live in `docs/CHANNELS.md`.
 | GET | `/v1/workspace/ideas` |
 | POST | `/v1/workspace/brains` |
 | POST | `/v1/workspace/skills` |

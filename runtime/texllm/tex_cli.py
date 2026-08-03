@@ -102,6 +102,19 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("serve", help="Start host + web (same as texllm serve)")
 
+    p_channels = sub.add_parser(
+        "channels", help="Messaging channels: poll workers + status (docs/CHANNELS.md)"
+    )
+    channels_sub = p_channels.add_subparsers(dest="channels_cmd")
+    p_poll = channels_sub.add_parser(
+        "poll", help="Run a long-poll worker (no public URL needed)"
+    )
+    p_poll.add_argument("channel", choices=["telegram"])
+    p_poll.add_argument(
+        "--once", action="store_true", help="Single getUpdates pass (smoke test)"
+    )
+    channels_sub.add_parser("list", help="Show configured channel adapters")
+
     args = parser.parse_args(argv)
     if not args.cmd:
         parser.print_help()
@@ -233,7 +246,65 @@ def main(argv: list[str] | None = None) -> int:
         serve_main()
         return 0
 
+    if args.cmd == "channels":
+        return _cmd_channels(args)
+
     parser.print_help()
+    return 2
+
+
+def _cmd_channels(args) -> int:
+    from texllm.channels.service import get_channel_service
+
+    service = get_channel_service()
+
+    if args.channels_cmd == "list" or not args.channels_cmd:
+        report = service.status_report()
+        if not report["channels"]:
+            print(
+                "no channels configured — set TELEGRAM_BOT_TOKEN (or WhatsApp/"
+                "Google Chat/BlueBubbles/custom env vars) in .env; see docs/CHANNELS.md"
+            )
+            return 0
+        for ch in report["channels"]:
+            print(
+                f"{ch['name']:12} allowed_senders={ch['allowed_senders']:<3} "
+                f"push={str(ch['can_push']).lower():5} sync={str(ch['sync_reply']).lower()}"
+            )
+        if report.get("default_team"):
+            print(f"default team (freeform): {report['default_team']}")
+        return 0
+
+    if args.channels_cmd == "poll":
+        from texllm.channels.telegram import TelegramAdapter
+        from texllm.channels.telegram_poll import TelegramPoller
+
+        adapter = service.adapter("telegram")
+        if not isinstance(adapter, TelegramAdapter):
+            print(
+                "telegram is not configured — set TELEGRAM_BOT_TOKEN in .env",
+                file=sys.stderr,
+            )
+            return 1
+        if not adapter.allowed_senders():
+            print(
+                "WARNING: TELEGRAM_ALLOWED_SENDERS is empty — every message will be "
+                "dropped (default-deny). Add your numeric Telegram user id to dispatch.",
+                file=sys.stderr,
+            )
+        poller = TelegramPoller(adapter, service)
+        if args.once:
+            handled = poller.poll_once()
+            print(f"handled {handled} update(s)")
+            return 0
+        print("telegram long-poll worker running — Ctrl-C to stop")
+        try:
+            poller.run_forever()
+        except KeyboardInterrupt:
+            print("stopped")
+        return 0
+
+    print("usage: tex channels [list|poll telegram [--once]]", file=sys.stderr)
     return 2
 
 

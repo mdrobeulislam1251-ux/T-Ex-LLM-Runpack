@@ -11,6 +11,7 @@ tex teams
 tex dash sales
 tex run dev "Ship release notes agent"
 tex run dev --code "Add /healthz endpoint"   # real edits + diff (claude CLI required)
+tex channels poll telegram                   # drive runs from chat (docs/CHANNELS.md)
 tex review customer-domain.com
 tex bd "Growth plan for Q3"
 tex @T-ex "What should CEO prioritize this week?"
