@@ -162,6 +162,51 @@ def test_code_mode_without_agent_fails_honestly(tmp_path: Path):
     assert job.error and "code mode" in job.error.lower()
 
 
+def test_verify_gate_passes_when_command_exits_zero(tmp_path: Path):
+    """The done-gate: job succeeds because the REAL verify command passed."""
+    settings = _settings(tmp_path)
+    executor = CodeExecutor(
+        settings=settings,
+        run_cmd=fake_agent_cmd({"hello.py": "print('hi')\n"}),
+    )
+    runner = TeamRunner(settings=settings, code_executor=executor)
+    job = Job(
+        firmware_id="sample-assistant",
+        firmware_version="0.1.0",
+        goal="Create hello.py",
+        input={"verify": "test -f hello.py"},
+        mode="code",
+    )
+    job = runner.run_job(job)
+    assert job.status == JobStatus.succeeded, job.error
+    verify = job.result.output["verify"]
+    assert verify["ok"] is True
+    assert verify["exit_code"] == 0
+    assert verify["command"] == "test -f hello.py"
+
+
+def test_verify_gate_failure_fails_job_despite_passing_review(tmp_path: Path):
+    """Model approval is never 'done': a failing verify command fails the job."""
+    settings = _settings(tmp_path)
+    executor = CodeExecutor(
+        settings=settings,
+        run_cmd=fake_agent_cmd({"hello.py": "print('hi')\n"}),
+    )
+    runner = TeamRunner(settings=settings, code_executor=executor)
+    job = Job(
+        firmware_id="sample-assistant",
+        firmware_version="0.1.0",
+        goal="Create something that satisfies an impossible check",
+        input={"verify": "test -f does-not-exist.txt"},
+        mode="code",
+    )
+    job = runner.run_job(job)
+    # Mock reviewer approves the diff draft, but the machine gate must win
+    assert job.status == JobStatus.failed
+    assert "verification gate failed" in (job.error or "")
+    assert "does-not-exist.txt" in (job.error or "")
+
+
 def test_chat_mode_unchanged(tmp_path: Path):
     """Default mode stays the text loop — no workdir, no executor requirement."""
     settings = _settings(tmp_path)

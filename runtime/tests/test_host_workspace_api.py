@@ -307,7 +307,8 @@ def test_runbook_run_phase_with_mock_provider(host_client):
             assert not value.startswith("[")
 
 
-def test_runbook_run_phase_error_fallback_still_advances(host_client, monkeypatch):
+def test_runbook_run_phase_provider_error_fails_phase(host_client, monkeypatch):
+    """Provider failure marks the phase FAILED — no fabricated demo draft."""
     from texllm import providers as providers_mod
 
     def boom(settings=None):
@@ -316,10 +317,65 @@ def test_runbook_run_phase_error_fallback_still_advances(host_client, monkeypatc
     monkeypatch.setattr(providers_mod, "get_provider", boom)
     r = host_client.post("/v1/runbook/phases/product/run", headers=H, json={})
     assert r.status_code == 200
-    product = next(p for p in r.json()["phases"] if p["id"] == "product")
-    assert product["status"] == "done"
-    assert product["result"]["mode"] == "error_fallback"
+    body = r.json()
+    product = next(p for p in body["phases"] if p["id"] == "product")
+    assert product["status"] == "failed"
+    assert product["result"]["mode"] == "error"
     assert "no provider available" in product["result"]["error"]
+    # A failed phase never counts as progress
+    assert body["progress"]["done"] == 0
+
+
+def test_runbook_run_phase_unusable_content_fails_phase(host_client, monkeypatch):
+    """CLI auth-failure text from the provider is a failure, not a draft."""
+    from texllm import providers as providers_mod
+    from texllm.providers.base import CompletionResult
+
+    class NotLoggedIn:
+        name = "claude_cli"
+
+        def complete(self, messages, **kwargs):
+            return CompletionResult(
+                content="Not logged in — please run /login",
+                model="claude",
+                provider="claude_cli",
+            )
+
+    monkeypatch.setattr(providers_mod, "get_provider", lambda s=None: NotLoggedIn())
+    r = host_client.post("/v1/runbook/phases/intent/run", headers=H, json={})
+    assert r.status_code == 200
+    intent = next(p for p in r.json()["phases"] if p["id"] == "intent")
+    assert intent["status"] == "failed"
+    assert "unusable output" in intent["result"]["error"]
+
+
+def test_chat_unconfigured_provider_returns_actionable_502(host_client, monkeypatch):
+    monkeypatch.delenv("TEXLLM_FORCE_MOCK", raising=False)
+    monkeypatch.setenv("LLM_PROVIDER", "auto")
+    from texllm import config as config_mod
+
+    config_mod.get_settings.cache_clear()
+    r = host_client.post("/v1/chat", headers=H, json={"message": "hello"})
+    assert r.status_code == 502
+    assert "No AI provider configured" in r.json()["detail"]
+
+
+def test_run_async_unconfigured_provider_fails_job(host_client, monkeypatch):
+    """Dispatch threads must land on a FAILED job, never hang or mock-succeed."""
+    monkeypatch.delenv("TEXLLM_FORCE_MOCK", raising=False)
+    monkeypatch.setenv("LLM_PROVIDER", "auto")
+    from texllm import config as config_mod
+
+    config_mod.get_settings.cache_clear()
+    r = host_client.post(
+        "/v1/workspace/teams/dev/run-async",
+        headers=H,
+        json={"goal": "Write release notes"},
+    )
+    assert r.status_code == 200
+    final = _poll_job(host_client, r.json()["job_id"])
+    assert final["status"] == "failed"
+    assert "No AI provider configured" in (final["error"] or "")
 
 
 # ----- jobs / agents / system -----

@@ -67,9 +67,18 @@ class TeamRunner:
         code_executor: Optional[CodeExecutor] = None,
     ) -> None:
         self.settings = settings or get_settings()
-        self.provider = provider or get_provider(self.settings)
+        # Lazy: resolving inside run_job means an unconfigured provider becomes
+        # a failed job record (with the actionable error) instead of an
+        # exception escaping a dispatch thread.
+        self._provider = provider
         self.base_tools = tools or build_builtin_registry()
         self.code_executor = code_executor
+
+    @property
+    def provider(self) -> LLMProvider:
+        if self._provider is None:
+            self._provider = get_provider(self.settings)
+        return self._provider
 
     def run_job(self, job: Job) -> Job:
         job.status = JobStatus.running
@@ -111,6 +120,12 @@ class TeamRunner:
         code_outcome: Optional[CodeRunOutcome] = None
         executor: Optional[CodeExecutor] = None
         workdir = None
+        # Programmatic done-gate: a shell command that must exit 0 before the
+        # job may succeed. The model's own "done" claim is never sufficient.
+        verify_cmd = (
+            str(input_data.get("verify") or "").strip() if code_mode else ""
+        )
+        verify_result: Optional[Dict[str, Any]] = None
         if code_mode:
             executor = self.code_executor or CodeExecutor(settings=self.settings)
             if not executor.available():
@@ -173,6 +188,15 @@ class TeamRunner:
                     }
                 )
                 state.draft = _compose_code_draft(code_outcome)
+                if verify_cmd:
+                    verify_result = executor.run_verify(verify_cmd, workdir)
+                    state.tool_log.append({"tool": "verify", **verify_result})
+                    state.draft += (
+                        f"\n\nVerification `{verify_cmd}` → exit "
+                        f"{verify_result['exit_code']} "
+                        f"({'PASS' if verify_result['ok'] else 'FAIL'})\n"
+                        f"```\n{verify_result['output'][-1500:]}\n```"
+                    )
             else:
                 state.draft = self._role_text(
                     fw,
@@ -226,13 +250,40 @@ class TeamRunner:
             )
             state.iteration += 1
 
-            if state.review.get("passed"):
+            gate_ok = bool(state.review.get("passed"))
+            if verify_cmd:
+                verify_ok = bool(verify_result and verify_result.get("ok"))
+                if gate_ok and not verify_ok:
+                    # The machine gate overrides an approving reviewer: an
+                    # unverified draft is not done, whatever the model says.
+                    state.review = {
+                        "passed": False,
+                        "feedback": (
+                            "Reviewer approved the draft, but the verification "
+                            f"command `{verify_cmd}` failed (exit "
+                            f"{(verify_result or {}).get('exit_code')}). Fix the "
+                            "code until it passes:\n"
+                            f"{(verify_result or {}).get('output', '')[-800:]}"
+                        ),
+                        "score": 0.0,
+                    }
+                gate_ok = gate_ok and verify_ok
+            if gate_ok:
                 break
             state.review_retries += 1
             logger.info(
                 "Review rejected (retry %s): %s",
                 state.review_retries,
                 state.review.get("feedback"),
+            )
+
+        if verify_cmd and not (verify_result and verify_result.get("ok")):
+            raise RuntimeError(
+                f"verification gate failed: `{verify_cmd}` exited "
+                f"{(verify_result or {}).get('exit_code', 'n/a')} after "
+                f"{state.review_retries} retr{'y' if state.review_retries == 1 else 'ies'} "
+                f"(workdir: {workdir}). Last output:\n"
+                f"{(verify_result or {}).get('output', '(none)')[-800:]}"
             )
 
         # 3) Integrate
@@ -269,6 +320,8 @@ class TeamRunner:
             output["workdir"] = code_outcome.workdir
             output["files_changed"] = code_outcome.files_changed
             output["diff"] = code_outcome.diff
+            if verify_result is not None:
+                output["verify"] = verify_result
             state.artifacts.append(
                 Artifact(
                     name="files_changed",

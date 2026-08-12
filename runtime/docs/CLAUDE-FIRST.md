@@ -72,14 +72,15 @@ curl -s -X POST http://127.0.0.1:3006/v1/chat \
 ```bash
 curl -s http://127.0.0.1:3006/v1/auth/runtime -H "X-API-Key: change-me"
 # expect method: setup_token | local_cli | api_key
-# not mock (unless nothing configured)
+# "mock" only if you explicitly set LLM_PROVIDER=mock; with nothing
+# configured, runs fail with an actionable error instead of mock drafts
 ```
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| mock replies | No default Claude profile — connect Max token or CLI or API key |
+| `No AI provider configured` errors | Connect Max token, CLI, or API key (mock is opt-in via `LLM_PROVIDER=mock`) |
 | `claude CLI not found` | Install Claude Code; fix PATH for the process running `texllm serve` |
 | CLI 401 / auth | `claude auth login` or refresh setup-token |
 | Chat error 502 | Read `detail` in response; fix Claude auth on host |

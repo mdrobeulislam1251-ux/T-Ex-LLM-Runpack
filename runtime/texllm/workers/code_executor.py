@@ -181,6 +181,28 @@ class CodeExecutor:
             log=(err or out)[-2000:],
         )
 
+    def run_verify(self, command: str, workdir: Path) -> Dict[str, Any]:
+        """Run the done-gate command in the workdir. Exit 0 is the only pass.
+
+        Deliberately NOT routed through the injectable run_cmd: verification is
+        the honesty gate, so it always executes for real — tests use real shell
+        commands (e.g. `test -f file`) instead of fakes.
+        """
+        shell = shutil.which("bash") or shutil.which("sh") or "sh"
+        code, out, err = _default_run_cmd(
+            [shell, "-c", command],
+            str(workdir),
+            dict(os.environ),
+            int(self.settings.code_agent_timeout_sec),
+        )
+        output = ((out or "") + (("\n" + err) if err else "")).strip()
+        return {
+            "command": command,
+            "exit_code": code,
+            "ok": code == 0,
+            "output": output[-4000:],
+        }
+
     def _build_prompt(
         self,
         goal: str,

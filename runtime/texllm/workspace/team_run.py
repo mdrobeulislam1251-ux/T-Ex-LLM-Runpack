@@ -18,6 +18,7 @@ def prepare_team_job(
     db: Optional[WorkspaceDB] = None,
     mode: str = "chat",
     workdir: Optional[str] = None,
+    verify: Optional[str] = None,
 ) -> tuple[Dict[str, Any], Job]:
     """Resolve team context + firmware and build the Job (without running it).
 
@@ -76,6 +77,10 @@ def prepare_team_job(
     job_input: Dict[str, Any] = {"goal": goal, "team": team["slug"]}
     if workdir:
         job_input["workdir"] = workdir
+    if verify:
+        # Programmatic done-gate for code mode: this command must exit 0 in
+        # the workdir before the job may succeed.
+        job_input["verify"] = verify
     job = Job(
         firmware_id=fw_id,
         firmware_version=fw_ver,
@@ -93,10 +98,11 @@ def run_team_flow(
     db: Optional[WorkspaceDB] = None,
     mode: str = "chat",
     workdir: Optional[str] = None,
+    verify: Optional[str] = None,
 ) -> Dict[str, Any]:
     db = db or get_workspace()
     team, job = prepare_team_job(
-        team_slug, goal, db=db, mode=mode, workdir=workdir
+        team_slug, goal, db=db, mode=mode, workdir=workdir, verify=verify
     )
     job = TeamRunner(settings=get_settings()).run_job(job)
 
