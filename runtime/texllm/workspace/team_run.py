@@ -81,6 +81,16 @@ def prepare_team_job(
         # Programmatic done-gate for code mode: this command must exit 0 in
         # the workdir before the job may succeed.
         job_input["verify"] = verify
+    if mode != "code":
+        # Persistent per-team memory dir (NanoClaw per-group model): chat agent
+        # sessions run here so Claude auto-loads the team's CLAUDE.md and can
+        # keep durable notes in notes.md across runs.
+        try:
+            job_input["memory_dir"] = str(
+                write_team_memory(team, brains, skills, settings=settings)
+            )
+        except OSError:  # memory is an enhancement — never block the run
+            pass
     job = Job(
         firmware_id=fw_id,
         firmware_version=fw_ver,
@@ -89,6 +99,45 @@ def prepare_team_job(
         mode=(mode or "chat"),
     )
     return team, job
+
+
+def write_team_memory(
+    team: Dict[str, Any],
+    brains: list,
+    skills: list,
+    *,
+    settings=None,
+) -> Path:
+    """Regenerate <team_memory_dir>/<slug>/CLAUDE.md from the workspace DB.
+
+    CLAUDE.md is generated context (safe to overwrite every run); the agent's
+    own durable notes live in notes.md in the same dir and are never touched.
+    """
+    settings = settings or get_settings()
+    root = Path(settings.team_memory_dir) / str(team["slug"])
+    root.mkdir(parents=True, exist_ok=True)
+
+    brain_lines = "\n".join(
+        f"- **{b['name']}** ({b.get('role') or 'specialist'}): "
+        f"{(b.get('prompt') or '').strip()[:300]}"
+        for b in brains
+    ) or "- (none yet)"
+    skill_lines = "\n".join(
+        f"- **{s['name']}**: {(s.get('description') or '').strip()[:200]}"
+        for s in skills
+    ) or "- (none yet)"
+
+    (root / "CLAUDE.md").write_text(
+        f"# {team['name']} — team memory\n\n"
+        f"{(team.get('description') or '').strip()}\n\n"
+        "This directory is this team's persistent memory. `notes.md` here holds "
+        "durable notes from previous runs — read it before answering, and "
+        "append anything worth remembering for future runs.\n\n"
+        f"## Brains\n{brain_lines}\n\n"
+        f"## Skills\n{skill_lines}\n",
+        encoding="utf-8",
+    )
+    return root
 
 
 def run_team_flow(

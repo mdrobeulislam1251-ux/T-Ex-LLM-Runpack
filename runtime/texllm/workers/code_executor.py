@@ -181,6 +181,78 @@ class CodeExecutor:
             log=(err or out)[-2000:],
         )
 
+    def execute_chat(
+        self,
+        *,
+        goal: str,
+        plan: Optional[Dict[str, Any]],
+        feedback: Optional[Dict[str, Any]],
+        workdir: Path,
+    ) -> CodeRunOutcome:
+        """Chat-mode agent session: one full headless Claude session per attempt.
+
+        Runs in the team's memory dir so the session auto-loads that team's
+        CLAUDE.md and can keep durable notes — the NanoClaw per-group model.
+        The session's final text IS the draft the reviewer judges.
+        """
+        workdir.mkdir(parents=True, exist_ok=True)
+        prompt = self._build_chat_prompt(goal, plan, feedback)
+        argv = [
+            self._resolve_bin(),
+            "-p",
+            prompt,
+            "--output-format",
+            "json",
+            "--permission-mode",
+            "acceptEdits",
+            "--allowedTools",
+            self.settings.chat_agent_allowed_tools,
+        ]
+        env = dict(os.environ)
+        token = self._setup_token()
+        if token:
+            env["CLAUDE_CODE_OAUTH_TOKEN"] = token
+
+        run_cmd = self._run_cmd or _default_run_cmd
+        code, out, err = run_cmd(
+            argv, str(workdir), env, int(self.settings.code_agent_timeout_sec)
+        )
+        summary = self._parse_summary(out, err)
+        return CodeRunOutcome(
+            ok=code == 0 and bool(summary.strip()),
+            summary=summary,
+            workdir=str(workdir),
+            log=(err or out)[-2000:],
+        )
+
+    def _build_chat_prompt(
+        self,
+        goal: str,
+        plan: Optional[Dict[str, Any]],
+        feedback: Optional[Dict[str, Any]],
+    ) -> str:
+        plan_txt = json.dumps(plan or {}, indent=2)[:_PROMPT_SECTION_CAP]
+        parts = [
+            "You are the executor agent of a T-Ex team. The current directory is "
+            "this team's persistent memory: CLAUDE.md holds team context and "
+            "notes.md holds durable notes from earlier runs — read them if "
+            "present, and append anything worth remembering to notes.md.",
+            f"Goal: {goal}",
+            f"Plan from the planner:\n{plan_txt}",
+        ]
+        if feedback and not feedback.get("passed", True):
+            fb = json.dumps(feedback, indent=2)[:_PROMPT_SECTION_CAP]
+            parts.append(
+                "A reviewer rejected the previous attempt. Address this feedback "
+                f"in your next answer:\n{fb}"
+            )
+        parts.append(
+            "Rules: never write or print secret values; work only inside the "
+            "current directory when writing files. Your FINAL message must be "
+            "the complete deliverable for the goal (not a description of it)."
+        )
+        return "\n\n".join(parts)
+
     def run_verify(self, command: str, workdir: Path) -> Dict[str, Any]:
         """Run the done-gate command in the workdir. Exit 0 is the only pass.
 

@@ -49,6 +49,13 @@ class Settings(BaseSettings):
     code_runs_dir: Path = Path(".texllm/runs")
     code_diff_max_bytes: int = 200_000
 
+    # Chat-mode agent sessions: when Claude is connected (setup-token or CLI),
+    # the executor stage of chat runs drives a full headless Claude session in
+    # the team's memory dir instead of a single-shot completion.
+    chat_agent_sessions: bool = True
+    chat_agent_allowed_tools: str = "Read,Grep,Glob,Write,Edit"
+    team_memory_dir: Path = Path(".texllm/teams")
+
     # Messaging channels (docs/CHANNELS.md) — secret VALUES live only in .env
     channels_default_team: str = ""  # freeform chat text → draft run here ("" = reply help)
     channels_reply_max_chars: int = 3500  # Telegram hard cap is 4096

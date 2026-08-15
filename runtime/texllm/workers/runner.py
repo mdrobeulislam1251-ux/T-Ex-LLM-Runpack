@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from texllm.config import Settings, get_settings
@@ -80,6 +82,26 @@ class TeamRunner:
             self._provider = get_provider(self.settings)
         return self._provider
 
+    def _chat_sessions_enabled(self) -> bool:
+        """Agent sessions for chat runs — only when Claude itself is connected.
+
+        Mock (explicit or test-forced) and plain API-key setups keep the
+        single-shot completion loop; a subscription/CLI login means the real
+        Claude Code engine is available, so use it for the whole task.
+        """
+        if not getattr(self.settings, "chat_agent_sessions", True):
+            return False
+        if os.environ.get("TEXLLM_FORCE_MOCK", "").strip() in ("1", "true", "yes"):
+            return False
+        if (self.settings.llm_provider or "").strip().lower() == "mock":
+            return False
+        try:
+            from texllm.host.credentials import resolve_runtime
+
+            return resolve_runtime().get("method") in ("setup_token", "local_cli")
+        except Exception:  # noqa: BLE001
+            return False
+
     def run_job(self, job: Job) -> Job:
         job.status = JobStatus.running
         job.started_at = utcnow()
@@ -126,6 +148,7 @@ class TeamRunner:
             str(input_data.get("verify") or "").strip() if code_mode else ""
         )
         verify_result: Optional[Dict[str, Any]] = None
+        chat_session = False
         if code_mode:
             executor = self.code_executor or CodeExecutor(settings=self.settings)
             if not executor.available():
@@ -137,6 +160,16 @@ class TeamRunner:
             workdir = executor.prepare_workdir(
                 job.id, explicit=input_data.get("workdir")
             )
+        elif self._chat_sessions_enabled():
+            executor = self.code_executor or CodeExecutor(settings=self.settings)
+            if executor.available():
+                chat_session = True
+                # Team memory dir (written by prepare_team_job) or a scratch
+                # session dir — CLAUDE.md/notes.md there persist across runs.
+                workdir = Path(
+                    input_data.get("memory_dir")
+                    or Path(self.settings.code_runs_dir) / job.id
+                )
 
         state = TeamState(goal=goal, input=input_data)
 
@@ -197,6 +230,24 @@ class TeamRunner:
                         f"({'PASS' if verify_result['ok'] else 'FAIL'})\n"
                         f"```\n{verify_result['output'][-1500:]}\n```"
                     )
+            elif chat_session and executor is not None and workdir is not None:
+                # NanoClaw model: one full headless Claude session does the
+                # task in the team's memory dir. Its final text is the draft.
+                session = executor.execute_chat(
+                    goal=goal,
+                    plan=state.plan,
+                    feedback=state.review,
+                    workdir=workdir,
+                )
+                if not session.ok:
+                    raise RuntimeError(
+                        "chat agent session failed: "
+                        f"{(session.log or session.summary or 'no output')[-500:]}"
+                    )
+                state.tool_log.append(
+                    {"tool": "agent_session", "ok": True, "workdir": session.workdir}
+                )
+                state.draft = session.summary
             else:
                 state.draft = self._role_text(
                     fw,
@@ -313,6 +364,10 @@ class TeamRunner:
         output = (state.final or {}).get("output")
         if not isinstance(output, dict):
             output = {"answer": state.draft, "review": state.review}
+
+        if chat_session and workdir is not None:
+            output["mode"] = "agent_session"
+            output["memory_dir"] = str(workdir)
 
         if code_outcome is not None:
             # Real-change evidence travels with the result, not just prose.
