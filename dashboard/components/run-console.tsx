@@ -19,11 +19,16 @@ type RuntimeJob = {
       answer?: string;
       mode?: string;
       workdir?: string;
+      memory_dir?: string;
       files_changed?: string[];
       diff?: string;
+      verify?: { command?: string; exit_code?: number; ok?: boolean; output?: string };
     };
   } | null;
 };
+
+/** Runtime /health "ai" block — the honest provider status. */
+type AiStatus = { name?: string; method?: string | null; usable?: boolean; hint?: string };
 
 type Probe = "checking" | "online" | "offline";
 
@@ -38,6 +43,8 @@ export function RunConsole() {
   const [goal, setGoal] = useState("");
   const [mode, setMode] = useState<"chat" | "code">("code");
   const [workdir, setWorkdir] = useState("");
+  const [verify, setVerify] = useState("");
+  const [ai, setAi] = useState<AiStatus | null>(null);
   const [dispatching, setDispatching] = useState(false);
   const [dispatchError, setDispatchError] = useState<string | null>(null);
   const [job, setJob] = useState<RuntimeJob | null>(null);
@@ -58,6 +65,12 @@ export function RunConsole() {
       setTeams(list);
       if (list.length > 0 && !list.some((t) => t.slug === team)) setTeam(list[0].slug);
       setProbe("online");
+      try {
+        const h = await fetch("/api/run?health=1");
+        if (h.ok) setAi(((await h.json()) as { ai?: AiStatus }).ai || null);
+      } catch {
+        /* health is informational — the console still works without it */
+      }
     } catch {
       setProbe("offline");
     }
@@ -101,7 +114,13 @@ export function RunConsole() {
       const res = await fetch("/api/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ team, goal, mode, ...(mode === "code" && workdir ? { workdir } : {}) }),
+        body: JSON.stringify({
+          team,
+          goal,
+          mode,
+          ...(mode === "code" && workdir ? { workdir } : {}),
+          ...(mode === "code" && verify.trim() ? { verify: verify.trim() } : {}),
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -165,12 +184,34 @@ python -m texllm.cli serve   # host on :3006`}
 
   return (
     <div className="grid gap-6 lg:grid-cols-5">
+      {/* AI provider status — the honest signal from the runtime */}
+      {ai && (
+        <div
+          className={`lg:col-span-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-4 py-2.5 text-sm ${
+            ai.usable
+              ? "border-neon-lime/30 bg-neon-lime/5 text-neon-lime"
+              : "border-neon-rose/40 bg-neon-rose/10 text-neon-rose"
+          }`}
+        >
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
+            AI {ai.usable ? "connected" : "not connected"}
+          </span>
+          <span className="font-mono text-xs opacity-80">
+            {ai.usable ? `${ai.name}${ai.method ? ` · ${ai.method}` : ""}` : "runs will FAIL until a provider is connected"}
+          </span>
+          {!ai.usable && ai.hint && (
+            <span className="basis-full text-xs leading-relaxed text-slate-400">{ai.hint}</span>
+          )}
+        </div>
+      )}
+
       {/* Dispatch form */}
       <div className="glass scan-card animate-fade-up p-6 lg:col-span-2">
         <h2 className="mb-1 text-lg font-bold text-white">Command a team. Get real work back.</h2>
         <p className="mb-5 text-sm leading-relaxed text-slate-400">
-          Code mode drives a headless coding agent that edits files and returns the diff. Draft mode returns a
-          reviewed text answer only.
+          Code mode drives a headless coding agent that edits files and returns the diff. Chat mode runs a full
+          Claude agent session with the team&apos;s persistent memory (or a reviewed draft when only an API key is
+          connected).
         </p>
 
         <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">Team</label>
@@ -235,9 +276,19 @@ python -m texllm.cli serve   # host on :3006`}
               placeholder="blank = isolated .texllm/runs/<job-id>/ on the host"
               className="mb-2 w-full rounded-lg border border-line bg-black/30 px-4 py-2.5 font-mono text-xs text-white outline-none transition-all placeholder:text-slate-600 focus:border-neon-violet/50"
             />
+            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">
+              Verify command (optional done-gate)
+            </label>
+            <input
+              value={verify}
+              onChange={(e) => setVerify(e.target.value)}
+              placeholder="e.g. pytest -q — must exit 0 or the job FAILS"
+              className="mb-2 w-full rounded-lg border border-line bg-black/30 px-4 py-2.5 font-mono text-xs text-white outline-none transition-all placeholder:text-slate-600 focus:border-neon-lime/50"
+            />
             <p className="mb-4 font-mono text-[11px] leading-relaxed text-slate-500">
               Code mode needs the `claude` CLI on the runtime host — the job fails with a clear error if it&apos;s
-              missing, it never silently falls back to prose.
+              missing, it never silently falls back to prose. With a verify command, &quot;done&quot; means that
+              command passed for real — not that the model said so.
             </p>
           </>
         )}
@@ -325,6 +376,18 @@ python -m texllm.cli serve   # host on :3006`}
 
             {output?.mode === "code" ? (
               <>
+                {output.verify && (
+                  <div
+                    className={`rounded-lg border px-4 py-2.5 font-mono text-xs ${
+                      output.verify.ok
+                        ? "border-neon-lime/40 bg-neon-lime/10 text-neon-lime"
+                        : "border-neon-rose/40 bg-neon-rose/10 text-neon-rose"
+                    }`}
+                  >
+                    verify `{output.verify.command}` → exit {output.verify.exit_code}{" "}
+                    {output.verify.ok ? "PASS" : "FAIL"}
+                  </div>
+                )}
                 <div>
                   <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
                     Files changed ({output.files_changed?.length ?? 0}) · workdir{" "}
@@ -350,10 +413,22 @@ python -m texllm.cli serve   # host on :3006`}
               </>
             ) : (
               <div>
-                <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Answer</div>
+                <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  Answer
+                  {output?.mode === "agent_session" && (
+                    <span className="ml-2 rounded border border-neon-violet/40 bg-neon-violet/10 px-1.5 py-0.5 text-neon-violet">
+                      full agent session
+                    </span>
+                  )}
+                </div>
                 <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap rounded-lg border border-line bg-black/30 p-4 font-mono text-xs leading-relaxed text-slate-300">
                   {output?.answer?.trim() || result.summary || "— empty —"}
                 </pre>
+                {output?.mode === "agent_session" && output.memory_dir && (
+                  <p className="mt-1.5 font-mono text-[11px] text-slate-500">
+                    team memory: {output.memory_dir}
+                  </p>
+                )}
               </div>
             )}
           </div>
