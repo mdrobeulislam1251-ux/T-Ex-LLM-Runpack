@@ -376,8 +376,9 @@ def workspace_team_run(
         raise HTTPException(status_code=400, detail="goal required")
     mode = str(body.get("mode") or "chat").strip() or "chat"
     workdir = str(body.get("workdir") or "").strip() or None
+    verify = str(body.get("verify") or "").strip() or None
     try:
-        return run_team_flow(slug, goal, mode=mode, workdir=workdir)
+        return run_team_flow(slug, goal, mode=mode, workdir=workdir, verify=verify)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Team not found") from exc
     except Exception as exc:  # noqa: BLE001
@@ -402,9 +403,10 @@ def workspace_team_run_async(
         raise HTTPException(status_code=400, detail="goal required")
     mode = str(body.get("mode") or "chat").strip() or "chat"
     workdir = str(body.get("workdir") or "").strip() or None
+    verify = str(body.get("verify") or "").strip() or None
     try:
         team, job = dispatch_team_job(
-            slug, goal, store=store, mode=mode, workdir=workdir
+            slug, goal, store=store, mode=mode, workdir=workdir, verify=verify
         )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="Team not found") from exc
@@ -703,7 +705,8 @@ def runbook_run_phase(
         )
 
         content = (completion.content or "").strip()
-        # CLI auth failures or empty → still produce a usable draft
+        # CLI auth failures or empty output are failures — never substitute a
+        # fabricated draft and call the phase done.
         bad = (
             not content
             or "not logged in" in content.lower()
@@ -711,13 +714,10 @@ def runbook_run_phase(
             or content.lower().startswith("error")
         )
         if bad:
-            content = _mock_phase_markdown(phase, company, notes)
-            if completion.content:
-                content = (
-                    f"> Note: provider returned: `{completion.content[:120]}`\n"
-                    f"> Using offline draft so the runbook still advances.\n\n"
-                    + content
-                )
+            raise RuntimeError(
+                "provider returned unusable output for this phase: "
+                f"{(completion.content or '(empty)')[:200]}"
+            )
 
         filled = _fill_phase_placeholders(phase, company, notes, {"content": content})
         result = {
@@ -742,38 +742,29 @@ def runbook_run_phase(
         return rb.snapshot()
     except Exception as exc:  # noqa: BLE001
         logger.exception("runbook phase %s failed", phase_id)
-        # Still mark done with error draft so UI moves
+        # Honest failure: the phase is FAILED with the real error. No demo
+        # placeholders, no fabricated draft — the UI shows what actually broke
+        # and the phase can be re-run once a provider is connected.
         try:
             from texllm.providers import describe_active_provider
 
             ai = describe_active_provider()
         except Exception:  # noqa: BLE001
             ai = {}
-        err_md = (
-            f"## {phase['title']} — draft (error path)\n\n"
-            f"Company: **{company}**\n\n"
-            f"Provider error: `{exc}`\n\n"
-            f"Active AI: `{ai}`\n\n"
-            "Placeholders were auto-filled with demo text so you can continue the runbook.\n"
-            "**Tip:** Grok needs a valid xAI API key (not Claude local CLI). "
-            "Paste key under Grok → Save, then Run again.\n"
-        )
-        filled = _fill_phase_placeholders(phase, company, notes, {})
         rb.update_phase(
             phase_id,
-            status="done",
-            placeholder=filled,
+            status="failed",
             result={
-                "summary": f"Fallback draft (provider error): {str(exc)[:120]}",
-                "content": err_md + "\n" + _mock_phase_markdown(phase, company, notes),
-                "mode": "error_fallback",
+                "summary": f"Phase failed: {str(exc)[:160]}",
                 "error": str(exc),
+                "mode": "error",
                 "provider": ai.get("name"),
                 "auth_method": ai.get("method"),
+                "hint": ai.get("hint"),
             },
             company_name=company,
         )
-        rb.log(f"Phase fallback: {phase['title']}", str(exc)[:200])
+        rb.log(f"Phase failed: {phase['title']}", str(exc)[:200])
         return rb.snapshot()
 
 
@@ -836,21 +827,6 @@ def _fill_phase_placeholders(
     if notes:
         out["notes"] = notes
     return out
-
-
-def _mock_phase_markdown(
-    phase: Dict[str, Any], company: str, notes: str
-) -> str:
-    outs = "\n".join(f"- {o}" for o in (phase.get("outputs") or []))
-    return (
-        f"# {phase.get('title')} — {company}\n\n"
-        f"**Agent:** {phase.get('agent_role')}\n\n"
-        f"**Status:** Draft generated (mock or fallback provider).\n\n"
-        f"## Outputs\n{outs}\n\n"
-        f"## Notes\n{notes or 'None'}\n\n"
-        f"## Next\nContinue to the next runbook phase or connect a live provider "
-        f"(Claude / ChatGPT / Gemini / Grok) for richer drafts.\n"
-    )
 
 
 @app.get("/v1/settings/aliases", response_model=AgentAliases)

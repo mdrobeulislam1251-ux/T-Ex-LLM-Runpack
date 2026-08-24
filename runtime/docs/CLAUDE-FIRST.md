@@ -72,14 +72,25 @@ curl -s -X POST http://127.0.0.1:3006/v1/chat \
 ```bash
 curl -s http://127.0.0.1:3006/v1/auth/runtime -H "X-API-Key: change-me"
 # expect method: setup_token | local_cli | api_key
-# not mock (unless nothing configured)
+# "mock" only if you explicitly set LLM_PROVIDER=mock; with nothing
+# configured, runs fail with an actionable error instead of mock drafts
 ```
+
+## Agent sessions (chat mode)
+
+With a Claude setup-token or CLI login connected, every chat-mode team run
+executes as a full headless Claude Code session (like NanoClaw), not a
+single-shot completion. Sessions run in the team's persistent memory dir
+(`.texllm/teams/<slug>/`): `CLAUDE.md` there is regenerated from the team's
+brains/skills each run, and the agent keeps its own durable notes in
+`notes.md`. Disable with `CHAT_AGENT_SESSIONS=false`. API-key-only and
+`LLM_PROVIDER=mock` setups keep the single-shot loop.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| mock replies | No default Claude profile — connect Max token or CLI or API key |
+| `No AI provider configured` errors | Connect Max token, CLI, or API key (mock is opt-in via `LLM_PROVIDER=mock`) |
 | `claude CLI not found` | Install Claude Code; fix PATH for the process running `texllm serve` |
 | CLI 401 / auth | `claude auth login` or refresh setup-token |
 | Chat error 502 | Read `detail` in response; fix Claude auth on host |

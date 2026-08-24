@@ -17,7 +17,7 @@ def test_no_profile_uses_mock(tmp_path: Path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     from texllm.host import credentials as cred
 
-    cred.credential_store = CredentialStore(path=tmp_path / "c.json")
+    monkeypatch.setattr(cred, "credential_store", CredentialStore(path=tmp_path / "c.json"))
     from texllm import config as config_mod
 
     config_mod.get_settings.cache_clear()
@@ -36,7 +36,7 @@ def test_local_cli_profile_selects_claude_cli(tmp_path: Path, monkeypatch):
 
     config_mod.get_settings.cache_clear()
     store = CredentialStore(path=tmp_path / "c.json")
-    cred.credential_store = store
+    monkeypatch.setattr(cred, "credential_store", store)
     store.upsert(
         AuthProfileCreate(
             id="claude-cli",
@@ -65,7 +65,7 @@ def test_setup_token_prefers_cli_when_present(tmp_path: Path, monkeypatch):
 
     config_mod.get_settings.cache_clear()
     store = CredentialStore(path=tmp_path / "c.json")
-    cred.credential_store = store
+    monkeypatch.setattr(cred, "credential_store", store)
     store.upsert(
         AuthProfileCreate(
             id="claude-max",

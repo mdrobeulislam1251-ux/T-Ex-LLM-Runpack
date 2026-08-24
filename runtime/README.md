@@ -14,7 +14,7 @@ Apache-2.0 · default port **3006**
 | Capability | Status |
 |------------|--------|
 | Team runner (plan → execute → review → integrate) | Working |
-| Mock provider (no API key) | Working |
+| Mock provider (opt-in demo: `LLM_PROVIDER=mock`; never a silent fallback) | Working |
 | OpenAI-compatible HTTP provider | Working |
 | Auto-detect agent CLIs on PATH | Working |
 | Spawn local CLI from host (e.g. `claude -p`) | Working when CLI supports non-interactive mode + is logged in |

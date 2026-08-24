@@ -8,6 +8,14 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
+class ProviderNotConfiguredError(RuntimeError):
+    """No usable AI provider — raised instead of silently falling back to mock.
+
+    Work must fail loudly when no provider is connected; fabricated mock output
+    presented as real progress is worse than an actionable error.
+    """
+
+
 class ChatMessage(BaseModel):
     role: str  # system | user | assistant
     content: str

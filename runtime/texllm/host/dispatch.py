@@ -24,6 +24,7 @@ def dispatch_team_job(
     store: JobStore,
     mode: str = "chat",
     workdir: Optional[str] = None,
+    verify: Optional[str] = None,
     db: Optional[WorkspaceDB] = None,
     runner_factory: Callable[[], TeamRunner] = TeamRunner,
     on_done: Optional[Callable[[Job], None]] = None,
@@ -36,7 +37,7 @@ def dispatch_team_job(
     result is already persisted in the store by then.
     """
     team, job = prepare_team_job(
-        team_slug, goal, db=db, mode=mode, workdir=workdir
+        team_slug, goal, db=db, mode=mode, workdir=workdir, verify=verify
     )
     store.put(job)
     team_id = team["id"]

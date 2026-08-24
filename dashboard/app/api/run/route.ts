@@ -10,9 +10,10 @@ import { NextResponse } from "next/server";
  *   TEX_RUNTIME_URL      runtime host base URL (default http://127.0.0.1:3006)
  *   TEX_RUNTIME_API_KEY  host X-API-Key (only needed when the host sets one)
  *
- * POST {team, goal, mode?, workdir?} → host /v1/workspace/teams/{team}/run-async
- * GET  ?id=<jobId>                   → host /v1/jobs/{jobId}
- * GET  ?teams=1                      → host /v1/workspace/teams
+ * POST {team, goal, mode?, workdir?, verify?} → host /v1/workspace/teams/{team}/run-async
+ * GET  ?id=<jobId>                            → host /v1/jobs/{jobId}
+ * GET  ?teams=1                               → host /v1/workspace/teams
+ * GET  ?health=1                              → host /health (AI provider status)
  */
 
 const RUNTIME_URL = (process.env.TEX_RUNTIME_URL || "http://127.0.0.1:3006").replace(/\/+$/, "");
@@ -72,14 +73,17 @@ export async function GET(request: Request) {
     if (wantTeams) {
       return await passThrough(await hostFetch(`/v1/workspace/teams`));
     }
-    return NextResponse.json({ error: "Pass ?id=<jobId> or ?teams=1" }, { status: 400 });
+    if (url.searchParams.get("health")) {
+      return await passThrough(await hostFetch(`/health`));
+    }
+    return NextResponse.json({ error: "Pass ?id=<jobId>, ?teams=1 or ?health=1" }, { status: 400 });
   } catch {
     return offline();
   }
 }
 
 export async function POST(request: Request) {
-  let body: { team?: unknown; goal?: unknown; mode?: unknown; workdir?: unknown };
+  let body: { team?: unknown; goal?: unknown; mode?: unknown; workdir?: unknown; verify?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -90,6 +94,7 @@ export async function POST(request: Request) {
   const goal = typeof body.goal === "string" ? body.goal.trim() : "";
   const mode = body.mode === "code" ? "code" : "chat";
   const workdir = typeof body.workdir === "string" ? body.workdir.trim() : "";
+  const verify = typeof body.verify === "string" ? body.verify.trim() : "";
 
   if (!/^[a-z0-9-]+$/.test(team)) {
     return NextResponse.json({ error: "Invalid team slug" }, { status: 400 });
@@ -101,7 +106,12 @@ export async function POST(request: Request) {
   try {
     const res = await hostFetch(`/v1/workspace/teams/${team}/run-async`, {
       method: "POST",
-      body: JSON.stringify({ goal, mode, ...(workdir ? { workdir } : {}) }),
+      body: JSON.stringify({
+        goal,
+        mode,
+        ...(workdir ? { workdir } : {}),
+        ...(mode === "code" && verify ? { verify } : {}),
+      }),
     });
     return await passThrough(res);
   } catch {

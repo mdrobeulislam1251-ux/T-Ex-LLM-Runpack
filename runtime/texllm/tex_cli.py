@@ -61,6 +61,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Code mode only: run in this existing directory instead of an "
         "isolated .texllm/runs/<job-id>/ scratch dir",
     )
+    p_run.add_argument(
+        "--verify",
+        default=None,
+        help="Code mode only: done-gate shell command run in the workdir — "
+        "the job succeeds ONLY if it exits 0 (e.g. --verify 'pytest -q')",
+    )
 
     p_rev = sub.add_parser("review", help="Domain/website review → ideas, brains, skills")
     p_rev.add_argument("domain", help="example.com or URL")
@@ -150,6 +156,7 @@ def main(argv: list[str] | None = None) -> int:
             as_json=args.json,
             mode="code" if args.code else "chat",
             workdir=args.workdir,
+            verify=args.verify,
         )
 
     if args.cmd == "review":
@@ -315,11 +322,12 @@ def _cmd_run(
     as_json: bool,
     mode: str = "chat",
     workdir: str | None = None,
+    verify: str | None = None,
 ) -> int:
     from texllm.workspace.team_run import run_team_flow
 
     try:
-        out = run_team_flow(team, goal, mode=mode, workdir=workdir)
+        out = run_team_flow(team, goal, mode=mode, workdir=workdir, verify=verify)
     except KeyError:
         print(f"Unknown team: {team}", file=sys.stderr)
         return 1
@@ -339,6 +347,12 @@ def _cmd_run(
         output = res.get("output") or {}
         if output.get("mode") == "code":
             print(f"workdir: {output.get('workdir')}")
+            if output.get("verify"):
+                v = output["verify"]
+                print(
+                    f"verify: `{v.get('command')}` → exit {v.get('exit_code')} "
+                    f"({'PASS' if v.get('ok') else 'FAIL'})"
+                )
             files = output.get("files_changed") or []
             print(f"files changed ({len(files)}):")
             for f in files[:50]:
