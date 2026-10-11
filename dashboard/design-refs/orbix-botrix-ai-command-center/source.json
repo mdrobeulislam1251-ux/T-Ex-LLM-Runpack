@@ -1,0 +1,21 @@
+{
+  "source_url": "https://www.instagram.com/p/DeKYi70DCOx/",
+  "platform": "instagram",
+  "author_handle": "orbixdashboard",
+  "author_name": "Orbix Studio Dashboard",
+  "author_profile": "https://www.instagram.com/orbixdashboard",
+  "title": "Botrix: AI Command Center Dashboard UI with Agent and Server Monitoring",
+  "date_posted": "2026-10-06T18:03:33.000Z",
+  "retrieved_at": "2026-10-11",
+  "retrieval_method": "Bright Data Instagram Posts scraper for caption/metadata; images pulled from the public embed page (/embed/captioned/) display_url fields at native 1440x1800",
+  "content_type": "Carousel",
+  "photos_number": 5,
+  "slides": [
+    {"file": "slide-1.jpg", "media_id": "4002118812501294855", "what": "Full dashboard, whole viewport"},
+    {"file": "slide-2.jpg", "media_id": "4002118874283422612", "what": "Zoom: left half (nav, KPI row, Agent Activity chart, Live Activity Feed, Connected tools)"},
+    {"file": "slide-3.jpg", "media_id": "4002118927358104954", "what": "Zoom: right half (actions, KPI row, Server Status cards with gauges)"},
+    {"file": "slide-4.jpg", "media_id": "4002118973772278670", "what": "Perspective close-up of KPI row, range toggles and chart tooltip"},
+    {"file": "slide-5.jpg", "media_id": "4002119020186464425", "what": "Studio promo / contact slide (not dashboard UI)"}
+  ],
+  "license_note": "Third-party design shared publicly on Instagram. Reference only: do not ship these images or copy the Botrix brand. Credit Orbix Studio if the composition is cited."
+}
