@@ -43,6 +43,29 @@ class RoutingConfigTests(unittest.TestCase):
         with self.assertRaises(RoutingConfigError):
             Router.from_config(bad)
 
+    def test_route_missing_required_field_is_rejected(self) -> None:
+        """A route lacking name/track/workspace/keywords must surface as a
+        RoutingConfigError (the CLI's documented config-error path), never as
+        a bare KeyError traceback."""
+        default = {"name": "d", "track": "t", "workspace": "t/inbox"}
+        for missing in ("name", "track", "workspace", "keywords"):
+            route = {"name": "x", "track": "t", "workspace": "t/x", "keywords": ["k"]}
+            del route[missing]
+            with self.subTest(missing=missing):
+                with self.assertRaises(RoutingConfigError):
+                    Router.from_config({"default_route": default, "routes": [route]})
+
+    def test_default_route_missing_required_field_is_rejected(self) -> None:
+        bad = {"default_route": {"name": "d"}, "routes": [
+            {"name": "x", "track": "t", "workspace": "t/x", "keywords": ["k"]}]}
+        with self.assertRaises(RoutingConfigError):
+            Router.from_config(bad)
+
+    def test_route_entry_with_wrong_type_is_rejected(self) -> None:
+        default = {"name": "d", "track": "t", "workspace": "t/inbox"}
+        with self.assertRaises(RoutingConfigError):
+            Router.from_config({"default_route": default, "routes": ["not-a-dict"]})
+
     def test_missing_default_route_is_rejected(self) -> None:
         with self.assertRaises(RoutingConfigError):
             Router.from_config({"routes": []})

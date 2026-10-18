@@ -101,26 +101,41 @@ class Router:
         except KeyError as exc:  # noqa: TRY003 - explicit message is clearer
             raise RoutingConfigError(f"routing config missing key: {exc}") from exc
 
-        routes = [
-            Route(
-                name=r["name"],
-                track=r["track"],
-                workspace=r["workspace"],
-                keywords=tuple(r["keywords"]),
-                priority=int(r.get("priority", 0)),
-                description=r.get("description", ""),
+        routes = []
+        for index, r in enumerate(raw_routes):
+            try:
+                routes.append(
+                    Route(
+                        name=r["name"],
+                        track=r["track"],
+                        workspace=r["workspace"],
+                        keywords=tuple(r["keywords"]),
+                        priority=int(r.get("priority", 0)),
+                        description=r.get("description", ""),
+                    )
+                )
+            except KeyError as exc:
+                raise RoutingConfigError(
+                    f"route #{index} is missing required field {exc}"
+                ) from exc
+            except (TypeError, AttributeError, ValueError) as exc:
+                raise RoutingConfigError(f"route #{index} is malformed: {exc}") from exc
+        try:
+            default = RouteMatch(
+                route_name=raw_default["name"],
+                track=raw_default["track"],
+                workspace=raw_default["workspace"],
+                description=raw_default.get("description", ""),
+                score=0,
+                matched_keywords=(),
+                is_default=True,
             )
-            for r in raw_routes
-        ]
-        default = RouteMatch(
-            route_name=raw_default["name"],
-            track=raw_default["track"],
-            workspace=raw_default["workspace"],
-            description=raw_default.get("description", ""),
-            score=0,
-            matched_keywords=(),
-            is_default=True,
-        )
+        except KeyError as exc:
+            raise RoutingConfigError(
+                f"default_route is missing required field {exc}"
+            ) from exc
+        except (TypeError, AttributeError) as exc:
+            raise RoutingConfigError(f"default_route is malformed: {exc}") from exc
         return cls(routes, default)
 
     @classmethod
