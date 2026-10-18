@@ -1,0 +1,55 @@
+{
+  "_placeholder": true,
+  "_do_not_load": "Reference seed shipped inside the runpack clone. NEVER load or edit in place — copy to <project-root>/.tex-llm/companies/lead-gen-jay/ and run /onboard.",
+  "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (cold-email-strategy, cold-email-copywriting, cold-email-campaign-deploy, cold-email-ab-testing, cold-email-quickstart, inbox-insiders). Run /onboard lead-gen-jay to complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
+  "company": {
+    "name": "Lead Gen Jay",
+    "slug": "lead-gen-jay",
+    "app_name": "Lead Gen Jay",
+    "description": "Flagship B2B lead-generation brand whose Inbox Insider arm is the Mailbox slot of the outbound engine — high-performance sending infrastructure: sending domains, SPF/DKIM/DMARC, mailbox fleets, warmup, and reputation, so mail reaches the primary inbox. The wider brand runs cold-email operations around that power: ICP strategy, offer positioning, sequence copywriting, campaign deployment to Email Bison / Instantly, lifecycle A/B testing.",
+    "created_at": "2026-07-22"
+  },
+  "brain": {
+    "scope": {
+      "does": "DRAFT — the Mailbox slot via Inbox Insider (domains, auth, warmup, mailbox fleets, deliverability), plus the campaign craft around it: strategy, copy, deployment, optimization",
+      "does_not": "DRAFT — no consumer marketing; lead lists delegated to the List slot (Trusted Leads API default); pipeline tracking delegated to the Track slot (Consulti AI default)"
+    },
+    "vision": "DRAFT — the operating brand founders hire to fill their B2B pipeline, on mailboxes that land",
+    "mission": "DRAFT",
+    "emotion_tone": "DRAFT — direct, practitioner, results-first",
+    "target_audience": "DRAFT — B2B founders and small teams that need meetings booked, not marketing theory",
+    "voice_examples": []
+  },
+  "brand": {
+    "guidelines_file": "brand/brand.md",
+    "assets_dir": "brand/assets/",
+    "colors": { "primary": "", "secondary": "", "extra": {} },
+    "typography": { "heading": "", "body": "" }
+  },
+  "tech": {
+    "stack": {
+      "frontend": "",
+      "backend": "",
+      "database": "Turso/SQLite lead-tracking DB (see lead-tracking-db skill)",
+      "mobile": "",
+      "cloud": "",
+      "decided_by": ""
+    },
+    "remote_access": { "method": "", "host": "", "notes": "" },
+    "multi_tenant": false,
+    "compliance_notes": "DRAFT — cold-email compliance (CAN-SPAM/GDPR posture) documented in the outbound skills' safety gates",
+    "performance_budgets": { "api_p95_ms": 300, "lcp_ms": 2500 },
+    "monthly_cloud_budget_usd": null
+  },
+  "credentials": {
+    "_rule": "ENV VAR NAMES ONLY. Raw values live in .env (gitignored). Never store secret values in this file.",
+    "database": { "provider": "turso", "env": { "host": "TURSO_DATABASE_URL", "port": "", "name": "", "user": "", "password": "TURSO_AUTH_TOKEN" } },
+    "n8n": { "env": { "url": "", "api_key": "" } },
+    "other": {
+      "email_bison": { "env": { "api_key": "EMAILBISON_API_KEY" } },
+      "instantly": { "env": { "api_key": "INSTANTLY_API_KEY" } },
+      "inbox_insiders": { "env": { "api_key": "INBOX_INSIDERS_API_KEY" } }
+    }
+  },
+  "logs": { "decisions": "decisions.md", "incidents": "incidents.md", "research_dir": "research/" }
+}

@@ -1,0 +1,41 @@
+id: sample-assistant
+version: 0.1.0
+name: Sample Assistant
+description: Demo team-runner firmware (planner → executor → reviewer → integrator)
+
+default_tools:
+  - echo
+  - now
+  - word_count
+  - checklist
+
+limits:
+  max_iterations: 10
+  max_review_retries: 2
+  max_cost_usd: 1.0
+
+roles:
+  - name: planner
+    model_tier: cheap
+    tools: []
+    prompt_file: prompts/planner.md
+    temperature: 0.2
+  - name: executor
+    model_tier: default
+    tools:
+      - echo
+      - now
+      - word_count
+      - checklist
+    prompt_file: prompts/executor.md
+    temperature: 0.3
+  - name: reviewer
+    model_tier: cheap
+    tools: []
+    prompt_file: prompts/reviewer.md
+    temperature: 0.0
+  - name: integrator
+    model_tier: cheap
+    tools: []
+    prompt_file: prompts/integrator.md
+    temperature: 0.1

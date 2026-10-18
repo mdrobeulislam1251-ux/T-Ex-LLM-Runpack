@@ -1,0 +1,285 @@
+import type { AppSettings } from "../state/settings";
+
+export type JobStatus =
+  | "queued"
+  | "running"
+  | "succeeded"
+  | "failed"
+  | "cancelled";
+
+export type Handoff = {
+  from_role: string;
+  to_role?: string | null;
+  content: string;
+  data?: Record<string, unknown>;
+};
+
+export type Job = {
+  id: string;
+  firmware_id: string;
+  firmware_version: string;
+  goal: string;
+  status: JobStatus;
+  error?: string | null;
+  result?: {
+    summary: string;
+    output: Record<string, unknown>;
+    review_passed: boolean;
+    iterations: number;
+    handoffs: Handoff[];
+  } | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BackendConfigPayload = {
+  db: "postgres" | "supabase" | "other" | "none";
+  port: string;
+  domain: string;
+  company: string;
+  vision: string;
+  theme: string;
+  hostUrl?: string;
+  apiKey?: string;
+};
+
+function baseUrl(settings: AppSettings) {
+  return (settings.hostUrl || "").replace(/\/$/, "");
+}
+
+async function request<T>(
+  settings: AppSettings,
+  path: string,
+  init: RequestInit = {}
+): Promise<T> {
+  const url = `${baseUrl(settings)}${path}`;
+  const headers = new Headers(init.headers);
+  headers.set("Content-Type", "application/json");
+  if (settings.apiKey) headers.set("X-API-Key", settings.apiKey);
+
+  const res = await fetch(url, { ...init, headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${res.status}: ${text || res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export function health(settings: AppSettings) {
+  return request<{ status: string; version: string }>(settings, "/health");
+}
+
+export function createJob(
+  settings: AppSettings,
+  body: {
+    goal: string;
+    firmware_id?: string;
+    firmware_version?: string;
+  }
+) {
+  return request<Job>(settings, "/v1/jobs", {
+    method: "POST",
+    body: JSON.stringify({
+      firmware_id: body.firmware_id || "sample-assistant",
+      firmware_version: body.firmware_version || "0.1.0",
+      goal: body.goal,
+      input: { goal: body.goal },
+    }),
+  });
+}
+
+export function getJob(settings: AppSettings, id: string) {
+  return request<Job>(settings, `/v1/jobs/${id}`);
+}
+
+export function listJobs(settings: AppSettings) {
+  return request<{ jobs: Job[] }>(settings, "/v1/jobs");
+}
+
+export function listFirmware(settings: AppSettings) {
+  return request<{ firmware: { id: string; version: string; name: string }[] }>(
+    settings,
+    "/v1/firmware"
+  );
+}
+
+/** Persist onboarding config locally; host may add /v1/config later. */
+export function saveBackendConfigLocal(config: BackendConfigPayload) {
+  localStorage.setItem("texllm.backendConfig.v1", JSON.stringify(config));
+  return config;
+}
+
+export function loadBackendConfigLocal(): BackendConfigPayload | null {
+  try {
+    const raw = localStorage.getItem("texllm.backendConfig.v1");
+    return raw ? (JSON.parse(raw) as BackendConfigPayload) : null;
+  } catch {
+    return null;
+  }
+}
+
+export type AgentAliases = {
+  agent_name: string;
+  user_name: string;
+  agent_aliases: string[];
+  user_aliases: string[];
+};
+
+export function getAliases(settings: AppSettings) {
+  return request<AgentAliases>(settings, "/v1/settings/aliases");
+}
+
+export function putAliases(settings: AppSettings, body: AgentAliases) {
+  return request<AgentAliases>(settings, "/v1/settings/aliases", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export type AuthProfile = {
+  id: string;
+  provider: string;
+  method:
+    | "api_key"
+    | "local_cli"
+    | "oauth_google"
+    | "oauth_codex"
+    | "setup_token";
+  label: string;
+  base_url?: string;
+  model?: string;
+  has_api_key?: boolean;
+  has_secret?: boolean;
+  agent_id?: string;
+  notes?: string;
+  account_hint?: string;
+};
+
+export type AuthProfilesResponse = {
+  default_profile_id: string | null;
+  profiles: AuthProfile[];
+  methods_explained?: Record<string, string>;
+  honest_notes?: string[];
+};
+
+export function listAuthProfiles(settings: AppSettings) {
+  return request<AuthProfilesResponse>(settings, "/v1/auth/profiles");
+}
+
+export function upsertAuthProfile(
+  settings: AppSettings,
+  body: {
+    id: string;
+    provider: string;
+    method: string;
+    label?: string;
+    base_url?: string;
+    model?: string;
+    api_key?: string;
+    agent_id?: string;
+    notes?: string;
+  }
+) {
+  return request<AuthProfile>(settings, "/v1/auth/profiles", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function setDefaultAuthProfile(settings: AppSettings, profileId: string) {
+  return request<{ default_profile_id: string }>(
+    settings,
+    `/v1/auth/profiles/${encodeURIComponent(profileId)}/default`,
+    { method: "POST" }
+  );
+}
+
+export function deleteAuthProfile(settings: AppSettings, profileId: string) {
+  return request<{ ok: boolean }>(
+    settings,
+    `/v1/auth/profiles/${encodeURIComponent(profileId)}`,
+    { method: "DELETE" }
+  );
+}
+
+export function cliAuthStatus(settings: AppSettings, agentId: string) {
+  return request<{
+    agent_id: string;
+    installed: boolean;
+    logged_in: boolean | null;
+    detail: string;
+    path?: string;
+    version?: string;
+  }>(settings, `/v1/auth/cli-status/${encodeURIComponent(agentId)}`);
+}
+
+export function saveClaudeSetupToken(
+  settings: AppSettings,
+  body: { token: string; profile_id?: string; model?: string; set_default?: boolean }
+) {
+  return request<{ ok: boolean; profile: AuthProfile }>(
+    settings,
+    "/v1/auth/claude/setup-token",
+    { method: "POST", body: JSON.stringify(body) }
+  );
+}
+
+export function startOAuth(
+  settings: AppSettings,
+  provider: string,
+  profile_id: string
+) {
+  return request<{
+    authorize_url?: string;
+    state?: string;
+    error?: string;
+    hint?: string;
+  }>(settings, "/v1/auth/oauth/start", {
+    method: "POST",
+    body: JSON.stringify({ provider, profile_id }),
+  });
+}
+
+export function getAuthRuntime(settings: AppSettings) {
+  return request<Record<string, unknown>>(settings, "/v1/auth/runtime");
+}
+
+/** Claude-first chat via host /v1/chat (setup-token / CLI / API key). */
+export async function friendlyChat(
+  settings: AppSettings,
+  message: string,
+  aliases?: AgentAliases | null
+): Promise<{ role: "agent"; content: string }> {
+  const agentName = aliases?.agent_name || "Tex";
+  const userName = aliases?.user_name || "Operator";
+  try {
+    const res = await request<{
+      content: string;
+      provider?: string;
+      auth_method?: string;
+      agent_name?: string;
+      user_name?: string;
+    }>(settings, "/v1/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, use_aliases: true }),
+    });
+    return { role: "agent", content: res.content };
+  } catch (e) {
+    const err = e instanceof Error ? e.message : String(e);
+    return {
+      role: "agent",
+      content:
+        `I'm ${agentName}. Claude path failed: ${err}\n\n` +
+        `${userName}, open Settings → connect Claude Max (setup-token) or Use local Claude CLI, ` +
+        `then ensure host is running: python3 -m texllm.cli serve`,
+    };
+  }
+}
+
+export async function useClaudeCli(settings: AppSettings) {
+  return request<{ ok: boolean; cli_status: unknown }>(
+    settings,
+    "/v1/auth/claude/use-cli",
+    { method: "POST", body: JSON.stringify({ set_default: true }) }
+  );
+}

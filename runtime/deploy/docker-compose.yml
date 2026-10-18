@@ -1,0 +1,35 @@
+# T-Ex LLM host + optional Postgres (API-only image: no web dist baked in —
+# build apps/web separately if you want the console served from the container)
+services:
+  host:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.host
+    ports:
+      - "${HOST_PORT:-3006}:3006"
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      HOST_API_KEY: ${HOST_API_KEY:-change-me}
+      HOST_PORT: "3006"
+      SERVE_WEB: "false"
+    volumes:
+      - ../firmware:/app/firmware:ro
+    working_dir: /app
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["db"]
+    environment:
+      POSTGRES_USER: texllm
+      POSTGRES_PASSWORD: texllm
+      POSTGRES_DB: texllm
+    ports:
+      - "5432:5432"
+    volumes:
+      - tex_pg:/var/lib/postgresql/data
+
+volumes:
+  tex_pg:

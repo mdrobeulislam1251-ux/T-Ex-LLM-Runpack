@@ -1,0 +1,54 @@
+{
+  "_placeholder": true,
+  "_do_not_load": "Reference seed shipped inside the runpack clone. NEVER load or edit in place — copy to <project-root>/.tex-llm/companies/trusted-leads/ and run /onboard.",
+  "_note": "ECOSYSTEM PLACEHOLDER — real operational skills live in the Outbound agent workspace (email-verification, list-optimize, lead-tracking-db). Run /onboard trusted-leads to complete and confirm this brain. Fields marked DRAFT are unconfirmed.",
+  "company": {
+    "name": "Trusted Leads",
+    "slug": "trusted-leads",
+    "app_name": "Trusted Leads",
+    "description": "The List slot of the outbound engine — hyper-personalized lead lists via API: sourced against the ICP, AI-qualified, enriched with personalization fields, company names normalized, emails verified (batch backend or /verify) — every list arrives send-ready, so campaigns launch on data that lands.",
+    "created_at": "2026-07-22"
+  },
+  "brain": {
+    "scope": {
+      "does": "DRAFT — the List slot, end-to-end: ICP-targeted sourcing, qualification, enrichment/personalization, normalization, email verification, list QA — hyper-personalized, send-ready lead lists delivered via API",
+      "does_not": "DRAFT — no mailboxes or sending (Mailbox slot: Inbox Insider default), no pipeline ledger (Track slot: Consulti AI default)"
+    },
+    "vision": "DRAFT — every campaign starts from a list that lands: one power, done completely",
+    "mission": "DRAFT",
+    "emotion_tone": "DRAFT — quality-obsessed, evidence-first",
+    "target_audience": "DRAFT — outbound teams burned by bounces, generic blasts, and wasted sends",
+    "voice_examples": []
+  },
+  "brand": {
+    "guidelines_file": "brand/brand.md",
+    "assets_dir": "brand/assets/",
+    "colors": { "primary": "", "secondary": "", "extra": {} },
+    "typography": { "heading": "", "body": "" }
+  },
+  "tech": {
+    "stack": {
+      "frontend": "",
+      "backend": "",
+      "database": "Turso/SQLite lead-tracking DB (shared ecosystem ledger)",
+      "mobile": "",
+      "cloud": "",
+      "decided_by": ""
+    },
+    "remote_access": { "method": "", "host": "", "notes": "" },
+    "multi_tenant": false,
+    "compliance_notes": "DRAFT",
+    "performance_budgets": { "api_p95_ms": 300, "lcp_ms": 2500 },
+    "monthly_cloud_budget_usd": null
+  },
+  "credentials": {
+    "_rule": "ENV VAR NAMES ONLY. Raw values live in .env (gitignored). Never store secret values in this file.",
+    "database": { "provider": "turso", "env": { "host": "TURSO_DATABASE_URL", "port": "", "name": "", "user": "", "password": "TURSO_AUTH_TOKEN" } },
+    "n8n": { "env": { "url": "", "api_key": "" } },
+    "other": {
+      "trusted_leads_api": { "env": { "api_key": "TRUSTED_LEADS_API_KEY" } },
+      "consulti_verify": { "env": { "api_key": "CONSULTI_API_KEY" } }
+    }
+  },
+  "logs": { "decisions": "decisions.md", "incidents": "incidents.md", "research_dir": "research/" }
+}
