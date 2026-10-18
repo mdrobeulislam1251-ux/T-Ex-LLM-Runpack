@@ -76,6 +76,11 @@ Sections 0–5 are the T-Ex LLM core engine rules (behavioral doctrine — they 
 - **Clients**: Claude Code in a terminal session (Anthropic API key or Claude Max/Pro
   login) is primary; Cursor and other agents follow `AGENTS.md`. Project management syncs
   through the `linear-integration` skill — issues reach Done only after run-verification.
+- **n8n workflow building**: the official n8n skills ship under `.claude/skills/`. When
+  working with n8n workflows, nodes, expressions, or the n8n MCP tools, ALWAYS load the
+  `using-n8n-skills-official` meta-skill first and follow its routing into the matching
+  capability skill before acting. Requires an n8n instance with the instance-level MCP
+  server enabled (see `.claude/skills/README.md`).
 - **External dashboards**: the guaranteed read surface is the data contract in
   `runpacks/grok-dashboard-builder.md` (repo files + `GET /api/runpack`,
   `POST /api/active`, `POST /api/brain`, and run dispatch via `POST /api/run` +
