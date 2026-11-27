@@ -22,7 +22,7 @@
 
 - [x] **RED** `tests/test_router.py::SchemaIntegrityTests::test_workspace_folders_exist_on_disk`
 - [x] **GREEN** Create the two-track file tree
-      (`App Dev and Engineering Team/`, `Robeul's Workspace Assistant/`)
+      (`workspaces/app-dev-engineering/`, `workspaces/workspace-assistant/`)
 - [x] **GREEN** Author `config/routing.json` (keyword → workspace map)
 - [x] **GREEN** Author `ARCHITECTURE.md` (initialization schema / file tree)
 
@@ -38,7 +38,7 @@
 
 ## Phase 2 — Runtime hooks & interception ✅
 
-> Workspace: `App Dev and Engineering Team/runtime_hooks/` ·
+> Workspace: `workspaces/app-dev-engineering/runtime_hooks/` ·
 > Engine: `core/hooks.py`
 
 - [x] **RED** `tests/test_hooks.py::QueryHookTests` — assert an incoming
@@ -52,7 +52,7 @@
 
 ## Phase 3 — Agent execution engine ✅
 
-> Workspace: `App Dev and Engineering Team/agents/` · Engine: `core/engine.py`
+> Workspace: `workspaces/app-dev-engineering/agents/` · Engine: `core/engine.py`
 
 - [x] **RED** `tests/test_engine.py::EngineTests` — routed task is handed to
       the correct handler; result carries route metadata.
@@ -66,7 +66,7 @@
 
 ## Phase 4 — External tool handlers `[ ]`
 
-> Workspace: `Robeul's Workspace Assistant/tool_handlers/`
+> Workspace: `workspaces/workspace-assistant/tool_handlers/`
 
 - [ ] **RED** `test_gmail_handler.py` — mock the Gmail boundary; assert a
       "read inbox" intent calls the handler exactly once.
@@ -77,7 +77,7 @@
 
 ## Phase 5 — Support pipelines `[ ]`
 
-> Workspace: `Robeul's Workspace Assistant/pipelines/`
+> Workspace: `workspaces/workspace-assistant/pipelines/`
 
 - [ ] **RED** `test_pipelines.py::test_escalation_transitions` — assert a
       support ticket advances new → triaged → escalated.
@@ -85,7 +85,7 @@
 
 ## Phase 6 — Deployment pipeline `[ ]`
 
-> Workspace: `App Dev and Engineering Team/deployments/`
+> Workspace: `workspaces/app-dev-engineering/deployments/`
 
 - [ ] **RED** `test_deploy.py::test_dry_run_healthcheck` — assert a dry-run
       deploy returns a health-check verdict without touching `tl-host`.

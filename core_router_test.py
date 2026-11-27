@@ -19,8 +19,8 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
-WORKSPACE_SKILL = REPO_ROOT / "Robeul's Workspace Assistant" / "SKILL.md"
-APPDEV_SKILL = REPO_ROOT / "App Dev and Engineering Team" / "SKILL.md"
+WORKSPACE_SKILL = REPO_ROOT / "workspaces" / "workspace-assistant" / "SKILL.md"
+APPDEV_SKILL = REPO_ROOT / "workspaces" / "app-dev-engineering" / "SKILL.md"
 
 # Matches a route target in an Intent Hook line, e.g. `-> Route to: .\gmail\`
 _ROUTE_RE = re.compile(r"Route to:\s*`?\.?[\\/]?([A-Za-z0-9_./\\-]+?)[\\/]?`?\s*$")

@@ -1,7 +1,7 @@
 # Arion — System Architecture & Initialization Schema
 
 > **Path note.** The originating initialization brief referenced a Windows
-> root (`E:\Robeul's Ai Assistant`). This repository is the canonical,
+> root on the operator's machine. This repository is the canonical,
 > cross-platform home of the system; all paths below are **relative to the
 > repository root** and are real, on-disk paths — no invented absolute paths.
 
@@ -31,33 +31,34 @@ Arion-Multi-Agent/
 │   ├── test_engine.py                # 6 TDD tests (dispatch, guards, metadata)
 │   └── test_hooks.py                 # 4 TDD tests (route+dispatch, lifecycle order)
 │
-├── App Dev and Engineering Team/     # TRACK 1 — engines, hooks, deployments
-│   ├── README.md
-│   ├── SKILL.md                      #   Intent Hooks + code-gen/TDD/SSH/Playwright rules
-│   ├── agents/                       #   → agent execution engines & orchestration
-│   │   └── README.md
-│   ├── runtime_hooks/                #   → runtime hooks, lifecycle interceptors
-│   │   └── README.md
-│   └── deployments/                  #   → Tailnet SSH (tl-host) + Playwright
-│       └── README.md
-│
-└── Robeul's Workspace Assistant/     # TRACK 2 — tasks, tool handlers, pipelines
-    ├── README.md
-    ├── SKILL.md                      #   Global routing Intent Hooks + execution rules
-    ├── tasks/                        #   → task/roadmap/backlog management
+└── workspaces/
+    ├── app-dev-engineering/          # TRACK 1 — engines, hooks, deployments
     │   ├── README.md
-    │   └── inbox/                    #   → DEFAULT fallback for unrouted queries
+    │   ├── SKILL.md                      #   Intent Hooks + code-gen/TDD/SSH/Playwright rules
+    │   ├── agents/                       #   → agent execution engines & orchestration
+    │   │   └── README.md
+    │   ├── runtime_hooks/                #   → runtime hooks, lifecycle interceptors
+    │   │   └── README.md
+    │   └── deployments/                  #   → Tailnet SSH (tl-host) + Playwright
     │       └── README.md
-    ├── gmail/                        #   → Gmail intent-hook skill home
-    │   └── README.md
-    ├── asana/                        #   → Asana intent-hook skill home
-    │   └── README.md
-    ├── support/                      #   → support intent-hook skill home
-    │   └── README.md
-    ├── tool_handlers/                #   → low-level Gmail / Asana / calendar adapters
-    │   └── README.md
-    └── pipelines/                    #   → support & workflow automation
-        └── README.md
+    │
+    └── workspace-assistant/          # TRACK 2 — tasks, tool handlers, pipelines
+        ├── README.md
+        ├── SKILL.md                      #   Global routing Intent Hooks + execution rules
+        ├── tasks/                        #   → task/roadmap/backlog management
+        │   ├── README.md
+        │   └── inbox/                    #   → DEFAULT fallback for unrouted queries
+        │       └── README.md
+        ├── gmail/                        #   → Gmail intent-hook skill home
+        │   └── README.md
+        ├── asana/                        #   → Asana intent-hook skill home
+        │   └── README.md
+        ├── support/                      #   → support intent-hook skill home
+        │   └── README.md
+        ├── tool_handlers/                #   → low-level Gmail / Asana / calendar adapters
+        │   └── README.md
+        └── pipelines/                    #   → support & workflow automation
+            └── README.md
 ```
 
 ## 2. Routing schema (`config/routing.json`)
@@ -100,19 +101,19 @@ dispatch to  <track>/<workspace>           (owning sub-agent workspace)
 - Substring collisions are rejected — `management` does **not** trigger the
   `agent` keyword.
 - Empty / whitespace / unmatched queries deterministically fall to
-  `Robeul's Workspace Assistant/tasks/inbox/`.
+  `workspaces/workspace-assistant/tasks/inbox/`.
 
 ## 4. Active route table
 
 | Route               | Track                        | Workspace                                        | Priority |
 | ------------------- | ---------------------------- | ------------------------------------------------ | -------- |
-| `agent-engineering` | App Dev and Engineering Team | `…/agents`                                        | 90       |
-| `system-deployment` | App Dev and Engineering Team | `…/deployments`                                   | 85       |
-| `runtime-hooks`     | App Dev and Engineering Team | `…/runtime_hooks`                                 | 80       |
-| `external-tools`    | Robeul's Workspace Assistant | `…/tool_handlers`                                 | 75       |
-| `task-management`   | Robeul's Workspace Assistant | `…/tasks`                                         | 70       |
-| `support-pipelines` | Robeul's Workspace Assistant | `…/pipelines`                                     | 65       |
-| *(default)*         | Robeul's Workspace Assistant | `…/tasks/inbox`                                   | —        |
+| `agent-engineering` | `workspaces/app-dev-engineering` | `…/agents`                                        | 90       |
+| `system-deployment` | `workspaces/app-dev-engineering` | `…/deployments`                                   | 85       |
+| `runtime-hooks`     | `workspaces/app-dev-engineering` | `…/runtime_hooks`                                 | 80       |
+| `external-tools`    | `workspaces/workspace-assistant` | `…/tool_handlers`                                 | 75       |
+| `task-management`   | `workspaces/workspace-assistant` | `…/tasks`                                         | 70       |
+| `support-pipelines` | `workspaces/workspace-assistant` | `…/pipelines`                                     | 65       |
+| *(default)*         | `workspaces/workspace-assistant` | `…/tasks/inbox`                                   | —        |
 
 ## 5. Deployment pipeline (target design — Phase 6)
 

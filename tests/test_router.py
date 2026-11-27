@@ -77,20 +77,20 @@ class EngineeringTrackRoutingTests(unittest.TestCase):
 
     def test_agent_query_routes_to_agents(self) -> None:
         match = self.router.route("build a new sub-agent orchestrator")
-        self.assertEqual(match.track, "App Dev and Engineering Team")
-        self.assertEqual(match.workspace, "App Dev and Engineering Team/agents")
+        self.assertEqual(match.track, "workspaces/app-dev-engineering")
+        self.assertEqual(match.workspace, "workspaces/app-dev-engineering/agents")
         self.assertFalse(match.is_default)
 
     def test_deployment_query_routes_to_deployments(self) -> None:
         match = self.router.route("deploy to the tl-host over tailnet via ssh")
         self.assertEqual(
-            match.workspace, "App Dev and Engineering Team/deployments"
+            match.workspace, "workspaces/app-dev-engineering/deployments"
         )
 
     def test_hook_query_routes_to_runtime_hooks(self) -> None:
         match = self.router.route("register a runtime hook on the lifecycle event")
         self.assertEqual(
-            match.workspace, "App Dev and Engineering Team/runtime_hooks"
+            match.workspace, "workspaces/app-dev-engineering/runtime_hooks"
         )
 
 
@@ -101,17 +101,17 @@ class WorkspaceTrackRoutingTests(unittest.TestCase):
     def test_gmail_query_routes_to_tool_handlers(self) -> None:
         match = self.router.route("read my gmail and file it in asana")
         self.assertEqual(
-            match.workspace, "Robeul's Workspace Assistant/tool_handlers"
+            match.workspace, "workspaces/workspace-assistant/tool_handlers"
         )
 
     def test_task_query_routes_to_tasks(self) -> None:
         match = self.router.route("add this to my sprint backlog roadmap")
-        self.assertEqual(match.workspace, "Robeul's Workspace Assistant/tasks")
+        self.assertEqual(match.workspace, "workspaces/workspace-assistant/tasks")
 
     def test_support_query_routes_to_pipelines(self) -> None:
         match = self.router.route("set up a support escalation workflow")
         self.assertEqual(
-            match.workspace, "Robeul's Workspace Assistant/pipelines"
+            match.workspace, "workspaces/workspace-assistant/pipelines"
         )
 
 
@@ -122,7 +122,7 @@ class ScoringAndFallbackTests(unittest.TestCase):
     def test_empty_query_returns_default(self) -> None:
         match = self.router.route("   ")
         self.assertTrue(match.is_default)
-        self.assertEqual(match.workspace, "Robeul's Workspace Assistant/tasks/inbox")
+        self.assertEqual(match.workspace, "workspaces/workspace-assistant/tasks/inbox")
 
     def test_unmatched_query_returns_default(self) -> None:
         match = self.router.route("xyzzy plugh nothing here matches")
@@ -137,7 +137,7 @@ class ScoringAndFallbackTests(unittest.TestCase):
     def test_multiword_keyword_outscores_incidental_single_word(self) -> None:
         # "execution engine" (2 tokens) should win over a lone "task" hit.
         match = self.router.route("tune the execution engine for this task")
-        self.assertEqual(match.workspace, "App Dev and Engineering Team/agents")
+        self.assertEqual(match.workspace, "workspaces/app-dev-engineering/agents")
         self.assertIn("execution engine", match.matched_keywords)
 
     def test_matched_keywords_are_reported(self) -> None:
@@ -153,7 +153,7 @@ class SchemaIntegrityTests(unittest.TestCase):
         self.config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 
     def test_every_route_track_is_one_of_two_tracks(self) -> None:
-        allowed = {"App Dev and Engineering Team", "Robeul's Workspace Assistant"}
+        allowed = {"workspaces/app-dev-engineering", "workspaces/workspace-assistant"}
         for route in self.config["routes"]:
             self.assertIn(route["track"], allowed)
 

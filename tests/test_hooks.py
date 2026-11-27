@@ -27,7 +27,7 @@ class QueryHookTests(unittest.TestCase):
         hook = QueryHook(self.router, self.engine)
         result = hook.on_query("deploy to tl-host over tailnet via ssh")
         self.assertEqual(
-            result.workspace, "App Dev and Engineering Team/deployments"
+            result.workspace, "workspaces/app-dev-engineering/deployments"
         )
         self.assertIn("tl-host", result.output)
 
@@ -35,7 +35,7 @@ class QueryHookTests(unittest.TestCase):
         hook = QueryHook(self.router, self.engine)
         result = hook.on_query("xyzzy nothing matches here")
         self.assertEqual(
-            result.workspace, "Robeul's Workspace Assistant/tasks/inbox"
+            result.workspace, "workspaces/workspace-assistant/tasks/inbox"
         )
 
 
@@ -51,7 +51,7 @@ class LifecycleOrderTests(unittest.TestCase):
 
         engine = ExecutionEngine()
         engine.register(
-            "App Dev and Engineering Team/agents",
+            "workspaces/app-dev-engineering/agents",
             lambda q, r: (order.append("body"), "done")[1],
         )
 
@@ -72,7 +72,7 @@ class LifecycleOrderTests(unittest.TestCase):
         hook = QueryHook(self.router, engine, lifecycle)
         result = hook.on_query("this text would otherwise route to inbox")
         self.assertEqual(
-            result.workspace, "App Dev and Engineering Team/deployments"
+            result.workspace, "workspaces/app-dev-engineering/deployments"
         )
 
 
