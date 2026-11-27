@@ -8,8 +8,8 @@ operator workstation and standalone on Linux / the tl-host server (no
 hard-coded E:\\ path).
 
 Run:
-    pytest "App Dev and Engineering Team/test_system_core.py"
-    python3 "App Dev and Engineering Team/test_system_core.py"
+    pytest "workspaces/app-dev-engineering/test_system_core.py"
+    python3 "workspaces/app-dev-engineering/test_system_core.py"
 """
 
 import re

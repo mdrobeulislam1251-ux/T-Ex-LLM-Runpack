@@ -11,13 +11,13 @@ import unittest
 from core.engine import ExecutionEngine, ExecutionResult, UnknownWorkspaceError
 from core.router import RouteMatch
 
-AGENTS_WS = "App Dev and Engineering Team/agents"
+AGENTS_WS = "workspaces/app-dev-engineering/agents"
 
 
 def make_match(workspace: str = AGENTS_WS, kws=("agent",)) -> RouteMatch:
     return RouteMatch(
         route_name="agent-engineering",
-        track="App Dev and Engineering Team",
+        track="workspaces/app-dev-engineering",
         workspace=workspace,
         description="",
         score=len(kws),

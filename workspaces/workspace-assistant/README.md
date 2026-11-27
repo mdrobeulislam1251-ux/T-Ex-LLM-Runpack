@@ -1,4 +1,4 @@
-# Robeul's Workspace Assistant
+# Workspace Assistant
 
 Track owning **task management, external tool handlers (Gmail / Asana / …),
 and support pipelines** of the Arion multi-agent workspace.

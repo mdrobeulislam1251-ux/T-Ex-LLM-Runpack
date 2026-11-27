@@ -2,7 +2,7 @@
 
 ## Description
 This skill handles global task routing, automation hooks, and developer
-handoffs for Robeul's active workspace. Arion reads this file to learn which
+handoffs for the active workspace. Arion reads this file to learn which
 sub-agent folder owns an incoming request before taking any action.
 
 ## Intent Hooks
